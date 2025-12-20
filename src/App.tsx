@@ -29,6 +29,7 @@ import Caixa from "./pages/Caixa";
 import ContasReceber from "./pages/ContasReceber";
 import Instalar from "./pages/Instalar";
 import ResetPassword from "./pages/ResetPassword";
+import Manual from "./pages/Manual";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -133,6 +134,7 @@ function AppRoutes() {
       <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
       <Route path="/caixa" element={<ProtectedRoute><Caixa /></ProtectedRoute>} />
       <Route path="/contas-receber" element={<ProtectedRoute><ContasReceber /></ProtectedRoute>} />
+      <Route path="/manual" element={<ProtectedRoute><Manual /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
