@@ -57,10 +57,9 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
   const isTablet = useIsTablet();
 
   // Filter menu based on user role
-  const filteredMenu = menuItems.filter(item => {
-    if (!authUser) return false;
-    return item.roles.includes(authUser.role);
-  });
+  // While authUser is loading, show all items that include 'seller' role (most basic access)
+  const userRole = authUser?.role ?? 'seller';
+  const filteredMenu = menuItems.filter(item => item.roles.includes(userRole));
 
   const handleLogout = async () => {
     try {
