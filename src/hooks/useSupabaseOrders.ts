@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceOrder, OrderItem } from "@/lib/types";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export function useSupabaseOrders() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   const { data: orders = [], isLoading, error } = useQuery({
-    queryKey: ['service-orders'],
+    queryKey: ['service-orders', tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('service_orders')
@@ -37,10 +39,13 @@ export function useSupabaseOrders() {
         updatedAt: o.updated_at || undefined,
       })) as ServiceOrder[];
     },
+    enabled: !!tenantId,
   });
 
   const addOrder = useMutation({
     mutationFn: async (order: ServiceOrder) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const insertData = {
         id: order.id,
         customer_id: order.customerId === 'guest' ? null : (order.customerId || null),
@@ -58,6 +63,7 @@ export function useSupabaseOrders() {
         measurements: order.measurements || null,
         seller_id: order.sellerId || null,
         seller_name: order.sellerName || null,
+        tenant_id: tenantId,
       };
       
       const { error } = await supabase

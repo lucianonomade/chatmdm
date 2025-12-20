@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export interface Subcategory {
   id: string;
@@ -8,14 +9,16 @@ export interface Subcategory {
   category_id: string;
   created_at: string;
   created_by: string | null;
+  tenant_id: string | null;
 }
 
 export function useSupabaseSubcategories() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   // Fetch all subcategories
   const { data: subcategories = [], isLoading, error } = useQuery({
-    queryKey: ["subcategories"],
+    queryKey: ["subcategories", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subcategories")
@@ -25,11 +28,14 @@ export function useSupabaseSubcategories() {
       if (error) throw error;
       return data as Subcategory[];
     },
+    enabled: !!tenantId,
   });
 
   // Add subcategory
   const addSubcategoryMutation = useMutation({
     mutationFn: async ({ name, categoryId }: { name: string; categoryId: string }) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const { data: userData } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
@@ -37,7 +43,8 @@ export function useSupabaseSubcategories() {
         .insert({ 
           name: name.trim(),
           category_id: categoryId,
-          created_by: userData.user?.id 
+          created_by: userData.user?.id,
+          tenant_id: tenantId,
         })
         .select()
         .single();

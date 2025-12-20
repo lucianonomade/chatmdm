@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Supplier } from "@/lib/types";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export function useSupabaseSuppliers() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   const { data: suppliers = [], isLoading, error } = useQuery({
-    queryKey: ['suppliers'],
+    queryKey: ['suppliers', tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('suppliers')
@@ -24,10 +26,13 @@ export function useSupabaseSuppliers() {
         email: s.email || undefined,
       })) as Supplier[];
     },
+    enabled: !!tenantId,
   });
 
   const addSupplier = useMutation({
     mutationFn: async (supplier: Omit<Supplier, 'id'>) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const { error } = await supabase
         .from('suppliers')
         .insert({
@@ -35,6 +40,7 @@ export function useSupabaseSuppliers() {
           contact: supplier.contact,
           phone: supplier.phone,
           email: supplier.email,
+          tenant_id: tenantId,
         });
       
       if (error) throw error;

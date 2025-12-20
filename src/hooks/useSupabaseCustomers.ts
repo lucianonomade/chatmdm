@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Customer } from "@/lib/types";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export function useSupabaseCustomers() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   const { data: customers = [], isLoading, error } = useQuery({
-    queryKey: ['customers'],
+    queryKey: ['customers', tenantId],
     queryFn: async () => {
       // Check if user can view PII (Personal Identifiable Information)
       const { data: canViewPii } = await supabase.rpc('can_view_customer_pii');
@@ -29,10 +31,13 @@ export function useSupabaseCustomers() {
         notes: c.notes || undefined,
       })) as Customer[];
     },
+    enabled: !!tenantId,
   });
 
   const addCustomer = useMutation({
     mutationFn: async (customer: Omit<Customer, 'id'>) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const { data: { user } } = await supabase.auth.getUser();
       
       const { error } = await supabase
@@ -44,6 +49,7 @@ export function useSupabaseCustomers() {
           doc: customer.doc,
           notes: customer.notes,
           created_by: user?.id,
+          tenant_id: tenantId,
         });
       
       if (error) throw error;

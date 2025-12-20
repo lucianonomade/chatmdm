@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/lib/types";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export function useSupabaseProducts() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   const { data: products = [], isLoading, error } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('products')
@@ -39,10 +41,13 @@ export function useSupabaseProducts() {
         };
       }) as Product[];
     },
+    enabled: !!tenantId,
   });
 
   const addProduct = useMutation({
     mutationFn: async (product: Omit<Product, 'id'>) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const rawPricingMode = (product as any).pricing_mode;
       const pricingMode =
         rawPricingMode === 'meter' || rawPricingMode === 'medidor'
@@ -61,6 +66,7 @@ export function useSupabaseProducts() {
           description: product.description || null,
           variations: product.variations ? JSON.parse(JSON.stringify(product.variations)) : null,
           pricing_mode: pricingMode,
+          tenant_id: tenantId,
         });
       
       if (error) throw error;

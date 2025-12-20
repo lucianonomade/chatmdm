@@ -19,6 +19,7 @@ const signupSchema = z.object({
   name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  companyName: z.string().min(2, "Nome da empresa deve ter no mínimo 2 caracteres"),
 });
 
 const forgotPasswordSchema = z.object({
@@ -37,6 +38,7 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   // Login header color (fixed white as original)
@@ -54,7 +56,7 @@ export default function Auth() {
       if (mode === 'login') {
         loginSchema.parse({ name, password });
       } else if (mode === 'signup') {
-        signupSchema.parse({ name, email, password });
+        signupSchema.parse({ name, email, password, companyName });
       } else {
         forgotPasswordSchema.parse({ name });
       }
@@ -179,7 +181,7 @@ export default function Auth() {
           // e o useEffect acima redirecionar, evitando "loop" de rotas e conflitos de DOM.
         }
       } else {
-        const { error } = await signUp(email, password, name);
+        const { error } = await signUp(email, password, name, companyName);
         
         if (error) {
           if (error.message.includes('already registered')) {
@@ -202,6 +204,7 @@ export default function Auth() {
           });
           setMode('login');
           setPassword("");
+          setCompanyName("");
         }
       }
     } finally {
@@ -270,20 +273,35 @@ export default function Auth() {
             </div>
             
             {mode === 'signup' ? (
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-                {errors.email ? (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                ) : null}
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Nome da Empresa</Label>
+                  <Input
+                    id="companyName"
+                    placeholder="Nome da sua empresa"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    disabled={loading}
+                  />
+                  {errors.companyName ? (
+                    <p className="text-sm text-destructive">{errors.companyName}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                  />
+                  {errors.email ? (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  ) : null}
+                </div>
+              </>
             ) : null}
             
             {mode !== 'forgot' ? (

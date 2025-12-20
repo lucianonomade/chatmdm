@@ -1,20 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export interface Category {
   id: string;
   name: string;
   created_at: string;
   created_by: string | null;
+  tenant_id: string | null;
 }
 
 export function useSupabaseCategories() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   // Fetch all categories
   const { data: categories = [], isLoading, error } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
@@ -24,18 +27,22 @@ export function useSupabaseCategories() {
       if (error) throw error;
       return data as Category[];
     },
+    enabled: !!tenantId,
   });
 
   // Add category
   const addCategoryMutation = useMutation({
     mutationFn: async (name: string) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       const { data: userData } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
         .from("categories")
         .insert({ 
           name: name.trim(),
-          created_by: userData.user?.id 
+          created_by: userData.user?.id,
+          tenant_id: tenantId,
         })
         .select()
         .single();

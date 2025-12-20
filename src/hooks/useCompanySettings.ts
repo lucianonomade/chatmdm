@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanySettings } from "@/lib/types";
 import { toast } from "sonner";
+import { useTenant } from "./useTenant";
 
 export function useCompanySettings() {
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
 
   const { data: settings, isLoading, error } = useQuery({
-    queryKey: ['company-settings'],
+    queryKey: ['company-settings', tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('company_settings')
@@ -41,10 +43,13 @@ export function useCompanySettings() {
         loginHeaderColor: data.login_header_color || '#ffffff',
       } as CompanySettings;
     },
+    enabled: !!tenantId,
   });
 
   const updateSettings = useMutation({
     mutationFn: async (newSettings: Partial<CompanySettings>) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+      
       // Transform to database format
       const dbSettings: Record<string, unknown> = {};
       
@@ -77,7 +82,8 @@ export function useCompanySettings() {
         
         if (error) throw error;
       } else {
-        // Insert new
+        // Insert new with tenant_id
+        dbSettings.tenant_id = tenantId;
         const { error } = await supabase
           .from('company_settings')
           .insert(dbSettings);
