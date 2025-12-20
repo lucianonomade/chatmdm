@@ -1,0 +1,362 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Clean SaaS ERP Color Palette */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Deep Blue Primary - Professional & Trustworthy */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light Blue Secondary */
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - Emerald for Success */
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Custom Colors */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Hover Color */
+    --hover: 221 83% 53%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 221 83% 53%;
+    --sidebar-header-background: 0 0% 100%;
+    --sidebar-header-foreground: 222 47% 11%;
+
+    /* Chart Colors */
+    --chart-1: 221 83% 53%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 67% 55%;
+    --chart-5: 199 89% 48%;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Hover Color */
+    --hover: 221 83% 53%;
+
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 221 83% 53%;
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 47% 14%;
+    --sidebar-ring: 221 83% 53%;
+    --sidebar-header-background: 222 47% 14%;
+    --sidebar-header-foreground: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(221 83% 45%) 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(160 84% 30%) 100%);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-medium {
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out forwards;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
+
+  .hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  /* Mobile-first utilities */
+  .mobile-container {
+    @apply px-3 sm:px-4 md:px-5 lg:px-6;
+  }
+
+  .mobile-text-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .mobile-text-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .mobile-text-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .mobile-text-lg {
+    @apply text-lg sm:text-xl md:text-xl;
+  }
+
+  .mobile-text-xl {
+    @apply text-xl sm:text-2xl md:text-2xl;
+  }
+
+  .mobile-gap {
+    @apply gap-2 sm:gap-3 md:gap-4;
+  }
+
+  .mobile-p {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6;
+  }
+
+  .mobile-card {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6 rounded-lg sm:rounded-xl;
+  }
+
+  /* Tablet-specific utilities */
+  .tablet-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
+  }
+
+  .tablet-flex-wrap {
+    @apply flex flex-wrap gap-2 md:gap-3;
+  }
+
+  .tablet-card-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4;
+  }
+
+  .tablet-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4;
+  }
+
+  .responsive-dialog {
+    @apply w-full max-w-[95vw] sm:max-w-lg md:max-w-xl lg:max-w-2xl;
+  }
+
+  .responsive-table-container {
+    @apply overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0;
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Reduce font sizes on mobile */
+  h1 { @apply text-xl; }
+  h2 { @apply text-lg; }
+  h3 { @apply text-base; }
+  
+  /* Compact cards on mobile */
+  .card-compact {
+    @apply p-3;
+  }
+  
+  /* Smaller buttons on mobile */
+  button {
+    @apply text-sm;
+  }
+  
+  /* Better touch targets */
+  input, select, textarea {
+    @apply min-h-[44px] text-base;
+  }
+  
+  /* Dialog/Modal optimizations - ensure proper centering */
+  [role="dialog"] {
+    @apply max-h-[85vh] overflow-y-auto;
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+/* Tablet-specific improvements (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet typography */
+  h1 { @apply text-2xl; }
+  h2 { @apply text-xl; }
+  h3 { @apply text-lg; }
+  
+  /* Better spacing for tablets */
+  .tablet-container {
+    @apply px-4;
+  }
+  
+  /* Optimized grid layouts for tablets */
+  .tablet-grid-2 {
+    @apply grid-cols-2;
+  }
+  
+  .tablet-grid-3 {
+    @apply grid-cols-3;
+  }
+  
+  /* Better touch targets for tablets */
+  input, select, textarea {
+    @apply min-h-[42px];
+  }
+  
+  /* Dialog/Modal optimizations for tablets */
+  [role="dialog"] {
+    @apply max-h-[90vh] max-w-[90vw];
+  }
+}
+
+/* Tablet landscape improvements (900px - 1024px) */
+@media (min-width: 900px) and (max-width: 1023px) {
+  .tablet-landscape-grid-4 {
+    @apply grid-cols-4;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
