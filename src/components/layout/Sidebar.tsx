@@ -15,6 +15,7 @@ import {
   DollarSign,
   AlertTriangle,
   X,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const menuItems = [
   { icon: Truck, label: "Fornecedores", path: "/fornecedores", roles: ['admin', 'manager'] },
   { icon: BarChart3, label: "Relatórios", path: "/relatorios", roles: ['admin', 'manager'] },
   { icon: Settings, label: "Ajustes", path: "/configuracoes", roles: ['admin'] },
+  { icon: BookOpen, label: "Manual", path: "/manual", roles: ['admin', 'manager', 'seller'] },
 ];
 
 interface SidebarProps {
