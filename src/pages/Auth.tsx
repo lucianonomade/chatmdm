@@ -175,7 +175,8 @@ export default function Auth() {
             title: "Bem-vindo!",
             description: "Login realizado com sucesso.",
           });
-          navigate("/");
+          // Não navegar manualmente aqui: aguardar o AuthProvider atualizar o user/session
+          // e o useEffect acima redirecionar, evitando "loop" de rotas e conflitos de DOM.
         }
       } else {
         const { error } = await signUp(email, password, name);
