@@ -6,11 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useTrial } from "@/hooks/useTrial";
 import { playClickSound } from "@/hooks/useClickSound";
 import { useProducts } from "@/hooks/useProducts";
 import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { useStore } from "@/lib/store";
 import { Loader2 } from "lucide-react";
+import { TrialExpiredScreen } from "@/components/TrialExpiredScreen";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import Produtos from "./pages/Produtos";
@@ -90,8 +92,9 @@ function DataSync() {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const { isLoading: trialLoading, isExpired } = useTrial();
   
-  if (loading) {
+  if (loading || trialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -101,6 +104,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (isExpired) {
+    return <TrialExpiredScreen />;
   }
   
   return <>{children}</>;

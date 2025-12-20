@@ -292,18 +292,24 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          trial_expired: boolean | null
+          trial_started_at: string | null
         }
         Insert: {
           created_at?: string | null
           email?: string | null
           id: string
           name: string
+          trial_expired?: boolean | null
+          trial_started_at?: string | null
         }
         Update: {
           created_at?: string | null
           email?: string | null
           id?: string
           name?: string
+          trial_expired?: boolean | null
+          trial_started_at?: string | null
         }
         Relationships: []
       }
