@@ -7,7 +7,9 @@ import { GlobalSearch } from "@/components/GlobalSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { TrialBanner } from "@/components/TrialBanner";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useTrial } from "@/hooks/useTrial";
 import { useIsMobile, useIsTablet } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
@@ -19,6 +21,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { daysRemaining } = useTrial();
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
 
@@ -99,6 +102,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
 
         {/* Page Content */}
         <main className="p-3 md:p-4 lg:p-6 animate-fade-in">
+          <TrialBanner daysRemaining={daysRemaining} />
           <Breadcrumbs />
           {children}
         </main>
