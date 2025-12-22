@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/lib/types";
 import { toast } from "sonner";
 import { useTenant } from "./useTenant";
+import { useEffect } from "react";
 
 export function useSupabaseProducts() {
   const queryClient = useQueryClient();
@@ -43,6 +44,31 @@ export function useSupabaseProducts() {
     },
     enabled: !!tenantId,
   });
+
+  // Real-time subscription for cross-device sync
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const channel = supabase
+      .channel('products-realtime-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products',
+          filter: `tenant_id=eq.${tenantId}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['products', tenantId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId, queryClient]);
 
   const addProduct = useMutation({
     mutationFn: async (product: Omit<Product, 'id'>) => {
