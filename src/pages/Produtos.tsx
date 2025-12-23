@@ -509,7 +509,8 @@ export default function Produtos() {
         {/* Products Table */}
         <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
           <ScrollArea className="h-[calc(100vh-280px)] min-h-[400px]">
-          <Table>
+            <div className="min-w-[800px]">
+              <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Produto</TableHead>
@@ -597,7 +598,8 @@ export default function Produtos() {
                 ))
               )}
             </TableBody>
-          </Table>
+              </Table>
+            </div>
           </ScrollArea>
         </div>
       </div>
