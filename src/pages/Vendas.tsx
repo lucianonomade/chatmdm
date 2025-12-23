@@ -869,7 +869,7 @@ export default function Vendas() {
       customerName: type === 'quote' ? (customers.find(c => c.id === selectedCustomer)?.name || "Consumidor Final") : (lastSaleCustomer?.name || "Consumidor Final"),
       items: type === 'quote' ? cart : lastSaleItems,
       total: type === 'quote' ? cartTotal : lastSaleTotal,
-      sellerName: type === 'quote' ? users.find(u => u.id === selectedSeller)?.name : lastSaleSeller,
+      sellerName: type === 'quote' ? (authUser?.name || users.find(u => u.id === selectedSeller)?.name || 'Vendedor') : lastSaleSeller,
       paymentMethod: type === 'quote' ? null : lastSalePaymentMethod,
       amountPaid: type === 'quote' ? 0 : lastSaleAmountPaid,
       remaining: type === 'quote' ? 0 : lastSaleRemaining,
