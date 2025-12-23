@@ -1,5 +1,6 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +16,17 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ error: 'Serviço de email não configurado' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
     
     // Create admin client with service role key
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
@@ -97,8 +108,8 @@ serve(async (req) => {
     }
 
     // The reset link is for the user's email, but notification goes to admin
-    const userEmail = profile.email; // The actual user's email for the reset link
-    const adminEmail = adminProfile.email; // Where to send the notification
+    const userEmail = profile.email;
+    const adminEmail = adminProfile.email;
 
     if (!userEmail) {
       console.error(`No email found for user: ${profile.id}`);
@@ -130,22 +141,52 @@ serve(async (req) => {
       );
     }
 
-    // Log the info - the reset link should be sent to the admin's email
+    const resetLink = linkData.properties?.action_link;
     console.log(`Password reset link generated for ${profile.name}`);
-    console.log(`Will be sent to admin email: ${adminEmail}`);
-    console.log(`Reset link: ${linkData.properties?.action_link}`);
 
-    // Return info about where the email will be sent
-    // In production, you would integrate with Resend to actually send the email to adminEmail
+    // Send email to admin using Resend
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: 'Sistema <onboarding@resend.dev>',
+      to: [adminEmail],
+      subject: `Recuperação de Senha - ${profile.name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333;">Solicitação de Recuperação de Senha</h2>
+          <p>O usuário <strong>${profile.name}</strong> solicitou a recuperação de senha.</p>
+          <p>Clique no botão abaixo para redefinir a senha:</p>
+          <a href="${resetLink}" 
+             style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+            Redefinir Senha
+          </a>
+          <p style="color: #666; font-size: 14px;">
+            Se você não reconhece esta solicitação, ignore este email.
+          </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="color: #999; font-size: 12px;">
+            Este é um email automático, não responda.
+          </p>
+        </div>
+      `,
+    });
+
+    if (emailError) {
+      console.error('Resend email error:', emailError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erro ao enviar email. Verifique a configuração do Resend.',
+          details: emailError.message 
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Email sent successfully to ${adminEmail}`, emailData);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Link de recuperação será enviado para o email do administrador.`,
-        adminNotified: true,
-        adminEmail: adminEmail,
-        userName: profile.name,
-        // In production, remove actionLink - this is for testing only
-        actionLink: linkData.properties?.action_link
+        message: `Link de recuperação enviado para o email do administrador.`,
+        adminNotified: true
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
