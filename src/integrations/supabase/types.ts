@@ -695,6 +695,7 @@ export type Database = {
       can_view_customer_pii: { Args: never; Returns: boolean }
       can_view_payment_details: { Args: never; Returns: boolean }
       get_email_by_name: { Args: { p_name: string }; Returns: string }
+      get_email_by_name_public: { Args: { p_name: string }; Returns: string }
       get_public_company_branding: { Args: never; Returns: Json }
       get_user_role: {
         Args: { _user_id: string }
