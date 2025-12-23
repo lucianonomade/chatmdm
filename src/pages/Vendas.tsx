@@ -1490,69 +1490,25 @@ export default function Vendas() {
               </div>
             ) : (
               cart.map((item) => (
-                <div key={item.id} className="p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    {/* Quantity controls */}
-                    <div className="flex flex-col items-center gap-1 bg-background rounded-lg p-1 shrink-0">
-                      <button 
-                        className="w-7 h-7 flex items-center justify-center hover:bg-green-100 hover:text-green-600 rounded"
-                        onClick={() => {
-                          // Use the existing item's unit price to add quantity
-                          const newQuantity = item.quantity + 1;
-                          const newTotal = item.price * newQuantity;
-                          useStore.getState().updateCartItem(item.id, { quantity: newQuantity, total: newTotal });
-                        }}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                      <span className="font-bold text-sm">{item.quantity}</span>
-                      <button 
-                        className="w-7 h-7 flex items-center justify-center hover:bg-red-100 hover:text-red-600 rounded"
-                        onClick={() => {
-                          if (item.quantity > 1) {
-                            // Decrease quantity instead of removing
-                            const newQuantity = item.quantity - 1;
-                            const newTotal = item.price * newQuantity;
-                            useStore.getState().updateCartItem(item.id, { quantity: newQuantity, total: newTotal });
-                          } else {
-                            removeFromCart(item.id);
-                          }
-                        }}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                    </div>
-
+                <div key={item.id} className="p-3 bg-muted/50 rounded-lg space-y-2">
+                  {/* Header row: Name + Total + Actions */}
+                  <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm break-words leading-tight">{item.name}</p>
+                      <p className="font-semibold text-sm">{item.name}</p>
                       {item.variationName && (
-                        <p className="text-xs text-primary font-medium break-words leading-tight mt-0.5">{item.variationName}</p>
+                        <p className="text-xs text-primary font-medium">{item.variationName}</p>
                       )}
-                      {item.dimensions && (
-                        <p className="text-xs text-muted-foreground mt-0.5">Medidas: {item.dimensions}</p>
-                      )}
-                      {item.finishing && (
-                        <p className="text-xs text-muted-foreground break-words leading-tight mt-0.5">Acab.: {item.finishing}</p>
-                      )}
-                      {item.customDescription && (
-                        <div className="text-xs text-muted-foreground mt-1 p-2 bg-background rounded border break-words">
-                          <span className="font-bold text-primary/80">OBS:</span> {item.customDescription}
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">Unit: R$ {item.price.toFixed(2)}</p>
                     </div>
-
-                    <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right">
-                        <span className="text-xs text-muted-foreground block">Total</span>
+                        <span className="text-xs text-muted-foreground">Total</span>
                         <p className="font-bold text-primary whitespace-nowrap">R$ {item.total.toFixed(2)}</p>
                       </div>
-                      <div className="flex gap-1 mt-1">
+                      <div className="flex gap-1">
                         <button 
                           className="w-7 h-7 flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 rounded bg-background border"
                           title="Editar item"
                           onClick={() => {
-                            // Find the product and open the dialog for editing
                             const product = products.find(p => p.id === item.productId);
                             if (product) {
                               setSelectedProductForVariation(product);
@@ -1568,7 +1524,6 @@ export default function Vendas() {
                               } else {
                                 setDimensions({ width: "", height: "" });
                               }
-                              // Remove the item so user can re-add with changes
                               removeFromCart(item.id);
                             }
                           }}
@@ -1583,6 +1538,63 @@ export default function Vendas() {
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Details row: Dimensions, Finishing */}
+                  {(item.dimensions || item.finishing) && (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {item.dimensions && (
+                        <span className="bg-background px-2 py-0.5 rounded border text-muted-foreground">
+                          Medidas: {item.dimensions}
+                        </span>
+                      )}
+                      {item.finishing && (
+                        <span className="bg-background px-2 py-0.5 rounded border text-muted-foreground">
+                          Acab.: {item.finishing}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Observation */}
+                  {item.customDescription && (
+                    <div className="text-xs text-muted-foreground p-2 bg-background rounded border">
+                      <span className="font-bold text-primary/80">OBS:</span> {item.customDescription}
+                    </div>
+                  )}
+
+                  {/* Quantity controls row */}
+                  <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-background rounded-lg border">
+                        <button 
+                          className="w-8 h-8 flex items-center justify-center hover:bg-red-100 hover:text-red-600 rounded-l-lg"
+                          onClick={() => {
+                            if (item.quantity > 1) {
+                              const newQuantity = item.quantity - 1;
+                              const newTotal = item.price * newQuantity;
+                              useStore.getState().updateCartItem(item.id, { quantity: newQuantity, total: newTotal });
+                            } else {
+                              removeFromCart(item.id);
+                            }
+                          }}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="font-bold text-sm w-8 text-center">{item.quantity}</span>
+                        <button 
+                          className="w-8 h-8 flex items-center justify-center hover:bg-green-100 hover:text-green-600 rounded-r-lg"
+                          onClick={() => {
+                            const newQuantity = item.quantity + 1;
+                            const newTotal = item.price * newQuantity;
+                            useStore.getState().updateCartItem(item.id, { quantity: newQuantity, total: newTotal });
+                          }}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="text-xs text-muted-foreground">x R$ {item.price.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
