@@ -145,41 +145,42 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
       if (!isOpen) resetForm();
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
+      <DialogContent className="w-[95vw] max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0">
+        <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             <ShoppingBag className="h-5 w-5 text-primary" />
             Nova Compra
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm">
             Registre uma compra de materiais ou insumos
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 py-4">
+        <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4">
           {/* Supplier Selection */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold flex items-center gap-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Fornecedor
             </Label>
             
             <Tabs defaultValue="list" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="list">Buscar</TabsTrigger>
-                <TabsTrigger value="new">Novo Fornecedor</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-9">
+                <TabsTrigger value="list" className="text-xs">Buscar</TabsTrigger>
+                <TabsTrigger value="new" className="text-xs">Novo Fornecedor</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="list" className="space-y-3 mt-3">
+              <TabsContent value="list" className="space-y-2 mt-2">
                 <Input
                   placeholder="Buscar fornecedor..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-9"
                 />
-                <div className="max-h-[200px] overflow-y-auto space-y-2 border rounded-lg p-2">
+                <div className="max-h-[150px] overflow-y-auto space-y-1 border rounded-lg p-2">
                   {/* Option for no supplier */}
                   <div
-                    className={`p-3 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
+                    className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
                       selectedSupplier === "" 
                         ? "bg-primary/10 border-primary" 
                         : "hover:bg-muted"
@@ -187,16 +188,16 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                     onClick={() => handleSelectSupplier("")}
                   >
                     <div>
-                      <p className="font-medium text-muted-foreground">Sem fornecedor</p>
-                      <p className="text-sm text-muted-foreground">Compra avulsa</p>
+                      <p className="font-medium text-muted-foreground text-sm">Sem fornecedor</p>
+                      <p className="text-xs text-muted-foreground">Compra avulsa</p>
                     </div>
                     {selectedSupplier === "" && (
-                      <Check className="w-5 h-5 text-primary" />
+                      <Check className="w-4 h-4 text-primary" />
                     )}
                   </div>
                   
                   {filteredSuppliers.length === 0 && searchTerm && (
-                    <p className="text-center text-muted-foreground py-4">
+                    <p className="text-center text-muted-foreground py-2 text-sm">
                       Nenhum fornecedor encontrado
                     </p>
                   )}
@@ -206,30 +207,30 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                     return (
                       <div
                         key={supplier.id}
-                        className={`p-3 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
+                        className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
                           selectedSupplier === supplier.id 
                             ? "bg-primary/10 border-primary" 
                             : "hover:bg-muted"
                         }`}
                         onClick={() => handleSelectSupplier(supplier.id)}
                       >
-                        <div className="flex-1">
-                          <p className="font-semibold">{supplier.name}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate">{supplier.name}</p>
                           {supplier.phone && (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {supplier.phone}
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Phone className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">{supplier.phone}</span>
                             </p>
                           )}
                           {balance > 0 && (
-                            <p className="text-sm text-warning flex items-center gap-1 mt-1">
-                              <AlertCircle className="h-3 w-3" />
-                              Saldo devedor: R$ {balance.toFixed(2)}
+                            <p className="text-xs text-warning flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                              Saldo: R$ {balance.toFixed(2)}
                             </p>
                           )}
                         </div>
                         {selectedSupplier === supplier.id && (
-                          <Check className="w-5 h-5 text-primary" />
+                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
                         )}
                       </div>
                     );
@@ -237,45 +238,49 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                 </div>
               </TabsContent>
               
-              <TabsContent value="new" className="space-y-4 mt-3">
-                <div className="space-y-2">
-                  <Label>Nome do Fornecedor *</Label>
+              <TabsContent value="new" className="space-y-3 mt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Nome do Fornecedor *</Label>
                   <Input
                     value={newSupplierName}
                     onChange={(e) => setNewSupplierName(e.target.value)}
                     placeholder="Ex: Distribuidora ABC"
+                    className="h-9"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Telefone</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Telefone</Label>
                     <Input
                       value={newSupplierPhone}
                       onChange={(e) => setNewSupplierPhone(e.target.value)}
                       placeholder="(00) 00000-0000"
+                      className="h-9"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Contato</Label>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Contato</Label>
                     <Input
                       value={newSupplierContact}
                       onChange={(e) => setNewSupplierContact(e.target.value)}
                       placeholder="Nome do contato"
+                      className="h-9"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>E-mail</Label>
+                <div className="space-y-1">
+                  <Label className="text-xs">E-mail</Label>
                   <Input
                     type="email"
                     value={newSupplierEmail}
                     onChange={(e) => setNewSupplierEmail(e.target.value)}
                     placeholder="email@fornecedor.com"
+                    className="h-9"
                   />
                 </div>
                 <Button
                   type="button"
-                  className="w-full"
+                  className="w-full h-9"
                   onClick={handleAddNewSupplier}
                   disabled={isAddingSupplier || !newSupplierName.trim()}
                 >
@@ -287,24 +292,25 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
           </div>
 
           {/* Purchase Details */}
-          <div className="space-y-4 border-t pt-4">
-            <Label className="text-base font-semibold flex items-center gap-2">
+          <div className="space-y-3 border-t pt-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
               <Package className="h-4 w-4" />
               Detalhes da Compra
             </Label>
             
-            <div className="space-y-2">
-              <Label>Descrição *</Label>
+            <div className="space-y-1">
+              <Label className="text-xs">Descrição *</Label>
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex: Papel couche 115g - 500 folhas"
+                className="h-9"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Valor (R$) *</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Valor (R$) *</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -312,12 +318,13 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
+                  className="h-9"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Categoria</Label>
+              <div className="space-y-1">
+                <Label className="text-xs">Categoria</Label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue placeholder="Selecionar" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
@@ -329,32 +336,34 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Observações</Label>
+            <div className="space-y-1">
+              <Label className="text-xs">Observações</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Observações adicionais..."
                 rows={2}
+                className="text-sm"
               />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="border-t pt-4">
+        <DialogFooter className="border-t px-4 py-3 flex-shrink-0 gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
+            className="h-9"
           >
             Cancelar
           </Button>
           <Button
             onClick={handleSubmitPurchase}
             disabled={!description.trim() || !amount}
-            className="bg-primary"
+            className="bg-primary h-9"
           >
             <ShoppingBag className="h-4 w-4 mr-2" />
-            Registrar Compra
+            Registrar
           </Button>
         </DialogFooter>
       </DialogContent>
