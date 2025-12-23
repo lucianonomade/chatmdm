@@ -114,12 +114,16 @@ export function useSupabaseCategories() {
     },
   });
 
-  // Update category
+  // Update category (and rename products that use it)
   const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+    mutationFn: async ({ id, name, previousName }: { id: string; name: string; previousName?: string }) => {
+      if (!tenantId) throw new Error("Tenant não encontrado");
+
+      const nextName = name.trim();
+
       const { data, error } = await supabase
         .from("categories")
-        .update({ name: name.trim() })
+        .update({ name: nextName })
         .eq("id", id)
         .select()
         .single();
@@ -130,6 +134,18 @@ export function useSupabaseCategories() {
         }
         throw error;
       }
+
+      // If we know the previous name, update all products referencing it
+      if (previousName && previousName.trim() && previousName.trim() !== nextName) {
+        const { error: productsError } = await supabase
+          .from("products")
+          .update({ category: nextName })
+          .eq("tenant_id", tenantId)
+          .eq("category", previousName.trim());
+
+        if (productsError) throw productsError;
+      }
+
       return data;
     },
     onMutate: async ({ id, name }) => {

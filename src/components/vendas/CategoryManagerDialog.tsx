@@ -88,7 +88,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
 
   const handleConfirmEdit = () => {
     if (editingCategory) {
-      updateCategory({ id: editingCategory.id, name: editCategoryName.trim() });
+      updateCategory({ id: editingCategory.id, name: editCategoryName.trim(), previousName: editingCategory.name });
     }
     setEditingCategory(null);
     setEditCategoryName("");

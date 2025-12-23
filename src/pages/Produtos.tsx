@@ -661,27 +661,21 @@ export default function Produtos() {
                 if (categoryDialogMode === 'create') {
                   addCategory(trimmedName);
                   setFormData(prev => ({ ...prev, category: trimmedName }));
-                } else {
-                  // Se existe no banco, atualiza
-                  if (editingCategoryId) {
-                    updateCategory({ id: editingCategoryId, name: trimmedName });
-                  } else {
-                    // Se a categoria só existe em produtos, cria no banco primeiro
-                    addCategory(trimmedName);
-                  }
-                  
-                  // Atualiza todos os produtos que usam a categoria antiga
-                  const productsWithOldCategory = products.filter(p => p.category === editingCategoryOldName);
-                  productsWithOldCategory.forEach(product => {
-                    updateProduct({ id: product.id, data: { category: trimmedName } });
-                  });
-                  
-                  if (formData.category === editingCategoryOldName) {
-                    setFormData(prev => ({ ...prev, category: trimmedName }));
-                  }
-                  
-                  toast.success(`Categoria "${editingCategoryOldName}" renomeada para "${trimmedName}"`);
-                }
+                 } else {
+                   // Se existe no banco, atualiza (e renomeia os produtos no backend)
+                   if (editingCategoryId) {
+                     updateCategory({ id: editingCategoryId, name: trimmedName, previousName: editingCategoryOldName });
+                   } else {
+                     // Se a categoria só existe em produtos, cria no banco primeiro
+                     addCategory(trimmedName);
+                   }
+
+                   if (formData.category === editingCategoryOldName) {
+                     setFormData(prev => ({ ...prev, category: trimmedName }));
+                   }
+
+                   toast.success(`Categoria "${editingCategoryOldName}" renomeada para "${trimmedName}"`);
+                 }
                 
                 setCategoryDialogOpen(false);
                 setCategoryInputValue("");
