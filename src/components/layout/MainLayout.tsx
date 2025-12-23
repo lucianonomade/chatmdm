@@ -33,7 +33,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const effectiveSidebarCollapsed = isTablet ? true : sidebarCollapsed;
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Sidebar 
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -44,7 +44,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
       {/* Main Content */}
       <div
         className={cn(
-          "transition-all duration-300 overflow-x-hidden",
+          "transition-all duration-300",
           // Desktop: margin based on sidebar collapsed state
           // Tablet: collapsed sidebar margin
           // Mobile: no margin (sidebar overlays)
@@ -103,7 +103,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-3 md:p-4 lg:p-6 animate-fade-in overflow-x-hidden min-w-0">
+        <main className="p-3 md:p-4 lg:p-6 animate-fade-in min-w-0">
           <TrialBanner daysRemaining={daysRemaining} />
           <Breadcrumbs />
           {children}

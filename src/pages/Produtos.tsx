@@ -506,8 +506,8 @@ export default function Produtos() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
-          <div className="w-full overflow-x-auto">
+        <div className="bg-card rounded-xl border border-border shadow-soft max-w-full">
+          <div className="w-full max-w-full overflow-x-auto">
             <div className="min-w-[1000px]">
               <Table>
                 <TableHeader>
