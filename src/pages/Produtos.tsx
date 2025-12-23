@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -508,99 +507,99 @@ export default function Produtos() {
 
         {/* Products Table */}
         <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
-          <ScrollArea className="h-[calc(100vh-280px)] min-h-[400px]">
-            <div className="min-w-[800px]">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[1000px]">
               <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold">Produto</TableHead>
-                <TableHead className="font-semibold">Descrição</TableHead>
-                <TableHead className="font-semibold">Categoria</TableHead>
-                <TableHead className="font-semibold text-right">Preço</TableHead>
-                <TableHead className="font-semibold text-center">Estoque</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="font-semibold text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableSkeleton />
-              ) : filteredProducts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        <ShoppingBag className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Nenhum produto encontrado</p>
-                        <p className="text-sm text-muted-foreground">
-                          {search ? "Tente ajustar sua busca" : "Clique em 'Novo Produto' para começar"}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                          <Package className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <span className="font-medium">{product.name}</span>
-                          {product.subcategory && (
-                            <p className="text-xs text-muted-foreground">{product.subcategory}</p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground max-w-[200px]">
-                      {product.description ? (
-                        <span className="line-clamp-2 text-sm">{product.description}</span>
-                      ) : (
-                        <span className="text-muted-foreground/50 text-sm italic">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{product.category}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      R$ {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell className="text-center">{product.stock}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusConfig(product).className}>
-                        {getStatusConfig(product).label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleOpenDialog(product)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setProductToDelete(product)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Produto</TableHead>
+                    <TableHead className="font-semibold">Descrição</TableHead>
+                    <TableHead className="font-semibold">Categoria</TableHead>
+                    <TableHead className="font-semibold text-right">Preço</TableHead>
+                    <TableHead className="font-semibold text-center">Estoque</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold text-right">Ações</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableSkeleton />
+                  ) : filteredProducts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                            <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">Nenhum produto encontrado</p>
+                            <p className="text-sm text-muted-foreground">
+                              {search ? "Tente ajustar sua busca" : "Clique em 'Novo Produto' para começar"}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <TableRow key={product.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer">
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-medium">{product.name}</span>
+                              {product.subcategory && (
+                                <p className="text-xs text-muted-foreground">{product.subcategory}</p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground max-w-[240px]">
+                          {product.description ? (
+                            <span className="line-clamp-2 text-sm break-words">{product.description}</span>
+                          ) : (
+                            <span className="text-muted-foreground/50 text-sm italic">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{product.category}</TableCell>
+                        <TableCell className="text-right font-semibold whitespace-nowrap">
+                          R$ {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell className="text-center">{product.stock}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusConfig(product).className}>
+                            {getStatusConfig(product).label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right whitespace-nowrap">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleOpenDialog(product)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => setProductToDelete(product)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
               </Table>
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
 
