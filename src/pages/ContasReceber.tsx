@@ -548,20 +548,19 @@ export default function ContasReceber() {
         </div>
 
         {/* Table */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold whitespace-nowrap">Pedido</TableHead>
-                  <TableHead className="font-semibold whitespace-nowrap">Cliente</TableHead>
-                  <TableHead className="font-semibold whitespace-nowrap">Data</TableHead>
-                  <TableHead className="font-semibold text-right whitespace-nowrap">Total</TableHead>
-                  <TableHead className="font-semibold text-right whitespace-nowrap">Pago</TableHead>
-                  <TableHead className="font-semibold text-right whitespace-nowrap min-w-[100px]">Pendente</TableHead>
-                  <TableHead className="font-semibold whitespace-nowrap">Status</TableHead>
-                  <TableHead className="font-semibold text-right whitespace-nowrap">Ações</TableHead>
+                  <TableHead className="font-semibold">Pedido</TableHead>
+                  <TableHead className="font-semibold hidden sm:table-cell">Cliente</TableHead>
+                  <TableHead className="font-semibold hidden md:table-cell">Data</TableHead>
+                  <TableHead className="font-semibold text-right hidden lg:table-cell">Total</TableHead>
+                  <TableHead className="font-semibold text-right hidden lg:table-cell">Pago</TableHead>
+                  <TableHead className="font-semibold text-right">Pendente</TableHead>
+                  <TableHead className="font-semibold hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="font-semibold text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -584,21 +583,24 @@ export default function ContasReceber() {
                         className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer"
                         onClick={() => handleViewOrder(order)}
                       >
-                        <TableCell className="font-mono text-sm font-medium">#{order.id}</TableCell>
-                        <TableCell className="font-medium">{order.customerName}</TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell>
+                          <div className="font-mono text-sm font-medium">#{order.id}</div>
+                          <div className="text-xs text-muted-foreground sm:hidden">{order.customerName}</div>
+                        </TableCell>
+                        <TableCell className="font-medium hidden sm:table-cell">{order.customerName}</TableCell>
+                        <TableCell className="text-muted-foreground hidden md:table-cell">
                           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right hidden lg:table-cell">
                           R$ {order.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-right text-success">
+                        <TableCell className="text-right text-success hidden lg:table-cell">
                           R$ {paid.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="text-right font-bold text-warning">
                           R$ {remaining.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Badge className={
                             order.paymentStatus === 'partial'
                               ? "bg-warning/10 text-warning border-warning/20"
@@ -613,8 +615,8 @@ export default function ContasReceber() {
                             className="gradient-primary text-primary-foreground"
                             onClick={(e) => handleDarBaixa(order, e)}
                           >
-                            <DollarSign className="w-4 h-4 mr-1" />
-                            Receber
+                            <DollarSign className="w-4 h-4 sm:mr-1" />
+                            <span className="hidden sm:inline">Receber</span>
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -623,7 +625,6 @@ export default function ContasReceber() {
                 )}
               </TableBody>
             </Table>
-            </div>
           </CardContent>
         </Card>
       </div>
