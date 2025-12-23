@@ -3,48 +3,90 @@ import { supabase } from "@/integrations/supabase/client";
 import { CompanySettings } from "@/lib/types";
 import { toast } from "sonner";
 import { useTenant } from "./useTenant";
+import { useAuth } from "./useAuth";
 import { useEffect } from "react";
 
 export function useCompanySettings() {
   const queryClient = useQueryClient();
   const { tenantId } = useTenant();
+  const { authUser } = useAuth();
+
+  // Check if user is admin or manager (can see full settings)
+  const canViewFullSettings = authUser?.role === 'admin' || authUser?.role === 'manager';
 
   const { data: settings, isLoading, error } = useQuery({
-    queryKey: ['company-settings', tenantId],
+    queryKey: ['company-settings', tenantId, canViewFullSettings],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('company_settings')
-        .select('*')
-        .maybeSingle();
+      if (canViewFullSettings) {
+        // Admins/managers can access full company settings
+        const { data, error } = await supabase
+          .from('company_settings')
+          .select('*')
+          .maybeSingle();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (!data) return null;
+        if (!data) return null;
 
-      return {
-        id: data.id,
-        name: data.name,
-        cnpj: data.cnpj || '',
-        address: data.address || '',
-        phone: data.phone || '',
-        phone2: data.phone2 || '',
-        email: data.email || '',
-        logoUrl: data.logo_url || undefined,
-        usesStock: data.uses_stock ?? true,
-        lowStockThreshold: data.low_stock_threshold ?? 10,
-        // Print settings
-        printLogoOnReceipts: data.print_logo_on_receipts ?? true,
-        autoPrintOnSale: data.auto_print_on_sale ?? false,
-        // Notification settings
-        notifyLowStock: data.notify_low_stock ?? true,
-        notifyNewSales: data.notify_new_sales ?? true,
-        notifyPendingPayments: data.notify_pending_payments ?? true,
-        notifyOrderStatus: data.notify_order_status ?? true,
-        // Login settings
-        loginHeaderColor: data.login_header_color || '#ffffff',
-      } as CompanySettings;
+        return {
+          id: data.id,
+          name: data.name,
+          cnpj: data.cnpj || '',
+          address: data.address || '',
+          phone: data.phone || '',
+          phone2: data.phone2 || '',
+          email: data.email || '',
+          logoUrl: data.logo_url || undefined,
+          usesStock: data.uses_stock ?? true,
+          lowStockThreshold: data.low_stock_threshold ?? 10,
+          printLogoOnReceipts: data.print_logo_on_receipts ?? true,
+          autoPrintOnSale: data.auto_print_on_sale ?? false,
+          notifyLowStock: data.notify_low_stock ?? true,
+          notifyNewSales: data.notify_new_sales ?? true,
+          notifyPendingPayments: data.notify_pending_payments ?? true,
+          notifyOrderStatus: data.notify_order_status ?? true,
+          loginHeaderColor: data.login_header_color || '#ffffff',
+        } as CompanySettings;
+      } else {
+        // Sellers can only access public branding data (no CNPJ, email, etc.)
+        const { data, error } = await supabase.rpc('get_public_company_branding');
+
+        if (error) throw error;
+
+        if (!data) return null;
+
+        // Type assertion for the RPC response
+        const brandingData = data as {
+          name?: string;
+          logo_url?: string;
+          print_logo_url?: string;
+          login_header_color?: string;
+          address?: string;
+          phone?: string;
+          phone2?: string;
+        };
+
+        return {
+          name: brandingData.name || 'Minha Empresa',
+          cnpj: '', // Hidden from sellers
+          address: brandingData.address || '',
+          phone: brandingData.phone || '',
+          phone2: brandingData.phone2 || '',
+          email: '', // Hidden from sellers
+          logoUrl: brandingData.logo_url || undefined,
+          usesStock: true,
+          lowStockThreshold: 10,
+          printLogoOnReceipts: true,
+          autoPrintOnSale: false,
+          notifyLowStock: false,
+          notifyNewSales: false,
+          notifyPendingPayments: false,
+          notifyOrderStatus: false,
+          loginHeaderColor: brandingData.login_header_color || '#ffffff',
+        } as CompanySettings;
+      }
     },
-    enabled: !!tenantId,
+    enabled: !!tenantId && !!authUser,
   });
 
   // Real-time subscription for cross-device sync
