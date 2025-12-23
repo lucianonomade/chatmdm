@@ -232,15 +232,16 @@ export default function Manual() {
             <li>5. <a href="#ordens">Ordens de Serviço</a></li>
             <li>6. <a href="#financeiro">Financeiro</a></li>
             <li>7. <a href="#caixa">Controle de Caixa</a></li>
-            <li>8. <a href="#relatorios">Relatórios</a></li>
-            <li>9. <a href="#fornecedores">Fornecedores</a></li>
-            <li>10. <a href="#configuracoes">Configurações</a></li>
-            <li>11. <a href="#perfis">Perfis de Usuário</a></li>
-            <li>12. <a href="#seguranca">Segurança e Multi-tenant</a></li>
-            <li>13. <a href="#backup">Backup e Recuperação</a></li>
-            <li>14. <a href="#testes">Qualidade e Testes</a></li>
-            <li>15. <a href="#integracao">Integrações</a></li>
-            <li>16. <a href="#dicas">Dicas e Atalhos</a></li>
+            <li>8. <a href="#comissoes">Comissões</a></li>
+            <li>9. <a href="#relatorios">Relatórios</a></li>
+            <li>10. <a href="#fornecedores">Fornecedores</a></li>
+            <li>11. <a href="#configuracoes">Configurações</a></li>
+            <li>12. <a href="#perfis">Perfis de Usuário</a></li>
+            <li>13. <a href="#seguranca">Segurança e Multi-tenant</a></li>
+            <li>14. <a href="#backup">Backup e Recuperação</a></li>
+            <li>15. <a href="#testes">Qualidade e Testes</a></li>
+            <li>16. <a href="#integracao">Integrações</a></li>
+            <li>17. <a href="#dicas">Dicas e Atalhos</a></li>
           </ul>
         </div>
 
@@ -649,7 +650,7 @@ export default function Manual() {
             <ul>
               <li>Fundo de troco inicial (R$ 150,00)</li>
               <li>Entradas do dia (vendas)</li>
-              <li>Menos as saídas (sangrias e despesas)</li>
+              <li>Menos as saídas (sangrias, despesas e comissões)</li>
             </ul>
           </div>
 
@@ -661,6 +662,18 @@ export default function Manual() {
             <div class="button-desc">
               <span class="button-name">Sangria:</span> Retira dinheiro do caixa (ex: pagamento de fornecedor).
             </div>
+          </div>
+
+          <div class="section">
+            <h3>💸 Débito de Comissões</h3>
+            <p>Se a empresa utiliza comissões (configurado em Configurações), o sistema automaticamente:</p>
+            <ul>
+              <li>Calcula as comissões sobre vendas pagas</li>
+              <li>Exibe o valor de comissões no fluxo de caixa (em laranja)</li>
+              <li>Inclui as comissões no total de saídas</li>
+              <li>Mostra detalhamento no card "Total Saídas" e no resumo</li>
+            </ul>
+            <p>O percentual de comissão é definido nas configurações da empresa.</p>
           </div>
 
           <div class="section">
@@ -679,22 +692,111 @@ export default function Manual() {
             <h3>📋 Fluxo de Caixa</h3>
             <p>Lista todas as movimentações do dia com:</p>
             <ul>
-              <li>Hora da operação</li>
-              <li>Descrição</li>
-              <li>Cliente/Fornecedor</li>
-              <li>Valor (verde = entrada, vermelho = saída)</li>
+              <li>Abertura de caixa (fundo de troco)</li>
+              <li>Débito de comissões (se habilitado)</li>
+              <li>Vendas e pagamentos recebidos</li>
+              <li>Sangrias e despesas</li>
             </ul>
+            <p>Cada item mostra: hora, descrição, cliente/fornecedor e valor (verde = entrada, vermelho = saída, laranja = comissão).</p>
             <p>Clique em qualquer linha para ver detalhes completos.</p>
           </div>
 
+          <div class="section">
+            <h3>📊 Cards de Resumo</h3>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">📈</div>
+                <div>
+                  <strong>Total Entradas</strong><br/>
+                  Soma de todas as vendas e pagamentos recebidos. Clique para ver lista detalhada.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📉</div>
+                <div>
+                  <strong>Total Saídas</strong><br/>
+                  Soma de sangrias, despesas e comissões. Mostra separadamente o valor de comissões se habilitado.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">💵</div>
+                <div>
+                  <strong>Resultado</strong><br/>
+                  Diferença entre entradas e saídas (lucro ou prejuízo do dia).
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="tip">
-            <strong>💡 Dica:</strong> No final do dia, clique em "Resultado" para ver o resumo completo de entradas e saídas.
+            <strong>💡 Dica:</strong> No final do dia, clique em "Resultado" para ver o resumo completo de entradas, saídas e comissões.
           </div>
         </div>
 
-        <!-- 8. RELATÓRIOS -->
+        <!-- 8. COMISSÕES -->
+        <div class="page-break" id="comissoes">
+          <h1>8. 💵 Comissões</h1>
+          <p>Gerencie as comissões de vendedores sobre as vendas realizadas.</p>
+          
+          <div class="section">
+            <h3>⚙️ Ativando Comissões</h3>
+            <p>Para usar o sistema de comissões:</p>
+            <ol>
+              <li>Acesse <strong>Configurações</strong></li>
+              <li>Ative a opção <strong>"Usar Comissões"</strong></li>
+              <li>Defina o <strong>Percentual de Comissão</strong> (ex: 10%)</li>
+              <li>Salve as configurações</li>
+            </ol>
+          </div>
+
+          <div class="section">
+            <h3>📊 Visualizando Comissões</h3>
+            <p>Acesse o menu <strong>"Comissões"</strong> para ver:</p>
+            <ul>
+              <li><strong>Total Vendido:</strong> Soma das vendas pagas no período</li>
+              <li><strong>Total de Comissões:</strong> Valor calculado com base no percentual</li>
+              <li><strong>Número de Vendas:</strong> Quantidade de pedidos no período</li>
+              <li><strong>Taxa:</strong> Percentual configurado</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📅 Filtros</h3>
+            <p>Use os filtros para refinar a visualização:</p>
+            <ul>
+              <li><strong>Mês/Ano:</strong> Selecione o período desejado</li>
+              <li><strong>Vendedor:</strong> Veja comissões de um vendedor específico (Admin/Gerente)</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>👥 Visão por Perfil</h3>
+            <table>
+              <tr><th>Perfil</th><th>Visualização</th></tr>
+              <tr><td>Admin/Gerente</td><td>Vê comissões de todos os vendedores com resumo por pessoa</td></tr>
+              <tr><td>Vendedor</td><td>Vê apenas suas próprias comissões e vendas</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3>🏦 Comissões no Caixa</h3>
+            <p>O valor total de comissões também aparece na tela de Caixa:</p>
+            <ul>
+              <li>No card <strong>"Total Saídas"</strong> - mostra o valor de comissões incluído</li>
+              <li>No <strong>Fluxo de Caixa</strong> - aparece como "Débito de Comissões" em laranja</li>
+              <li>No <strong>Resumo do Caixa</strong> - detalhamento separado das comissões</li>
+            </ul>
+            <p>As comissões são calculadas automaticamente sobre o valor pago das vendas.</p>
+          </div>
+
+          <div class="tip">
+            <strong>💡 Dica:</strong> Clique no nome de um vendedor na tabela de resumo para ver todas as vendas que geraram comissão para ele.
+          </div>
+        </div>
+
+        <!-- 9. RELATÓRIOS -->
         <div class="page-break" id="relatorios">
-          <h1>8. 📊 Relatórios</h1>
+          <h1>9. 📊 Relatórios</h1>
           <p>Gere relatórios detalhados para análise do seu negócio.</p>
           
           <div class="section">
@@ -735,9 +837,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 9. FORNECEDORES -->
+        <!-- 10. FORNECEDORES -->
         <div class="page-break" id="fornecedores">
-          <h1>9. 🚚 Fornecedores</h1>
+          <h1>10. 🚚 Fornecedores</h1>
           <p>Cadastre e gerencie seus fornecedores.</p>
           
           <div class="section">
@@ -757,9 +859,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 10. CONFIGURAÇÕES -->
+        <!-- 11. CONFIGURAÇÕES -->
         <div class="page-break" id="configuracoes">
-          <h1>10. ⚙️ Configurações</h1>
+          <h1>11. ⚙️ Configurações</h1>
           <p>Personalize o sistema de acordo com suas necessidades.</p>
           
           <div class="section">
@@ -830,11 +932,21 @@ export default function Manual() {
               <li>Escolher tipo de som</li>
             </ul>
           </div>
+
+          <div class="section">
+            <h3>💵 Comissões</h3>
+            <p>Configure o sistema de comissões:</p>
+            <ul>
+              <li><strong>Usar Comissões:</strong> Ativa/desativa o cálculo de comissões</li>
+              <li><strong>Percentual:</strong> Define o percentual de comissão sobre vendas (ex: 10%)</li>
+            </ul>
+            <p>Quando ativado, o sistema calcula automaticamente as comissões sobre o valor pago das vendas e exibe no Caixa e na tela de Comissões.</p>
+          </div>
         </div>
 
-        <!-- 11. PERFIS -->
+        <!-- 12. PERFIS -->
         <div class="page-break" id="perfis">
-          <h1>11. 👤 Perfis de Usuário</h1>
+          <h1>12. 👤 Perfis de Usuário</h1>
           <p>O sistema possui três níveis de acesso:</p>
           
           <div class="section">
@@ -870,9 +982,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 12. SEGURANÇA -->
+        <!-- 13. SEGURANÇA -->
         <div class="page-break" id="seguranca">
-          <h1>12. 🔒 Segurança e Multi-tenant</h1>
+          <h1>13. 🔒 Segurança e Multi-tenant</h1>
           <p>O sistema foi desenvolvido com segurança em primeiro lugar, utilizando as melhores práticas do mercado.</p>
           
           <div class="section">
@@ -934,9 +1046,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 13. BACKUP -->
+        <!-- 14. BACKUP -->
         <div class="page-break" id="backup">
-          <h1>13. 💾 Backup e Recuperação</h1>
+          <h1>14. 💾 Backup e Recuperação</h1>
           <p>O sistema oferece funcionalidades de backup para proteção dos seus dados.</p>
           
           <div class="section">
@@ -978,9 +1090,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 14. TESTES -->
+        <!-- 15. TESTES -->
         <div class="page-break" id="testes">
-          <h1>14. ✅ Qualidade e Testes</h1>
+          <h1>15. ✅ Qualidade e Testes</h1>
           <p>O sistema passa por rigorosos testes de qualidade para garantir seu funcionamento correto.</p>
           
           <div class="section">
@@ -1069,9 +1181,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 15. INTEGRAÇÕES -->
+        <!-- 16. INTEGRAÇÕES -->
         <div class="page-break" id="integracao">
-          <h1>15. 🔗 Integrações</h1>
+          <h1>16. 🔗 Integrações</h1>
           <p>O sistema se integra com diversas ferramentas para ampliar suas funcionalidades.</p>
           
           <div class="section">
@@ -1118,9 +1230,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 16. DICAS -->
+        <!-- 17. DICAS -->
         <div class="page-break" id="dicas">
-          <h1>16. 💡 Dicas e Atalhos</h1>
+          <h1>17. 💡 Dicas e Atalhos</h1>
           
           <div class="section">
             <h3>⌨️ Atalhos de Teclado</h3>
