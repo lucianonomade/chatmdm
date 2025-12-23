@@ -674,21 +674,7 @@ export default function Configuracoes() {
                     onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-user-email">Email</Label>
-                  <Input
-                    id="new-user-email"
-                    type="email"
-                    placeholder="email@exemplo.com"
-                    value={newUserData.email}
-                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-                    disabled
-                    className="bg-muted/50"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    O email do administrador será usado para recuperação de senha
-                  </p>
-                </div>
+                {/* Email is auto-generated and hidden from user */}
                 <div className="space-y-2">
                   <Label htmlFor="new-user-password">Senha</Label>
                   <Input
