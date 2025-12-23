@@ -1523,20 +1523,20 @@ export default function Vendas() {
                       </button>
                     </div>
 
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="font-semibold text-sm truncate">{item.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm break-words leading-tight">{item.name}</p>
                       {item.variationName && (
-                        <p className="text-xs text-primary font-medium truncate">{item.variationName}</p>
+                        <p className="text-xs text-primary font-medium break-words leading-tight mt-0.5">{item.variationName}</p>
                       )}
                       {item.dimensions && (
-                        <p className="text-xs text-muted-foreground truncate">Medidas: {item.dimensions}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Medidas: {item.dimensions}</p>
                       )}
                       {item.finishing && (
-                        <p className="text-xs text-muted-foreground truncate">Acab.: {item.finishing}</p>
+                        <p className="text-xs text-muted-foreground break-words leading-tight mt-0.5">Acab.: {item.finishing}</p>
                       )}
                       {item.customDescription && (
-                        <div className="text-xs text-muted-foreground italic mt-1 p-2 bg-background rounded border">
-                          <span className="font-bold not-italic text-primary/80">OBS:</span> {item.customDescription}
+                        <div className="text-xs text-muted-foreground mt-1 p-2 bg-background rounded border break-words">
+                          <span className="font-bold text-primary/80">OBS:</span> {item.customDescription}
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">Unit: R$ {item.price.toFixed(2)}</p>
