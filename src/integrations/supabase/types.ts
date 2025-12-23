@@ -364,6 +364,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active: boolean | null
           created_at: string | null
           email: string | null
           id: string
@@ -373,6 +374,7 @@ export type Database = {
           trial_started_at: string | null
         }
         Insert: {
+          active?: boolean | null
           created_at?: string | null
           email?: string | null
           id: string
@@ -382,6 +384,7 @@ export type Database = {
           trial_started_at?: string | null
         }
         Update: {
+          active?: boolean | null
           created_at?: string | null
           email?: string | null
           id?: string
