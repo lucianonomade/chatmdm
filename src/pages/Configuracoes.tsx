@@ -616,7 +616,7 @@ export default function Configuracoes() {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">{user.role !== 'admin' ? authUser?.email : user.email}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeClass(user.role)}`}>
                           {getRoleLabel(user.role)}
                         </span>
