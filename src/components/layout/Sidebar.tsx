@@ -33,7 +33,7 @@ const menuItems = [
   { icon: Package, label: "Produtos", path: "/produtos", roles: ['admin', 'manager', 'seller'] },
   { icon: DollarSign, label: "Caixa", path: "/caixa", roles: ['admin', 'manager'] },
   { icon: AlertTriangle, label: "Contas a Receber", path: "/contas-receber", roles: ['admin', 'manager'] },
-  { icon: Wallet, label: "Financeiro", path: "/financeiro", roles: ['admin', 'manager'] },
+  { icon: Wallet, label: "Contas a Pagar", path: "/contas-pagar", roles: ['admin', 'manager'] },
   { icon: Truck, label: "Fornecedores", path: "/fornecedores", roles: ['admin', 'manager'] },
   { icon: BarChart3, label: "Relatórios", path: "/relatorios", roles: ['admin', 'manager'] },
   { icon: Settings, label: "Ajustes", path: "/configuracoes", roles: ['admin'] },

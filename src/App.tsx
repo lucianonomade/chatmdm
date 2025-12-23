@@ -27,6 +27,7 @@ import Fornecedores from "./pages/Fornecedores";
 import Configuracoes from "./pages/Configuracoes";
 import Caixa from "./pages/Caixa";
 import ContasReceber from "./pages/ContasReceber";
+import ContasPagar from "./pages/ContasPagar";
 import Instalar from "./pages/Instalar";
 import ResetPassword from "./pages/ResetPassword";
 import Manual from "./pages/Manual";
@@ -134,7 +135,9 @@ function AppRoutes() {
       <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
       <Route path="/caixa" element={<ProtectedRoute><Caixa /></ProtectedRoute>} />
       <Route path="/contas-receber" element={<ProtectedRoute><ContasReceber /></ProtectedRoute>} />
+      <Route path="/contas-pagar" element={<ProtectedRoute><ContasPagar /></ProtectedRoute>} />
       <Route path="/manual" element={<ProtectedRoute><Manual /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
