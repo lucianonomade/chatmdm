@@ -412,6 +412,24 @@ export default function Caixa() {
                       </span>
                     </div>
 
+                  {/* Commission Entry */}
+                  {totalCommission > 0 && (
+                    <div className="flex justify-between items-center p-3 hover:bg-orange-500/10 rounded-lg border-2 border-orange-500/30 hover:border-orange-500/50 transition-all duration-200 shadow-sm hover:shadow-md bg-orange-500/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500">
+                          <DollarSign className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Débito de Comissões ({companySettings?.commissionPercentage || 0}%)</p>
+                          <p className="text-xs text-muted-foreground">Sobre vendas pagas</p>
+                        </div>
+                      </div>
+                      <span className="font-bold text-orange-500">
+                        - R$ {totalCommission.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
                   {filteredTransactions.map((item, i) => (
                     <div 
                       key={i} 
