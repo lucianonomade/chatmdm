@@ -28,9 +28,10 @@ import {
   Mail,
   User,
   Check,
+  AlertCircle,
 } from "lucide-react";
-import { useStore } from "@/lib/store";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { toast } from "sonner";
 
 interface PurchaseDialogProps {
@@ -49,8 +50,8 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
-  const { addExpense } = useStore();
   const { suppliers, addSupplier, isAdding: isAddingSupplier } = useSupabaseSuppliers();
+  const { addExpense, getSupplierBalance, isAdding: isAddingExpense } = useSupabaseExpenses();
   
   // Purchase form state
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
@@ -200,30 +201,39 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                     </p>
                   )}
                   
-                  {filteredSuppliers.map(supplier => (
-                    <div
-                      key={supplier.id}
-                      className={`p-3 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
-                        selectedSupplier === supplier.id 
-                          ? "bg-primary/10 border-primary" 
-                          : "hover:bg-muted"
-                      }`}
-                      onClick={() => handleSelectSupplier(supplier.id)}
-                    >
-                      <div>
-                        <p className="font-semibold">{supplier.name}</p>
-                        {supplier.phone && (
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            {supplier.phone}
-                          </p>
+                  {filteredSuppliers.map(supplier => {
+                    const balance = getSupplierBalance(supplier.id);
+                    return (
+                      <div
+                        key={supplier.id}
+                        className={`p-3 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
+                          selectedSupplier === supplier.id 
+                            ? "bg-primary/10 border-primary" 
+                            : "hover:bg-muted"
+                        }`}
+                        onClick={() => handleSelectSupplier(supplier.id)}
+                      >
+                        <div className="flex-1">
+                          <p className="font-semibold">{supplier.name}</p>
+                          {supplier.phone && (
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {supplier.phone}
+                            </p>
+                          )}
+                          {balance > 0 && (
+                            <p className="text-sm text-warning flex items-center gap-1 mt-1">
+                              <AlertCircle className="h-3 w-3" />
+                              Saldo devedor: R$ {balance.toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                        {selectedSupplier === supplier.id && (
+                          <Check className="w-5 h-5 text-primary" />
                         )}
                       </div>
-                      {selectedSupplier === supplier.id && (
-                        <Check className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </TabsContent>
               
