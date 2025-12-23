@@ -66,9 +66,35 @@ export function useSupabaseCategories() {
     },
   });
 
-  // Delete category
+  // Delete category (with cascade to subcategories and products)
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
+      // First get the category name to update products
+      const { data: category, error: catError } = await supabase
+        .from("categories")
+        .select("name")
+        .eq("id", id)
+        .single();
+
+      if (catError) throw catError;
+
+      // Delete all subcategories that belong to this category
+      const { error: subError } = await supabase
+        .from("subcategories")
+        .delete()
+        .eq("category_id", id);
+
+      if (subError) throw subError;
+
+      // Update products that use this category to "Sem Categoria"
+      const { error: prodError } = await supabase
+        .from("products")
+        .update({ category: "Sem Categoria", subcategory: null })
+        .eq("category", category.name);
+
+      if (prodError) throw prodError;
+
+      // Finally delete the category
       const { error } = await supabase
         .from("categories")
         .delete()
@@ -78,6 +104,7 @@ export function useSupabaseCategories() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Categoria removida com sucesso!");
     },
