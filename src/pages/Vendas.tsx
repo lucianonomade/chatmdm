@@ -1500,6 +1500,12 @@ export default function Vendas() {
                     <div className="max-h-[300px] overflow-y-auto space-y-2">
                       {customers
                         .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.phone.includes(searchTerm))
+                        .sort((a, b) => {
+                          // "Consumidor" always first
+                          if (a.name === DEFAULT_CUSTOMER_NAME) return -1;
+                          if (b.name === DEFAULT_CUSTOMER_NAME) return 1;
+                          return a.name.localeCompare(b.name, 'pt-BR');
+                        })
                         .map(customer => (
                           <div
                             key={customer.id}
