@@ -104,8 +104,8 @@ export function useCompanySettings() {
           filter: `tenant_id=eq.${tenantId}`
         },
         () => {
-          // Invalidate query to refetch data when changes occur
-          queryClient.invalidateQueries({ queryKey: ['company-settings', tenantId] });
+          // Invalidate all company-settings queries to refetch data when changes occur
+          queryClient.invalidateQueries({ queryKey: ['company-settings'] });
         }
       )
       .subscribe();

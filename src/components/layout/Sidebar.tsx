@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { useStore } from "@/lib/store";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile, useIsTablet } from "@/hooks/use-mobile";
 
@@ -51,7 +51,7 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
   const location = useLocation();
   const navigate = useNavigate();
   const { authUser, signOut } = useAuth();
-  const { companySettings } = useStore();
+  const { settings: companySettings } = useCompanySettings();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
