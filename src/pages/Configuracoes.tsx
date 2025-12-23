@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, Volume2, VolumeX } from "lucide-react";
+import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, Volume2, VolumeX, KeyRound } from "lucide-react";
 import { useSoundSettings, SoundType } from "@/hooks/useSoundSettings";
 import { playClickSound } from "@/hooks/useClickSound";
 import { Slider } from "@/components/ui/slider";
@@ -107,6 +108,12 @@ export default function Configuracoes() {
     name: "",
     role: "seller" as "admin" | "manager" | "seller",
   });
+
+  // Reset password dialog state
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [resetPasswordUser, setResetPasswordUser] = useState<UserType | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   // Theme state
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -332,6 +339,58 @@ export default function Configuracoes() {
     setIsUserDialogOpen(false);
     setUserData({ name: "", role: "seller" });
     setEditingUser(null);
+  };
+
+  const handleOpenResetPassword = (user: UserType) => {
+    setResetPasswordUser(user);
+    setNewPassword("");
+    setIsResetPasswordDialogOpen(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPasswordUser || !newPassword) {
+      toast.error("Nova senha é obrigatória");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.data.session?.access_token}`,
+          },
+          body: JSON.stringify({ 
+            userId: resetPasswordUser.id, 
+            newPassword 
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao resetar senha');
+      }
+
+      toast.success(`Senha do usuário ${resetPasswordUser.name} foi alterada!`);
+      setIsResetPasswordDialogOpen(false);
+      setResetPasswordUser(null);
+      setNewPassword("");
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      toast.error(error.message || "Erro ao resetar senha");
+    } finally {
+      setIsResettingPassword(false);
+    }
   };
 
   const getRoleLabel = (role: string) => {
@@ -657,9 +716,19 @@ export default function Configuracoes() {
                     </div>
                     <div className="flex items-center gap-2">
                       {authUser?.role === 'admin' && user.role !== 'admin' && (
-                        <Button variant="outline" size="sm" onClick={() => handleOpenUserDialog(user)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleOpenResetPassword(user)}
+                            title="Resetar Senha"
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleOpenUserDialog(user)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -758,6 +827,52 @@ export default function Configuracoes() {
                     </>
                   ) : (
                     "Cadastrar"
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Reset Password Dialog */}
+          <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Resetar Senha</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm">
+                    Você está alterando a senha do usuário:
+                  </p>
+                  <p className="font-medium">{resetPasswordUser?.name}</p>
+                  <p className="text-xs text-muted-foreground">{resetPasswordUser?.email}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Nova Senha</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleResetPassword}
+                  disabled={isResettingPassword}
+                >
+                  {isResettingPassword ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Alterando...
+                    </>
+                  ) : (
+                    "Alterar Senha"
                   )}
                 </Button>
               </div>
