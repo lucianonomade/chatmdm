@@ -555,7 +555,22 @@ export default function Configuracoes() {
               <div className="flex flex-wrap gap-2">
                 <ChangePasswordDialog />
                 {authUser?.role === 'admin' && (
-                  <Button onClick={() => setIsCreateUserDialogOpen(true)}>
+                  <Button onClick={() => {
+                    // Pre-fill with admin's email for easier management
+                    const adminEmail = authUser?.email || '';
+                    // Generate a unique email suffix based on timestamp
+                    const uniqueSuffix = Date.now().toString().slice(-6);
+                    const generatedEmail = adminEmail 
+                      ? adminEmail.replace('@', `+vendedor${uniqueSuffix}@`)
+                      : `vendedor${uniqueSuffix}@empresa.local`;
+                    setNewUserData({ 
+                      email: generatedEmail, 
+                      password: "", 
+                      name: "", 
+                      role: "seller" 
+                    });
+                    setIsCreateUserDialogOpen(true);
+                  }}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Novo Usuário
                   </Button>
@@ -667,7 +682,12 @@ export default function Configuracoes() {
                     placeholder="email@exemplo.com"
                     value={newUserData.email}
                     onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                    disabled
+                    className="bg-muted/50"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    O email do administrador será usado para recuperação de senha
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new-user-password">Senha</Label>
