@@ -140,30 +140,36 @@ serve(async (req) => {
       );
     }
 
-    // Wait for trigger to execute, then update role and ensure tenant_id
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Update role to the specified one
-    const { error: updateRoleError } = await supabaseAdmin
-      .from('user_roles')
-      .update({ role: userRole, tenant_id: adminTenantId })
-      .eq('user_id', newUser.user.id);
-    
-    if (updateRoleError) {
-      console.error('Update role error:', updateRoleError);
-    }
-
-    // Ensure profile has the correct tenant_id
-    const { error: updateProfileError } = await supabaseAdmin
+    // Create profile for the new user
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update({ tenant_id: adminTenantId })
-      .eq('id', newUser.user.id);
+      .upsert({
+        id: newUser.user.id,
+        name: name,
+        email: email,
+        tenant_id: adminTenantId,
+        trial_started_at: new Date().toISOString(),
+        trial_expired: false
+      }, { onConflict: 'id' });
 
-    if (updateProfileError) {
-      console.error('Update profile tenant error:', updateProfileError);
+    if (profileError) {
+      console.error('Create profile error:', profileError);
     }
 
-    console.log(`User created successfully: ${newUser.user.id}`);
+    // Create or update user role
+    const { error: createRoleError } = await supabaseAdmin
+      .from('user_roles')
+      .upsert({
+        user_id: newUser.user.id,
+        role: userRole,
+        tenant_id: adminTenantId
+      }, { onConflict: 'user_id' });
+    
+    if (createRoleError) {
+      console.error('Create role error:', createRoleError);
+    }
+
+    console.log(`User created successfully: ${newUser.user.id} with profile and role`);
 
     return new Response(
       JSON.stringify({ 
