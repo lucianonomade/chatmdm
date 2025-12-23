@@ -30,7 +30,11 @@ import {
   BarChart3,
   Palette,
   Volume2,
-  Upload
+  Upload,
+  Shield,
+  TestTube,
+  Link,
+  Database
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 
@@ -231,7 +235,11 @@ export default function Manual() {
             <li>9. <a href="#fornecedores">Fornecedores</a></li>
             <li>10. <a href="#configuracoes">Configurações</a></li>
             <li>11. <a href="#perfis">Perfis de Usuário</a></li>
-            <li>12. <a href="#dicas">Dicas e Atalhos</a></li>
+            <li>12. <a href="#seguranca">Segurança e Multi-tenant</a></li>
+            <li>13. <a href="#backup">Backup e Recuperação</a></li>
+            <li>14. <a href="#testes">Qualidade e Testes</a></li>
+            <li>15. <a href="#integracao">Integrações</a></li>
+            <li>16. <a href="#dicas">Dicas e Atalhos</a></li>
           </ul>
         </div>
 
@@ -861,15 +869,254 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 12. DICAS -->
+        <!-- 12. SEGURANÇA -->
+        <div class="page-break" id="seguranca">
+          <h1>12. 🔒 Segurança e Multi-tenant</h1>
+          <p>O sistema foi desenvolvido com segurança em primeiro lugar, utilizando as melhores práticas do mercado.</p>
+          
+          <div class="section">
+            <h3>🏢 Isolamento Multi-tenant</h3>
+            <p>Cada empresa (tenant) possui dados completamente isolados:</p>
+            <ul>
+              <li>Cada usuário pertence a uma empresa específica</li>
+              <li>Dados de uma empresa nunca são visíveis para outra</li>
+              <li>O isolamento é garantido no nível do banco de dados (RLS)</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>🛡️ Row Level Security (RLS)</h3>
+            <p>Todas as tabelas possuem políticas de segurança:</p>
+            <table>
+              <tr><th>Tabela</th><th>Proteção</th></tr>
+              <tr><td>Clientes</td><td>Visíveis apenas para usuários do mesmo tenant</td></tr>
+              <tr><td>Produtos</td><td>Isolados por empresa</td></tr>
+              <tr><td>Pedidos</td><td>Vendedores veem apenas seus pedidos</td></tr>
+              <tr><td>Financeiro</td><td>Restrito a Admin e Gerentes</td></tr>
+              <tr><td>Configurações</td><td>Apenas Admin pode alterar</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3>🔐 Autenticação</h3>
+            <ul>
+              <li><strong>Login seguro:</strong> Email + senha com criptografia</li>
+              <li><strong>Sessões:</strong> Tokens JWT com expiração automática</li>
+              <li><strong>Recuperação de senha:</strong> Via email com link seguro</li>
+              <li><strong>Proteção:</strong> Senhas verificadas contra vazamentos conhecidos</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>👥 Controle de Acesso por Papel</h3>
+            <p>Os papéis são armazenados em tabela separada para evitar escalação de privilégios:</p>
+            <ul>
+              <li><strong>Admin:</strong> Acesso total, gerencia usuários</li>
+              <li><strong>Gerente:</strong> Acesso financeiro, sem criar usuários</li>
+              <li><strong>Vendedor:</strong> Apenas vendas e seus pedidos</li>
+            </ul>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ Importante:</strong> Nunca compartilhe suas credenciais de acesso. Cada usuário deve ter sua própria conta.
+          </div>
+        </div>
+
+        <!-- 13. BACKUP -->
+        <div class="page-break" id="backup">
+          <h1>13. 💾 Backup e Recuperação</h1>
+          <p>O sistema oferece funcionalidades de backup para proteção dos seus dados.</p>
+          
+          <div class="section">
+            <h3>☁️ Backup Automático</h3>
+            <p>Os dados são armazenados na nuvem com:</p>
+            <ul>
+              <li>Backups automáticos diários do banco de dados</li>
+              <li>Replicação geográfica para redundância</li>
+              <li>Histórico de versões para recuperação</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📥 Exportação de Dados</h3>
+            <p>Você pode exportar seus dados a qualquer momento:</p>
+            <div class="button-desc">
+              <span class="button-name">Exportar Produtos:</span> Baixa planilha Excel com todos os produtos.
+            </div>
+            <div class="button-desc">
+              <span class="button-name">Exportar Clientes:</span> Lista completa de clientes em Excel.
+            </div>
+            <div class="button-desc">
+              <span class="button-name">Relatórios:</span> Podem ser impressos ou salvos como PDF.
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>🔄 Sincronização</h3>
+            <p>O sistema sincroniza automaticamente:</p>
+            <ul>
+              <li>Todas as alterações são salvas em tempo real</li>
+              <li>Múltiplos usuários podem trabalhar simultaneamente</li>
+              <li>Conflitos são resolvidos automaticamente</li>
+            </ul>
+          </div>
+
+          <div class="tip">
+            <strong>💡 Dica:</strong> Exporte seus dados periodicamente como backup adicional, especialmente antes de grandes alterações.
+          </div>
+        </div>
+
+        <!-- 14. TESTES -->
+        <div class="page-break" id="testes">
+          <h1>14. ✅ Qualidade e Testes</h1>
+          <p>O sistema passa por rigorosos testes de qualidade para garantir seu funcionamento correto.</p>
+          
+          <div class="section">
+            <h3>🧪 Testes Automatizados</h3>
+            <p>O sistema possui uma suíte completa de testes:</p>
+            <table>
+              <tr><th>Tipo de Teste</th><th>Cobertura</th></tr>
+              <tr><td>Testes Unitários</td><td>Funções de cálculo, validação e utilidades</td></tr>
+              <tr><td>Testes de Integração</td><td>Fluxos de vendas, pedidos e financeiro</td></tr>
+              <tr><td>Testes de Componentes</td><td>Interface do usuário (botões, formulários, etc.)</td></tr>
+              <tr><td>Testes End-to-End</td><td>Fluxos completos do usuário</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3>📋 Áreas Testadas</h3>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">🛒</div>
+                <div>
+                  <strong>Fluxo de Vendas</strong><br/>
+                  Carrinho, cálculos de preço, descontos, pagamentos múltiplos.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📋</div>
+                <div>
+                  <strong>Ordens de Serviço</strong><br/>
+                  Criação, transições de status, pagamentos parciais.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">👥</div>
+                <div>
+                  <strong>Gestão de Clientes</strong><br/>
+                  Cadastro, busca, validação de CPF, telefone e email.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📦</div>
+                <div>
+                  <strong>Controle de Estoque</strong><br/>
+                  Movimentações, alertas de estoque baixo, variações.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <div>
+                  <strong>Financeiro</strong><br/>
+                  Cálculos de lucro, relatórios, fluxo de caixa.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🔐</div>
+                <div>
+                  <strong>Autenticação</strong><br/>
+                  Login, logout, validação de credenciais.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>📱 Testes de Responsividade</h3>
+            <p>O sistema é testado em múltiplos dispositivos:</p>
+            <ul>
+              <li><strong>Desktop:</strong> Chrome, Firefox, Safari, Edge</li>
+              <li><strong>Tablet:</strong> iPad, tablets Android</li>
+              <li><strong>Mobile:</strong> iPhone, smartphones Android</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>♿ Acessibilidade</h3>
+            <p>Verificações de acessibilidade incluem:</p>
+            <ul>
+              <li>Navegação por teclado</li>
+              <li>Textos alternativos em imagens</li>
+              <li>Contraste de cores adequado</li>
+              <li>Estrutura de cabeçalhos correta</li>
+            </ul>
+          </div>
+
+          <div class="tip">
+            <strong>💡 Nota Técnica:</strong> Os testes são executados automaticamente antes de cada atualização do sistema.
+          </div>
+        </div>
+
+        <!-- 15. INTEGRAÇÕES -->
+        <div class="page-break" id="integracao">
+          <h1>15. 🔗 Integrações</h1>
+          <p>O sistema se integra com diversas ferramentas para ampliar suas funcionalidades.</p>
+          
+          <div class="section">
+            <h3>📱 WhatsApp</h3>
+            <p>Integração nativa com WhatsApp:</p>
+            <ul>
+              <li>Enviar notificação de pedido pronto</li>
+              <li>Compartilhar orçamentos com clientes</li>
+              <li>Abre diretamente no WhatsApp do cliente</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>🖨️ Impressão</h3>
+            <p>Documentos prontos para impressão:</p>
+            <ul>
+              <li>Ordens de produção</li>
+              <li>Recibos de venda</li>
+              <li>Orçamentos personalizados</li>
+              <li>Relatórios gerenciais</li>
+              <li>Este manual completo</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📊 Exportação Excel</h3>
+            <p>Exporte dados para análise externa:</p>
+            <ul>
+              <li>Produtos e estoque</li>
+              <li>Clientes</li>
+              <li>Relatórios de vendas</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📲 PWA - Aplicativo</h3>
+            <p>Instale como aplicativo nativo:</p>
+            <ul>
+              <li>Funciona offline (dados em cache)</li>
+              <li>Ícone na tela inicial</li>
+              <li>Notificações push</li>
+              <li>Experiência de app nativo</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 16. DICAS -->
         <div class="page-break" id="dicas">
-          <h1>12. 💡 Dicas e Atalhos</h1>
+          <h1>16. 💡 Dicas e Atalhos</h1>
           
           <div class="section">
             <h3>⌨️ Atalhos de Teclado</h3>
             <table>
               <tr><th>Atalho</th><th>Função</th></tr>
               <tr><td>Ctrl + K (ou ⌘ + K)</td><td>Abrir busca global</td></tr>
+              <tr><td>F2</td><td>Venda rápida (na tela de vendas)</td></tr>
+              <tr><td>Escape</td><td>Fechar diálogos/modais</td></tr>
             </table>
           </div>
 
@@ -879,21 +1126,33 @@ export default function Manual() {
               <li>O sistema é totalmente responsivo</li>
               <li>Toque no menu hamburger (☰) para navegar</li>
               <li>Arraste para a direita para voltar</li>
+              <li>Use gestos de pinça para zoom em relatórios</li>
             </ul>
           </div>
 
           <div class="section">
             <h3>🔍 Busca Global</h3>
-            <p>A busca global (barra superior) encontra:</p>
+            <p>A busca global (barra superior ou Ctrl+K) encontra:</p>
             <ul>
-              <li>Clientes por nome</li>
+              <li>Clientes por nome ou documento</li>
               <li>Pedidos por número</li>
               <li>Produtos por nome</li>
+              <li>Páginas do sistema</li>
             </ul>
           </div>
 
           <div class="section">
-            <h3">📲 Instalação como App</h3>
+            <h3>🔔 Notificações</h3>
+            <p>Fique atento às notificações do sistema:</p>
+            <ul>
+              <li>Sino no canto superior mostra alertas</li>
+              <li>Número vermelho indica notificações não lidas</li>
+              <li>Clique para ver detalhes e marcar como lida</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📲 Instalação como App</h3>
             <p>Este sistema pode ser instalado como aplicativo no celular:</p>
             <ol>
               <li>Acesse o sistema pelo navegador</li>
@@ -902,8 +1161,17 @@ export default function Manual() {
             </ol>
           </div>
 
+          <div class="section">
+            <h3>🎨 Personalização</h3>
+            <ul>
+              <li>Mude entre tema claro e escuro</li>
+              <li>Configure cores personalizadas da empresa</li>
+              <li>Adicione logo nos recibos</li>
+            </ul>
+          </div>
+
           <div class="tip">
-            <strong>💡 Dica Final:</strong> Em caso de dúvidas, acesse a página de Configurações e clique em "Ajuda" para ver o tutorial de introdução novamente.
+            <strong>💡 Dica Final:</strong> Em caso de dúvidas, acesse a página de Configurações e clique em "Ajuda" para ver o tutorial de introdução novamente. Ou baixe este manual para consulta offline!
           </div>
         </div>
 
@@ -946,7 +1214,7 @@ export default function Manual() {
         </Card>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
             { icon: Home, title: "Dashboard", color: "text-blue-500" },
             { icon: ShoppingCart, title: "Vendas", color: "text-green-500" },
@@ -958,8 +1226,12 @@ export default function Manual() {
             { icon: FileText, title: "Relatórios", color: "text-pink-500" },
             { icon: Truck, title: "Fornecedores", color: "text-indigo-500" },
             { icon: Settings, title: "Configurações", color: "text-gray-500" },
-            { icon: Bell, title: "Notificações", color: "text-red-500" },
-            { icon: Palette, title: "Temas", color: "text-violet-500" },
+            { icon: Shield, title: "Segurança", color: "text-red-500" },
+            { icon: Database, title: "Backup", color: "text-teal-500" },
+            { icon: TestTube, title: "Testes", color: "text-lime-500" },
+            { icon: Link, title: "Integrações", color: "text-violet-500" },
+            { icon: Bell, title: "Notificações", color: "text-rose-500" },
+            { icon: Palette, title: "Temas", color: "text-fuchsia-500" },
           ].map((item, i) => (
             <Card key={i} className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
               <item.icon className={`h-8 w-8 mx-auto mb-2 ${item.color}`} />
@@ -971,7 +1243,7 @@ export default function Manual() {
         {/* Content Preview */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">📖 Conteúdo do Manual</h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-3">
               <div className="p-3 bg-muted/50 rounded-lg">
                 <h3 className="font-medium">1. Dashboard</h3>
@@ -1020,8 +1292,30 @@ export default function Manual() {
                 <p className="text-sm text-muted-foreground">Permissões de Admin, Gerente e Vendedor</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">12. Dicas e Atalhos</h3>
-                <p className="text-sm text-muted-foreground">Atalhos de teclado e dicas de uso</p>
+                <h3 className="font-medium">12. Segurança</h3>
+                <p className="text-sm text-muted-foreground">Multi-tenant, RLS e controle de acesso</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">13. Backup</h3>
+                <p className="text-sm text-muted-foreground">Backup automático e exportação de dados</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">14. Qualidade e Testes</h3>
+                <p className="text-sm text-muted-foreground">Testes automatizados, E2E e acessibilidade</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">15. Integrações</h3>
+                <p className="text-sm text-muted-foreground">WhatsApp, impressão, Excel e PWA</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">16. Dicas e Atalhos</h3>
+                <p className="text-sm text-muted-foreground">Atalhos de teclado, busca global e personalização</p>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <h3 className="font-medium text-primary">🆕 Novidades</h3>
+                <p className="text-sm text-muted-foreground">Testes E2E, segurança aprimorada e documentação completa</p>
               </div>
             </div>
           </div>
