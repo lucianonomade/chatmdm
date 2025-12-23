@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -30,25 +31,50 @@ import {
   Printer,
   FileText,
   Lock,
+  Percent,
+  User,
+  ShoppingCart,
+  Eye,
+  Calendar,
 } from "lucide-react";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
+import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
 import { useAuth } from "@/hooks/useAuth";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ServiceOrder } from "@/lib/types";
+
+interface SellerCommission {
+  sellerId: string;
+  sellerName: string;
+  totalSales: number;
+  commissionAmount: number;
+  ordersCount: number;
+  orders: ServiceOrder[];
+}
 
 export default function ContasPagar() {
   const { suppliers, isLoading: suppliersLoading } = useSupabaseSuppliers();
   const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading } = useSupabaseExpenses();
+  const { orders, isLoading: ordersLoading } = useSupabaseOrders();
   const { authUser } = useAuth();
   const { settings: companySettings } = useSyncedCompanySettings();
   
   const [search, setSearch] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
+  const [selectedSeller, setSelectedSeller] = useState<SellerCommission | null>(null);
+  const [sellerDetailsOpen, setSellerDetailsOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
 
-  const isLoading = suppliersLoading || expensesLoading;
+  const isLoading = suppliersLoading || expensesLoading || ordersLoading;
+
+  const usesCommission = companySettings?.usesCommission || false;
+  const commissionPercentage = companySettings?.commissionPercentage || 0;
 
   // Access Control: Sellers cannot access
   if (authUser?.role === 'seller') {
@@ -69,6 +95,47 @@ export default function ContasPagar() {
       </MainLayout>
     );
   }
+
+  // Calculate seller commissions for selected month
+  const sellerCommissions = useMemo((): SellerCommission[] => {
+    if (!usesCommission || !orders) return [];
+    
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const monthStart = startOfMonth(new Date(year, month - 1));
+    const monthEnd = endOfMonth(new Date(year, month - 1));
+    const commissionRate = commissionPercentage / 100;
+    
+    const commissionMap = new Map<string, SellerCommission>();
+    
+    orders.forEach(order => {
+      const orderDate = parseISO(order.createdAt);
+      const isInMonth = isWithinInterval(orderDate, { start: monthStart, end: monthEnd });
+      const hasPaidAmount = (order.amountPaid || 0) > 0;
+      
+      if (isInMonth && hasPaidAmount && order.sellerId) {
+        const existing = commissionMap.get(order.sellerId) || {
+          sellerId: order.sellerId,
+          sellerName: order.sellerName || 'Desconhecido',
+          totalSales: 0,
+          commissionAmount: 0,
+          ordersCount: 0,
+          orders: [],
+        };
+        
+        const amountPaid = order.amountPaid || 0;
+        existing.totalSales += amountPaid;
+        existing.commissionAmount += amountPaid * commissionRate;
+        existing.ordersCount += 1;
+        existing.orders.push(order);
+        
+        commissionMap.set(order.sellerId, existing);
+      }
+    });
+    
+    return Array.from(commissionMap.values()).sort((a, b) => b.commissionAmount - a.commissionAmount);
+  }, [orders, selectedMonth, commissionPercentage, usesCommission]);
+
+  const totalCommissionPayable = sellerCommissions.reduce((sum, s) => sum + s.commissionAmount, 0);
 
   // Calculate supplier balances with supplier info
   const suppliersWithBalance = suppliers.map(supplier => ({
@@ -97,6 +164,16 @@ export default function ContasPagar() {
     setDetailsOpen(true);
   };
 
+  const handleViewSellerDetails = (seller: SellerCommission) => {
+    setSelectedSeller(seller);
+    setSellerDetailsOpen(true);
+  };
+
+  const handleViewOrderDetails = (order: ServiceOrder) => {
+    setSelectedOrder(order);
+    setOrderDetailsOpen(true);
+  };
+
   const handlePrint = () => {
     const printContent = `
       <html>
@@ -118,6 +195,7 @@ export default function ContasPagar() {
           <h2>Relatório de Contas a Pagar</h2>
           <p>Data: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
           
+          <h3>Fornecedores</h3>
           <table>
             <thead>
               <tr>
@@ -140,8 +218,36 @@ export default function ContasPagar() {
               `).join('')}
             </tbody>
           </table>
+          <p class="total">Total Fornecedores: R$ ${totalPayable.toFixed(2)}</p>
           
-          <p class="total">Total a Pagar: R$ ${totalPayable.toFixed(2)}</p>
+          ${usesCommission ? `
+            <h3 style="margin-top: 40px;">Comissões de Vendedores - ${format(new Date(selectedMonth + '-01'), 'MMMM yyyy', { locale: ptBR })}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Vendedor</th>
+                  <th>Vendas</th>
+                  <th>Total Vendido</th>
+                  <th>Comissão (${commissionPercentage}%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sellerCommissions.map(s => `
+                  <tr>
+                    <td>${s.sellerName}</td>
+                    <td>${s.ordersCount}</td>
+                    <td>R$ ${s.totalSales.toFixed(2)}</td>
+                    <td style="color: #16a34a; font-weight: bold;">R$ ${s.commissionAmount.toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <p class="total">Total Comissões: R$ ${totalCommissionPayable.toFixed(2)}</p>
+          ` : ''}
+          
+          <p class="total" style="margin-top: 40px; font-size: 20px;">
+            TOTAL GERAL A PAGAR: R$ ${(totalPayable + totalCommissionPayable).toFixed(2)}
+          </p>
         </body>
       </html>
     `;
@@ -179,7 +285,7 @@ export default function ContasPagar() {
     <MainLayout title="Contas a Pagar">
       <div className="space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="border-l-4 border-l-warning">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -189,7 +295,7 @@ export default function ContasPagar() {
                 <div>
                   <p className="text-sm text-muted-foreground">Total a Pagar</p>
                   <p className="text-2xl font-bold text-warning">
-                    R$ {totalPayable.toFixed(2)}
+                    R$ {(totalPayable + totalCommissionPayable).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -203,14 +309,32 @@ export default function ContasPagar() {
                   <Truck className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Fornecedores com Saldo</p>
+                  <p className="text-sm text-muted-foreground">Fornecedores</p>
                   <p className="text-2xl font-bold text-foreground">
-                    {suppliersWithBalance.length}
+                    R$ {totalPayable.toFixed(2)}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {usesCommission && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <Percent className="w-6 h-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Comissões</p>
+                    <p className="text-2xl font-bold text-green-500">
+                      R$ {totalCommissionPayable.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardContent className="p-6">
@@ -219,7 +343,7 @@ export default function ContasPagar() {
                   <ArrowDownCircle className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total de Compras</p>
+                  <p className="text-sm text-muted-foreground">Compras</p>
                   <p className="text-2xl font-bold text-foreground">
                     {expenses.filter(e => e.supplierId).length}
                   </p>
@@ -246,83 +370,198 @@ export default function ContasPagar() {
           </Button>
         </div>
 
-        {/* Table */}
-        <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold">Fornecedor</TableHead>
-                <TableHead className="font-semibold">Contato</TableHead>
-                <TableHead className="font-semibold">Telefone</TableHead>
-                <TableHead className="font-semibold">Compras</TableHead>
-                <TableHead className="font-semibold">Saldo Devedor</TableHead>
-                <TableHead className="font-semibold text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableSkeleton />
-              ) : filteredSuppliers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
-                        <DollarSign className="h-8 w-8 text-success" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Nenhuma conta a pagar</p>
-                        <p className="text-sm text-muted-foreground">
-                          Todos os fornecedores estão em dia!
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredSuppliers.map((fornecedor) => (
-                  <TableRow 
-                    key={fornecedor.id} 
-                    className="hover:bg-hover/10 transition-all cursor-pointer"
-                    onClick={() => handleViewDetails(fornecedor.id)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                          <Truck className="h-5 w-5 text-warning" />
-                        </div>
-                        <span className="font-medium">{fornecedor.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{fornecedor.contact || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">{fornecedor.phone || "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{fornecedor.expenseCount}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-warning font-bold">
-                        <AlertCircle className="h-4 w-4" />
-                        R$ {fornecedor.balance.toFixed(2)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewDetails(fornecedor.id);
-                        }}
-                      >
-                        <FileText className="h-4 w-4 mr-1" />
-                        Detalhes
-                      </Button>
-                    </TableCell>
+        {/* Tabs */}
+        <Tabs defaultValue="fornecedores">
+          <TabsList>
+            <TabsTrigger value="fornecedores" className="gap-2">
+              <Truck className="h-4 w-4" />
+              Fornecedores
+            </TabsTrigger>
+            {usesCommission && (
+              <TabsTrigger value="comissoes" className="gap-2">
+                <Percent className="h-4 w-4" />
+                Comissões
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          {/* Fornecedores Tab */}
+          <TabsContent value="fornecedores">
+            <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Fornecedor</TableHead>
+                    <TableHead className="font-semibold">Contato</TableHead>
+                    <TableHead className="font-semibold">Telefone</TableHead>
+                    <TableHead className="font-semibold">Compras</TableHead>
+                    <TableHead className="font-semibold">Saldo Devedor</TableHead>
+                    <TableHead className="font-semibold text-right">Ações</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableSkeleton />
+                  ) : filteredSuppliers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+                            <DollarSign className="h-8 w-8 text-success" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">Nenhuma conta a pagar</p>
+                            <p className="text-sm text-muted-foreground">
+                              Todos os fornecedores estão em dia!
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredSuppliers.map((fornecedor) => (
+                      <TableRow 
+                        key={fornecedor.id} 
+                        className="hover:bg-hover/10 transition-all cursor-pointer"
+                        onClick={() => handleViewDetails(fornecedor.id)}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                              <Truck className="h-5 w-5 text-warning" />
+                            </div>
+                            <span className="font-medium">{fornecedor.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{fornecedor.contact || "-"}</TableCell>
+                        <TableCell className="text-muted-foreground">{fornecedor.phone || "-"}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{fornecedor.expenseCount}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-warning font-bold">
+                            <AlertCircle className="h-4 w-4" />
+                            R$ {fornecedor.balance.toFixed(2)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(fornecedor.id);
+                            }}
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            Detalhes
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          {/* Comissões Tab */}
+          {usesCommission && (
+            <TabsContent value="comissoes">
+              <div className="space-y-4">
+                {/* Month Filter */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Período:</span>
+                  </div>
+                  <Input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-48"
+                  />
+                </div>
+
+                <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="font-semibold">Vendedor</TableHead>
+                        <TableHead className="font-semibold text-center">Vendas</TableHead>
+                        <TableHead className="font-semibold text-right">Total Vendido</TableHead>
+                        <TableHead className="font-semibold text-right">Comissão ({commissionPercentage}%)</TableHead>
+                        <TableHead className="font-semibold text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoading ? (
+                        <TableSkeleton />
+                      ) : sellerCommissions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-12">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                                <Percent className="h-8 w-8 text-muted-foreground" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground">Nenhuma comissão a pagar</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Não há vendas com comissão no período selecionado.
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        sellerCommissions.map((seller) => (
+                          <TableRow 
+                            key={seller.sellerId} 
+                            className="hover:bg-hover/10 transition-all cursor-pointer"
+                            onClick={() => handleViewSellerDetails(seller)}
+                          >
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                  <User className="h-5 w-5 text-green-500" />
+                                </div>
+                                <span className="font-medium">{seller.sellerName}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="secondary">{seller.ordersCount}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              R$ {seller.totalSales.toFixed(2)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="font-bold text-green-500">
+                                R$ {seller.commissionAmount.toFixed(2)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewSellerDetails(seller);
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver Vendas
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
+          )}
+        </Tabs>
 
         {/* Supplier Details Dialog */}
         <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
@@ -390,6 +629,167 @@ export default function ContasPagar() {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDetailsOpen(false)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Seller Commission Details Dialog */}
+        <Dialog open={sellerDetailsOpen} onOpenChange={setSellerDetailsOpen}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <User className="h-5 w-5 text-green-500" />
+                Comissões - {selectedSeller?.sellerName}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedSeller && (
+              <div className="space-y-4">
+                {/* Summary */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Total em Vendas</Label>
+                    <p className="font-bold text-lg">
+                      R$ {selectedSeller.totalSales.toFixed(2)}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Número de Vendas</Label>
+                    <p className="font-bold text-lg">{selectedSeller.ordersCount}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Comissão a Pagar ({commissionPercentage}%)</Label>
+                    <p className="font-bold text-lg text-green-500">
+                      R$ {selectedSeller.commissionAmount.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Orders List */}
+                <div>
+                  <h4 className="font-semibold mb-3">Vendas do Período</h4>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {selectedSeller.orders.map((order) => {
+                      const commission = (order.amountPaid || 0) * (commissionPercentage / 100);
+                      return (
+                        <div 
+                          key={order.id} 
+                          className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleViewOrderDetails(order)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <ShoppingCart className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Venda #{order.id}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {format(parseISO(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                                {' • '}{order.customerName}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-muted-foreground">
+                              Valor: R$ {(order.amountPaid || 0).toFixed(2)}
+                            </p>
+                            <p className="font-bold text-green-500">
+                              Comissão: R$ {commission.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSellerDetailsOpen(false)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Order Details Dialog */}
+        <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+                Detalhes da Venda #{selectedOrder?.id}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedOrder && (
+              <div className="space-y-4">
+                {/* Order Info */}
+                <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Cliente</Label>
+                    <p className="font-medium">{selectedOrder.customerName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Data</Label>
+                    <p className="font-medium">
+                      {format(parseISO(selectedOrder.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Vendedor</Label>
+                    <p className="font-medium">{selectedOrder.sellerName || '-'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Status</Label>
+                    <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                      {selectedOrder.paymentStatus === 'paid' ? 'Pago' : 
+                       selectedOrder.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Items */}
+                <div>
+                  <h4 className="font-semibold mb-3">Itens</h4>
+                  <div className="space-y-2">
+                    {selectedOrder.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 border rounded">
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Qtd: {item.quantity} x R$ {item.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <p className="font-medium">R$ {item.total.toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Totals */}
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total da Venda</span>
+                    <span className="font-medium">R$ {selectedOrder.total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Valor Pago</span>
+                    <span className="font-medium">R$ {(selectedOrder.amountPaid || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold text-green-500">
+                    <span>Comissão ({commissionPercentage}%)</span>
+                    <span>R$ {((selectedOrder.amountPaid || 0) * (commissionPercentage / 100)).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOrderDetailsOpen(false)}>
                 Fechar
               </Button>
             </DialogFooter>
