@@ -550,17 +550,17 @@ export default function ContasReceber() {
         {/* Table */}
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table>
+            <Table className="table-fixed w-full" containerClassName="overflow-x-hidden">
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold">Pedido</TableHead>
-                  <TableHead className="font-semibold hidden sm:table-cell">Cliente</TableHead>
-                  <TableHead className="font-semibold hidden md:table-cell">Data</TableHead>
-                  <TableHead className="font-semibold text-right hidden lg:table-cell">Total</TableHead>
-                  <TableHead className="font-semibold text-right hidden lg:table-cell">Pago</TableHead>
-                  <TableHead className="font-semibold text-right">Pendente</TableHead>
-                  <TableHead className="font-semibold hidden sm:table-cell">Status</TableHead>
-                  <TableHead className="font-semibold text-right">Ações</TableHead>
+                  <TableHead className="font-semibold px-3 w-[110px]">Pedido</TableHead>
+                  <TableHead className="font-semibold px-3 hidden sm:table-cell">Cliente</TableHead>
+                  <TableHead className="font-semibold px-3 hidden md:table-cell w-[120px]">Data</TableHead>
+                  <TableHead className="font-semibold px-3 text-right hidden lg:table-cell w-[120px]">Total</TableHead>
+                  <TableHead className="font-semibold px-3 text-right hidden lg:table-cell w-[120px]">Pago</TableHead>
+                  <TableHead className="font-semibold px-3 text-right w-[130px]">Pendente</TableHead>
+                  <TableHead className="font-semibold px-3 hidden sm:table-cell w-[110px]">Status</TableHead>
+                  <TableHead className="font-semibold px-3 text-right w-[92px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -583,24 +583,24 @@ export default function ContasReceber() {
                         className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer"
                         onClick={() => handleViewOrder(order)}
                       >
-                        <TableCell>
-                          <div className="font-mono text-sm font-medium">#{order.id}</div>
-                          <div className="text-xs text-muted-foreground sm:hidden">{order.customerName}</div>
+                        <TableCell className="px-3 py-3">
+                          <div className="font-mono text-sm font-medium truncate">#{order.id}</div>
+                          <div className="text-xs text-muted-foreground sm:hidden truncate">{order.customerName}</div>
                         </TableCell>
-                        <TableCell className="font-medium hidden sm:table-cell">{order.customerName}</TableCell>
-                        <TableCell className="text-muted-foreground hidden md:table-cell">
+                        <TableCell className="font-medium hidden sm:table-cell px-3 py-3 truncate">{order.customerName}</TableCell>
+                        <TableCell className="text-muted-foreground hidden md:table-cell px-3 py-3 whitespace-nowrap">
                           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                         </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell">
+                        <TableCell className="text-right hidden lg:table-cell px-3 py-3 whitespace-nowrap">
                           R$ {order.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-right text-success hidden lg:table-cell">
+                        <TableCell className="text-right text-success hidden lg:table-cell px-3 py-3 whitespace-nowrap">
                           R$ {paid.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-warning">
+                        <TableCell className="text-right font-bold text-warning px-3 py-3 whitespace-nowrap">
                           R$ {remaining.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell">
+                        <TableCell className="hidden sm:table-cell px-3 py-3">
                           <Badge className={
                             order.paymentStatus === 'partial'
                               ? "bg-warning/10 text-warning border-warning/20"
@@ -609,14 +609,15 @@ export default function ContasReceber() {
                             {order.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            size="sm" 
-                            className="gradient-primary text-primary-foreground"
+                        <TableCell className="text-right px-3 py-3">
+                          <Button
+                            size="icon"
+                            className="gradient-primary text-primary-foreground h-9 w-9"
                             onClick={(e) => handleDarBaixa(order, e)}
+                            aria-label="Receber"
+                            title="Receber"
                           >
-                            <DollarSign className="w-4 h-4 sm:mr-1" />
-                            <span className="hidden sm:inline">Receber</span>
+                            <DollarSign className="w-4 h-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
