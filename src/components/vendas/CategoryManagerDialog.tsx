@@ -258,10 +258,13 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir a categoria <strong>"{deletingCategory?.name}"</strong>?
+            <AlertDialogDescription className="space-y-2">
+              <span>Tem certeza que deseja excluir a categoria <strong>"{deletingCategory?.name}"</strong>?</span>
               <br />
-              <span className="text-destructive">Esta ação não pode ser desfeita.</span>
+              <span className="text-amber-600 dark:text-amber-500 block mt-2">
+                ⚠️ Todas as subcategorias desta categoria serão excluídas e os produtos serão movidos para "Sem Categoria".
+              </span>
+              <span className="text-destructive block">Esta ação não pode ser desfeita.</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
