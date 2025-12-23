@@ -37,9 +37,11 @@ import {
   Database
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useNavigate } from "react-router-dom";
 
 export default function Manual() {
   const { companySettings } = useStore();
+  const navigate = useNavigate();
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '', 'height=800,width=1000');
@@ -1227,24 +1229,28 @@ export default function Manual() {
         {/* Quick Links */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
-            { icon: Home, title: "Dashboard", color: "text-blue-500" },
-            { icon: ShoppingCart, title: "Vendas", color: "text-green-500" },
-            { icon: Package, title: "Produtos", color: "text-purple-500" },
-            { icon: Users, title: "Clientes", color: "text-orange-500" },
-            { icon: ClipboardList, title: "Ordens", color: "text-cyan-500" },
-            { icon: DollarSign, title: "Financeiro", color: "text-emerald-500" },
-            { icon: Wallet, title: "Caixa", color: "text-yellow-500" },
-            { icon: FileText, title: "Relatórios", color: "text-pink-500" },
-            { icon: Truck, title: "Fornecedores", color: "text-indigo-500" },
-            { icon: Settings, title: "Configurações", color: "text-gray-500" },
-            { icon: Shield, title: "Segurança", color: "text-red-500" },
-            { icon: Database, title: "Backup", color: "text-teal-500" },
-            { icon: TestTube, title: "Testes", color: "text-lime-500" },
-            { icon: Link, title: "Integrações", color: "text-violet-500" },
-            { icon: Bell, title: "Notificações", color: "text-rose-500" },
-            { icon: Palette, title: "Temas", color: "text-fuchsia-500" },
+            { icon: Home, title: "Dashboard", color: "text-blue-500", route: "/" },
+            { icon: ShoppingCart, title: "Vendas", color: "text-green-500", route: "/vendas" },
+            { icon: Package, title: "Produtos", color: "text-purple-500", route: "/produtos" },
+            { icon: Users, title: "Clientes", color: "text-orange-500", route: "/clientes" },
+            { icon: ClipboardList, title: "Ordens", color: "text-cyan-500", route: "/ordens-servico" },
+            { icon: DollarSign, title: "Financeiro", color: "text-emerald-500", route: "/financeiro" },
+            { icon: Wallet, title: "Caixa", color: "text-yellow-500", route: "/caixa" },
+            { icon: FileText, title: "Relatórios", color: "text-pink-500", route: "/relatorios" },
+            { icon: Truck, title: "Fornecedores", color: "text-indigo-500", route: "/fornecedores" },
+            { icon: Settings, title: "Configurações", color: "text-gray-500", route: "/configuracoes" },
+            { icon: Shield, title: "Segurança", color: "text-red-500", route: "/configuracoes" },
+            { icon: Database, title: "Backup", color: "text-teal-500", route: "/configuracoes" },
+            { icon: TestTube, title: "Testes", color: "text-lime-500", route: "/configuracoes" },
+            { icon: Link, title: "Integrações", color: "text-violet-500", route: "/configuracoes" },
+            { icon: Bell, title: "Notificações", color: "text-rose-500", route: "/configuracoes" },
+            { icon: Palette, title: "Temas", color: "text-fuchsia-500", route: "/configuracoes" },
           ].map((item, i) => (
-            <Card key={i} className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50">
+            <Card 
+              key={i} 
+              className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50"
+              onClick={() => navigate(item.route)}
+            >
               <item.icon className={`h-8 w-8 mx-auto mb-2 ${item.color}`} />
               <p className="text-sm font-medium">{item.title}</p>
             </Card>
