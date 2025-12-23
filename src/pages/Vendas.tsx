@@ -250,7 +250,7 @@ export default function Vendas() {
               setSelectedSeller(order.sellerId);
             }
             
-            // Add items to cart
+            // Add items to cart with original prices preserved
             order.items.forEach((item: any) => {
               const product = products.find(p => p.id === item.productId);
               if (product) {
@@ -259,6 +259,27 @@ export default function Vendas() {
                   customDescription: item.customDescription,
                   dimensions: item.dimensions,
                   variationNameOverride: item.variationName,
+                  priceOverride: item.price,
+                  totalOverride: item.total,
+                });
+              } else {
+                // Product not found, create a placeholder with original values
+                const placeholderProduct: Product = {
+                  id: item.productId || `temp-${Date.now()}`,
+                  name: item.name,
+                  category: item.category || 'Outros',
+                  subcategory: item.subcategory,
+                  price: item.price,
+                  stock: 999,
+                  type: 'service'
+                };
+                addToCart(placeholderProduct, item.quantity, undefined, {
+                  finishing: item.finishing,
+                  customDescription: item.customDescription,
+                  dimensions: item.dimensions,
+                  variationNameOverride: item.variationName,
+                  priceOverride: item.price,
+                  totalOverride: item.total,
                 });
               }
             });

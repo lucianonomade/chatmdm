@@ -106,7 +106,7 @@ interface AppState {
   updateOrder: (id: string, data: Partial<ServiceOrder>) => void;
   updateOrderStatus: (id: string, status: ServiceOrder['status']) => void;
   removeOrder: (id: string) => void;
-  addToCart: (product: Product, quantity?: number, variationId?: string, options?: { finishing?: string, customDescription?: string, dimensions?: string, variationNameOverride?: string }) => void;
+  addToCart: (product: Product, quantity?: number, variationId?: string, options?: { finishing?: string, customDescription?: string, dimensions?: string, variationNameOverride?: string, priceOverride?: number, totalOverride?: number }) => void;
   removeFromCart: (itemId: string) => void;
   updateCartItem: (itemId: string, data: Partial<OrderItem>) => void;
   clearCart: () => void;
@@ -265,20 +265,22 @@ export const useStore = create<AppState>((set) => ({
   })),
 
   addToCart: (product, quantity = 1, variationId, options) => set((state) => {
-    let price = product.price;
+    // Use price override if provided (for editing orders), otherwise use product/variation price
+    let price = options?.priceOverride ?? product.price;
     let variationName = options?.variationNameOverride;
+    let total = options?.totalOverride;
 
     if (variationId && product.variations && !variationName) {
        const variation = product.variations.find(v => v.id === variationId);
        if (variation) {
-          price = variation.price;
+          price = options?.priceOverride ?? variation.price;
           variationName = variation.name;
        }
     }
 
     const hasCustomOptions = options?.finishing || options?.customDescription || options?.dimensions || options?.variationNameOverride;
 
-    if (!hasCustomOptions) {
+    if (!hasCustomOptions && !options?.priceOverride && !options?.totalOverride) {
         const existingIndex = state.cart.findIndex(item => 
            item.productId === product.id && 
            item.variationName === variationName &&
@@ -297,6 +299,9 @@ export const useStore = create<AppState>((set) => ({
         }
     }
 
+    // Calculate final total: use totalOverride if provided, otherwise calculate from price * quantity
+    const finalTotal = total ?? (price * quantity);
+
     return {
       cart: [...state.cart, {
         id: Math.random().toString(36).substr(2, 9),
@@ -305,7 +310,7 @@ export const useStore = create<AppState>((set) => ({
         variationName: variationName,
         price: price,
         quantity,
-        total: price * quantity,
+        total: finalTotal,
         finishing: options?.finishing,
         customDescription: options?.customDescription,
         dimensions: options?.dimensions,

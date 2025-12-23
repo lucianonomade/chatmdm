@@ -170,7 +170,7 @@ export default function Recibos() {
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Número</TableHead>
                 <TableHead className="font-semibold">Cliente</TableHead>
-                <TableHead className="font-semibold">Referência</TableHead>
+                <TableHead className="font-semibold">Vendedor</TableHead>
                 <TableHead className="font-semibold">Data</TableHead>
                 <TableHead className="font-semibold text-right">Valor</TableHead>
                 <TableHead className="font-semibold">Pagamento</TableHead>
@@ -196,7 +196,9 @@ export default function Recibos() {
                         <span className="font-medium">{rec.customerName}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">OS-{rec.id}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {rec.sellerName || '-'}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(rec.createdAt).toLocaleDateString('pt-BR')}
                     </TableCell>
@@ -249,12 +251,12 @@ export default function Recibos() {
                   <p className="font-medium">{new Date(viewOrder.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Forma de Pagamento</Label>
-                  <p className="font-medium">{getPaymentLabel(viewOrder.paymentMethod)}</p>
+                  <Label className="text-muted-foreground">Vendedor</Label>
+                  <p className="font-medium">{viewOrder.sellerName || '-'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Referência</Label>
-                  <p className="font-medium">OS-{viewOrder.id}</p>
+                  <Label className="text-muted-foreground">Forma de Pagamento</Label>
+                  <p className="font-medium">{getPaymentLabel(viewOrder.paymentMethod)}</p>
                 </div>
               </div>
               
