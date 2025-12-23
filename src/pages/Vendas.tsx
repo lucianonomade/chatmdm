@@ -241,34 +241,31 @@ export default function Vendas() {
   }, [users, selectedSeller, authUser]);
 
   // Ensure default customer "Consumidor" exists and select it by default
+  const [defaultCustomerCreated, setDefaultCustomerCreated] = useState(false);
+  
   useEffect(() => {
-    if (customers.length > 0 && !selectedCustomer) {
-      // Find or create the default customer
-      const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
-      if (defaultCustomer) {
-        setSelectedCustomer(defaultCustomer.id);
-      } else {
-        // Create the default customer
-        addCustomer({
-          name: DEFAULT_CUSTOMER_NAME,
-          phone: '',
-          email: '',
-          doc: '',
-          notes: 'Cliente padrão para vendas rápidas'
-        });
-      }
-    }
-  }, [customers, selectedCustomer, addCustomer]);
-
-  // When default customer is created, select it
-  useEffect(() => {
-    if (!selectedCustomer && customers.length > 0) {
-      const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
-      if (defaultCustomer) {
+    // Wait for customers to load (could be empty array if none exist yet)
+    if (customers === undefined) return;
+    
+    const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
+    
+    if (defaultCustomer) {
+      // Default customer exists, select it if no customer is selected
+      if (!selectedCustomer) {
         setSelectedCustomer(defaultCustomer.id);
       }
+    } else if (!defaultCustomerCreated && !isAddingCustomer) {
+      // Create default customer if it doesn't exist
+      setDefaultCustomerCreated(true);
+      addCustomer({
+        name: DEFAULT_CUSTOMER_NAME,
+        phone: '',
+        email: '',
+        doc: '',
+        notes: 'Cliente padrão para vendas rápidas'
+      });
     }
-  }, [customers, selectedCustomer]);
+  }, [customers, selectedCustomer, addCustomer, defaultCustomerCreated, isAddingCustomer]);
 
   // Load editing order from sessionStorage - only run once when we have products
   const [orderLoaded, setOrderLoaded] = useState(false);
