@@ -99,10 +99,14 @@ export default function Recibos() {
           </div>
           
           <div class="section">
-            <div class="section-title">Dados do Cliente</div>
+            <div class="section-title">Dados</div>
             <div class="info-row">
               <span class="info-label">Cliente:</span>
               <span>${order.customerName}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Vendedor:</span>
+              <span>${order.sellerName || '-'}</span>
             </div>
           </div>
           
