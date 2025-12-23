@@ -901,9 +901,20 @@ export default function Manual() {
             <h3>🔐 Autenticação</h3>
             <ul>
               <li><strong>Login seguro:</strong> Email + senha com criptografia</li>
+              <li><strong>Login por nome:</strong> Vendedores podem entrar usando apenas o nome</li>
               <li><strong>Sessões:</strong> Tokens JWT com expiração automática</li>
-              <li><strong>Recuperação de senha:</strong> Via email com link seguro</li>
               <li><strong>Proteção:</strong> Senhas verificadas contra vazamentos conhecidos</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>🔑 Recuperação de Senha</h3>
+            <p>O sistema oferece recuperação de senha automatizada:</p>
+            <ul>
+              <li><strong>Para Vendedores:</strong> Na tela de login, clique em "Esqueci minha senha" e digite o nome do usuário</li>
+              <li><strong>Email Automático:</strong> O administrador recebe um email com o link de recuperação</li>
+              <li><strong>Link Seguro:</strong> O link expira após uso único e redireciona para redefinir a senha</li>
+              <li><strong>Para Admins:</strong> Na página de Configurações > Usuários, use o botão "Redefinir Senha"</li>
             </ul>
           </div>
 
@@ -911,9 +922,9 @@ export default function Manual() {
             <h3>👥 Controle de Acesso por Papel</h3>
             <p>Os papéis são armazenados em tabela separada para evitar escalação de privilégios:</p>
             <ul>
-              <li><strong>Admin:</strong> Acesso total, gerencia usuários</li>
+              <li><strong>Admin:</strong> Acesso total, gerencia usuários, recebe emails de recuperação de senha</li>
               <li><strong>Gerente:</strong> Acesso financeiro, sem criar usuários</li>
-              <li><strong>Vendedor:</strong> Apenas vendas e seus pedidos</li>
+              <li><strong>Vendedor:</strong> Apenas vendas e seus pedidos, pode solicitar recuperação de senha</li>
             </ul>
           </div>
 
@@ -1315,7 +1326,7 @@ export default function Manual() {
               </div>
               <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
                 <h3 className="font-medium text-primary">🆕 Novidades</h3>
-                <p className="text-sm text-muted-foreground">Testes E2E, segurança aprimorada e documentação completa</p>
+                <p className="text-sm text-muted-foreground">Recuperação de senha automática via email, login por nome, segurança aprimorada</p>
               </div>
             </div>
           </div>
