@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Badge } from "@/components/ui/badge";
 
 interface ProductManagerDialogProps {
@@ -189,7 +189,7 @@ export function ProductManagerDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col p-0" aria-describedby={undefined}>
+        <DialogContent className="sm:max-w-md h-[85dvh] max-h-[85dvh] flex flex-col p-0" aria-describedby={undefined}>
           <DialogHeader className="p-4 pb-3 border-b shrink-0 pr-12 mt-2">
             <DialogTitle className="flex items-center gap-2 text-base">
               {showForm && (
@@ -338,7 +338,7 @@ export function ProductManagerDialog({
               </div>
 
               {/* Lista */}
-              <ScrollArea className="flex-1 px-3 pb-3">
+              <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-3">
                 <div className="space-y-1.5">
                   {filteredProducts.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">
@@ -384,7 +384,7 @@ export function ProductManagerDialog({
                     ))
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           )}
         </DialogContent>
