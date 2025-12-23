@@ -61,10 +61,15 @@ export default function Manual() {
             margin: 0 auto; 
             padding: 20px;
           }
+          .btn-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+          }
           .print-btn { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
             padding: 12px 24px; 
             background: #22c55e; 
             color: white; 
@@ -76,9 +81,6 @@ export default function Manual() {
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
           }
           .close-btn { 
-            position: fixed; 
-            top: 20px; 
-            right: 140px; 
             padding: 12px 24px; 
             background: #ef4444; 
             color: white; 
@@ -90,7 +92,7 @@ export default function Manual() {
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
           }
           @media print { 
-            .print-btn, .close-btn { display: none !important; } 
+            .btn-container { display: none !important; }
             body { padding: 0; }
           }
           .cover { 
@@ -210,8 +212,10 @@ export default function Manual() {
         </style>
       </head>
       <body>
-        <button class="print-btn" onclick="window.print()">📥 Salvar como PDF</button>
-        <button class="close-btn" onclick="window.close()">✕ Fechar</button>
+        <div class="btn-container">
+          <button class="close-btn" onclick="window.close()">✕ Fechar</button>
+          <button class="print-btn" onclick="window.print()">📥 Salvar como PDF</button>
+        </div>
 
         <!-- CAPA -->
         <div class="cover">
@@ -1489,22 +1493,10 @@ export default function Manual() {
           </div>
         </Card>
 
-        {/* CTA */}
-        <Card className="p-8 text-center bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <h2 className="text-xl font-bold mb-2">Pronto para baixar?</h2>
-          <p className="text-muted-foreground mb-4">
-            Clique no botão abaixo para gerar o PDF completo com todas as instruções
-          </p>
-          <Button 
-            onClick={() => handleDownloadPDF()}
-            className="gap-2 gradient-primary text-primary-foreground"
-            size="lg"
-          >
-            <Download className="h-5 w-5" />
-            Gerar e Baixar PDF
-          </Button>
-          <p className="text-xs text-muted-foreground mt-3">
-            O PDF será aberto em uma nova aba. Use Ctrl+P ou o botão "Salvar como PDF" para baixar.
+        {/* Info */}
+        <Card className="p-6 text-center bg-muted/30 border-muted">
+          <p className="text-sm text-muted-foreground">
+            💡 Clique nos cards acima para abrir o manual na seção desejada, ou use o botão "Baixar PDF Completo" no topo da página.
           </p>
         </Card>
       </div>
