@@ -77,21 +77,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const prevUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    // Get last logged user ID from localStorage
+    const getLastUserId = () => localStorage.getItem('last_logged_user_id');
+    const setLastUserId = (id: string | null) => {
+      if (id) {
+        localStorage.setItem('last_logged_user_id', id);
+      } else {
+        localStorage.removeItem('last_logged_user_id');
+      }
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Clear cart when a different user logs in
-        if (session?.user && prevUserIdRef.current !== session.user.id) {
-          if (prevUserIdRef.current !== null) {
-            // A different user logged in, clear the cart
+        // Clear cart when a different user logs in or on fresh login
+        if (session?.user) {
+          const lastUserId = getLastUserId();
+          if (lastUserId !== session.user.id) {
+            // Different user logged in, clear the cart
             useStore.getState().clearCart();
           }
+          setLastUserId(session.user.id);
           prevUserIdRef.current = session.user.id;
-        } else if (!session?.user) {
-          // User logged out
+        } else {
+          // User logged out - clear cart and reset tracking
+          useStore.getState().clearCart();
+          setLastUserId(null);
           prevUserIdRef.current = null;
         }
 
@@ -113,8 +127,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
 
-      // Set initial user ID reference
+      // Check if user changed since last session
       if (session?.user) {
+        const lastUserId = getLastUserId();
+        if (lastUserId !== session.user.id) {
+          // Different user, clear cart
+          useStore.getState().clearCart();
+        }
+        setLastUserId(session.user.id);
         prevUserIdRef.current = session.user.id;
         ensureUserRecords(session.access_token)
           .finally(() => fetchUserProfile(session.user.id, session.user.email ?? undefined));
