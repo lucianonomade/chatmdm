@@ -1460,10 +1460,27 @@ export default function Vendas() {
           </div>
 
           {/* Customer Selection */}
-          <div className="p-2 lg:p-4 border-b border-border">
+          <div className={cn(
+            "p-2 lg:p-4 border-b transition-colors",
+            !selectedCustomer && cart.length > 0 
+              ? "border-destructive bg-destructive/5 animate-pulse" 
+              : "border-border"
+          )}>
+            {!selectedCustomer && cart.length > 0 && (
+              <p className="text-xs text-destructive font-medium mb-2 flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                Selecione um cliente para finalizar
+              </p>
+            )}
             <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="w-full justify-between h-10 lg:h-12 text-sm">
+                <Button 
+                  variant="outline" 
+                  className={cn(
+                    "w-full justify-between h-10 lg:h-12 text-sm",
+                    !selectedCustomer && cart.length > 0 && "border-destructive text-destructive hover:bg-destructive/10"
+                  )}
+                >
                   <span className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     {selectedCustomer
