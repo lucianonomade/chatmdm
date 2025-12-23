@@ -182,6 +182,9 @@ export default function Vendas() {
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
   
+  // Default customer constant
+  const DEFAULT_CUSTOMER_NAME = "Consumidor";
+  
   // Seller state
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   
@@ -236,6 +239,36 @@ export default function Vendas() {
       setSelectedSeller(users[0].id);
     }
   }, [users, selectedSeller, authUser]);
+
+  // Ensure default customer "Consumidor" exists and select it by default
+  useEffect(() => {
+    if (customers.length > 0 && !selectedCustomer) {
+      // Find or create the default customer
+      const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
+      if (defaultCustomer) {
+        setSelectedCustomer(defaultCustomer.id);
+      } else {
+        // Create the default customer
+        addCustomer({
+          name: DEFAULT_CUSTOMER_NAME,
+          phone: '',
+          email: '',
+          doc: '',
+          notes: 'Cliente padrão para vendas rápidas'
+        });
+      }
+    }
+  }, [customers, selectedCustomer, addCustomer]);
+
+  // When default customer is created, select it
+  useEffect(() => {
+    if (!selectedCustomer && customers.length > 0) {
+      const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
+      if (defaultCustomer) {
+        setSelectedCustomer(defaultCustomer.id);
+      }
+    }
+  }, [customers, selectedCustomer]);
 
   // Load editing order from sessionStorage - only run once when we have products
   const [orderLoaded, setOrderLoaded] = useState(false);
@@ -645,6 +678,12 @@ export default function Vendas() {
 
   const handleFinishSale = (method: 'cash' | 'pix' | 'card') => {
     if (cart.length === 0) return;
+    
+    // Validate customer selection
+    if (!selectedCustomer) {
+      toast.error("Selecione um cliente para finalizar a venda");
+      return;
+    }
 
     const total = cartTotal;
     const paidInput = amountPaid === "" ? total : parseFloat(amountPaid.replace(',', '.'));
