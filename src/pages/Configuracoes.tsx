@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, Volume2, VolumeX, KeyRound } from "lucide-react";
+import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, Volume2, VolumeX, KeyRound, UserX, UserCheck } from "lucide-react";
 import { useSoundSettings, SoundType } from "@/hooks/useSoundSettings";
 import { playClickSound } from "@/hooks/useClickSound";
 import { Slider } from "@/components/ui/slider";
@@ -60,9 +60,11 @@ export default function Configuracoes() {
     updateUserRole, 
     updateUserName,
     createUser,
+    toggleUserStatus,
     isUpdatingRole,
     isUpdatingName,
-    isCreatingUser 
+    isCreatingUser,
+    isTogglingStatus 
   } = useSupabaseUsers();
   const { authUser } = useAuth();
   
@@ -701,13 +703,29 @@ export default function Configuracoes() {
             ) : (
               <div className="space-y-4">
                 {supabaseUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div 
+                    key={user.id} 
+                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                      user.active ? 'bg-muted/50' : 'bg-destructive/5 border border-destructive/20'
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-primary" />
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                        user.active ? 'bg-primary/10' : 'bg-muted'
+                      }`}>
+                        <User className={`h-5 w-5 ${user.active ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div>
-                        <p className="font-medium">{user.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className={`font-medium ${!user.active ? 'text-muted-foreground' : ''}`}>
+                            {user.name}
+                          </p>
+                          {!user.active && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
+                              Inativo
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeClass(user.role)}`}>
                           {getRoleLabel(user.role)}
@@ -717,6 +735,19 @@ export default function Configuracoes() {
                     <div className="flex items-center gap-2">
                       {authUser?.role === 'admin' && user.role !== 'admin' && (
                         <>
+                          <Button 
+                            variant={user.active ? "outline" : "default"}
+                            size="sm" 
+                            onClick={() => toggleUserStatus({ userId: user.id, active: !user.active })}
+                            title={user.active ? "Desativar Usuário" : "Ativar Usuário"}
+                            disabled={isTogglingStatus}
+                          >
+                            {user.active ? (
+                              <UserX className="h-4 w-4" />
+                            ) : (
+                              <UserCheck className="h-4 w-4" />
+                            )}
+                          </Button>
                           <Button 
                             variant="outline" 
                             size="sm" 

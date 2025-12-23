@@ -27,7 +27,7 @@ export function useSupabaseUsers() {
       // Fetch profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, name, email');
+        .select('id, name, email, active');
 
       if (profilesError) throw profilesError;
 
@@ -45,7 +45,7 @@ export function useSupabaseUsers() {
           name: profile.name,
           email: profile.email || '',
           role: (userRole?.role as AppRole) || 'seller',
-          active: true,
+          active: profile.active ?? true,
         };
       });
 
@@ -140,6 +140,38 @@ export function useSupabaseUsers() {
     },
   });
 
+  const toggleUserStatus = useMutation({
+    mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/toggle-user-status`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ userId, active }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao alterar status do usuário');
+      }
+
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['supabase-users'] });
+      toast.success(variables.active ? "Usuário ativado!" : "Usuário desativado!");
+    },
+    onError: (error: Error) => {
+      console.error('Error toggling user status:', error);
+      toast.error(error.message);
+    },
+  });
+
   return {
     users,
     isLoading,
@@ -147,8 +179,10 @@ export function useSupabaseUsers() {
     updateUserRole: updateUserRole.mutate,
     updateUserName: updateUserName.mutate,
     createUser: createUser.mutate,
+    toggleUserStatus: toggleUserStatus.mutate,
     isUpdatingRole: updateUserRole.isPending,
     isUpdatingName: updateUserName.isPending,
     isCreatingUser: createUser.isPending,
+    isTogglingStatus: toggleUserStatus.isPending,
   };
 }
