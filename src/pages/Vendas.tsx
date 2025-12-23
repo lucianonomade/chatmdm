@@ -219,9 +219,20 @@ export default function Vendas() {
 
   // Set seller on mount
   useEffect(() => {
+    // Default seller to the logged-in user (ensures seller is always saved on orders)
+    if (authUser?.id && !selectedSeller) {
+      setSelectedSeller(authUser.id);
+      return;
+    }
+
+    // If the logged user is a seller, lock to themselves
     if (authUser?.role === 'seller') {
       setSelectedSeller(authUser.id);
-    } else if (users.length > 0 && !selectedSeller) {
+      return;
+    }
+
+    // Fallback for admin/manager if we have a local users list
+    if (users.length > 0 && !selectedSeller) {
       setSelectedSeller(users[0].id);
     }
   }, [users, selectedSeller, authUser]);
@@ -643,8 +654,11 @@ export default function Vendas() {
     setLastSaleCustomer(customer ? { name: customer.name } : null);
     setLastSaleDate(new Date());
 
-    const seller = users.find(u => u.id === selectedSeller);
-    setLastSaleSeller(seller ? seller.name : null);
+    const sellerFromList = users.find(u => u.id === selectedSeller);
+    const sellerNameResolved = sellerFromList?.name || authUser?.name || null;
+    const sellerIdResolved = selectedSeller || authUser?.id || null;
+
+    setLastSaleSeller(sellerNameResolved);
 
     // Check if we're editing an existing order
     if (editingOrderId) {
@@ -686,8 +700,8 @@ export default function Vendas() {
           remainingAmount: remaining,
           payments: paymentsArray,
           paymentMethod: remaining > 0 && installments > 1 ? 'card' : method, // Use 'card' for installments
-          sellerId: selectedSeller,
-          sellerName: seller?.name
+          sellerId: sellerIdResolved,
+          sellerName: sellerNameResolved,
         }
       });
 
@@ -738,14 +752,14 @@ export default function Vendas() {
         paymentMethod: remaining > 0 && installments > 1 ? 'card' : method, // Use 'card' for installments
         createdAt: new Date().toISOString(),
         description: 'Venda Balcão',
-        sellerId: selectedSeller,
-        sellerName: seller?.name
+        sellerId: sellerIdResolved,
+        sellerName: sellerNameResolved,
       });
 
       // Send notifications
       const customerNameForNotification = customer?.name || "Consumidor Final";
-      notifyNewSale(newOrderId, customerNameForNotification, total, seller?.name);
-      
+      notifyNewSale(newOrderId, customerNameForNotification, total, sellerNameResolved || undefined);
+
       if (remaining > 0) {
         notifyPendingPayment(newOrderId, customerNameForNotification, remaining);
       }
