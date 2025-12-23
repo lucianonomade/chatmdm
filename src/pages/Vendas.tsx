@@ -1403,19 +1403,12 @@ export default function Vendas() {
 
         {/* Cart Panel */}
         <div className="bg-card rounded-xl border border-border shadow-soft flex flex-col min-h-[300px] max-h-[60vh] lg:max-h-none order-2">
-          {/* Seller Selection */}
+          {/* Seller Display */}
           <div className="p-2 lg:p-3 border-b border-border bg-muted/40">
-            <Select value={selectedSeller} onValueChange={setSelectedSeller} disabled={authUser?.role === 'seller'}>
-              <SelectTrigger className="h-9 lg:h-10 bg-background text-sm">
-                <User className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Selecione o Vendedor" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                {users.map(user => (
-                  <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2 h-9 lg:h-10 px-3 bg-background rounded-md border border-input text-sm">
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="text-foreground font-medium">{authUser?.name || 'Vendedor'}</span>
+            </div>
           </div>
 
           {/* Customer Selection */}
