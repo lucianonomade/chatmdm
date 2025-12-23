@@ -13,6 +13,7 @@ import { useStore } from "@/lib/store";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,8 @@ import { ExpenseDetailsDialog } from "@/components/caixa/ExpenseDetailsDialog";
 export default function Caixa() {
   const [isOpen, setIsOpen] = useState(true);
   const { orders } = useSupabaseOrders();
-  const { expenses, addExpense, suppliers, fixedExpenses, addFixedExpense, updateFixedExpense, removeFixedExpense, applyFixedExpenses } = useStore();
+  const { expenses, addExpense: addSupabaseExpense, supplierBalances, getSupplierBalance } = useSupabaseExpenses();
+  const { suppliers, fixedExpenses, addFixedExpense, updateFixedExpense, removeFixedExpense, applyFixedExpenses, addExpense: addLocalExpense } = useStore();
   const { authUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [suprimentoValue, setSuprimentoValue] = useState("");
@@ -177,7 +179,7 @@ export default function Caixa() {
       return;
     }
     
-    addExpense({
+    addSupabaseExpense({
       supplierId: '',
       supplierName: 'Sangria de Caixa',
       description: sangriaMotivo || 'Sangria de caixa',

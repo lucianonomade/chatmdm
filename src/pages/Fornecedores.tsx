@@ -30,8 +30,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Edit, Trash2, Truck, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Truck, Loader2, AlertCircle } from "lucide-react";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { Supplier } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -46,6 +47,8 @@ export default function Fornecedores() {
     isUpdating,
     isDeleting 
   } = useSupabaseSuppliers();
+  
+  const { getSupplierBalance, supplierBalances } = useSupabaseExpenses();
   
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -123,6 +126,7 @@ export default function Fornecedores() {
           <TableCell><Skeleton className="h-4 w-24" /></TableCell>
           <TableCell><Skeleton className="h-4 w-28" /></TableCell>
           <TableCell><Skeleton className="h-4 w-36" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
           <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
           <TableCell className="text-right">
             <div className="flex justify-end gap-1">
@@ -221,6 +225,7 @@ export default function Fornecedores() {
                 <TableHead className="font-semibold">Contato</TableHead>
                 <TableHead className="font-semibold">Telefone</TableHead>
                 <TableHead className="font-semibold">Email</TableHead>
+                <TableHead className="font-semibold">Saldo Devedor</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
                 <TableHead className="font-semibold text-right">Ações</TableHead>
               </TableRow>
@@ -230,7 +235,7 @@ export default function Fornecedores() {
                 <TableSkeleton />
               ) : filteredFornecedores.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
+                  <TableCell colSpan={7} className="text-center py-12">
                     <div className="flex flex-col items-center gap-3">
                       <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                         <Truck className="h-8 w-8 text-muted-foreground" />
@@ -245,46 +250,59 @@ export default function Fornecedores() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredFornecedores.map((fornecedor) => (
-                  <TableRow key={fornecedor.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                          <Truck className="h-5 w-5 text-muted-foreground" />
+                filteredFornecedores.map((fornecedor) => {
+                  const balance = getSupplierBalance(fornecedor.id);
+                  return (
+                    <TableRow key={fornecedor.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                            <Truck className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <span className="font-medium">{fornecedor.name}</span>
                         </div>
-                        <span className="font-medium">{fornecedor.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{fornecedor.contact || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">{fornecedor.phone || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">{fornecedor.email || "-"}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-success/10 text-success border-success/20">
-                        Ativo
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleOpenDialog(fornecedor)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setSupplierToDelete(fornecedor)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{fornecedor.contact || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground">{fornecedor.phone || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground">{fornecedor.email || "-"}</TableCell>
+                      <TableCell>
+                        {balance > 0 ? (
+                          <div className="flex items-center gap-1 text-warning font-medium">
+                            <AlertCircle className="h-4 w-4" />
+                            R$ {balance.toFixed(2)}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-success/10 text-success border-success/20">
+                          Ativo
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => handleOpenDialog(fornecedor)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => setSupplierToDelete(fornecedor)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

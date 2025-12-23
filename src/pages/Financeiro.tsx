@@ -63,6 +63,8 @@ import { useStore } from "@/lib/store";
 import { ServiceOrder, Expense } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
+import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TableSkeleton, EmptyState } from "@/components/ui/loading-skeleton";
@@ -71,7 +73,9 @@ import { ExpenseDetailsDialog } from "@/components/caixa/ExpenseDetailsDialog";
 
 export default function Financeiro() {
   const { orders, updateOrder } = useSupabaseOrders();
-  const { expenses, addExpense, suppliers, clearAllData } = useStore();
+  const { expenses, addExpense, supplierBalances, getSupplierBalance } = useSupabaseExpenses();
+  const { suppliers } = useSupabaseSuppliers();
+  const { clearAllData } = useStore();
   const { authUser, user } = useAuth();
   const [isEntradaOpen, setIsEntradaOpen] = useState(false);
   const [isSaidaOpen, setIsSaidaOpen] = useState(false);
