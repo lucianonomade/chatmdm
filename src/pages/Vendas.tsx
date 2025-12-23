@@ -1665,9 +1665,15 @@ export default function Vendas() {
             </div>
 
             {/* Payment Dialog */}
-            <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+            <Dialog open={paymentDialogOpen} onOpenChange={(open) => {
+              if (open && !selectedCustomer) {
+                toast.error("Selecione um cliente para finalizar a venda");
+                return;
+              }
+              setPaymentDialogOpen(open);
+            }}>
               <DialogTrigger asChild>
-                <Button className="w-full h-10 lg:h-14 text-base lg:text-xl font-bold" disabled={cart.length === 0}>
+                <Button className="w-full h-10 lg:h-14 text-base lg:text-xl font-bold" disabled={cart.length === 0 || !selectedCustomer}>
                   FINALIZAR
                 </Button>
               </DialogTrigger>
