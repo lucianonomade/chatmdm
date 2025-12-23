@@ -237,9 +237,12 @@ export default function Vendas() {
     }
   }, [users, selectedSeller, authUser]);
 
-  // Load editing order from sessionStorage
+  // Load editing order from sessionStorage - only run once when we have products
+  const [orderLoaded, setOrderLoaded] = useState(false);
+  
   useEffect(() => {
-    if (editOrderId) {
+    // Only load once and only when we have products loaded
+    if (editOrderId && !orderLoaded && products.length > 0) {
       const storedOrder = sessionStorage.getItem('editingOrder');
       if (storedOrder) {
         try {
@@ -297,13 +300,19 @@ export default function Vendas() {
             
             toast.info(`Editando pedido #${order.id}`);
             sessionStorage.removeItem('editingOrder');
+            setOrderLoaded(true);
           }
         } catch (e) {
           console.error('Failed to load editing order:', e);
         }
+      } else if (editingOrderId === null) {
+        // If there's an editOrderId in URL but no stored order and we haven't set editingOrderId yet,
+        // set it from URL to ensure updates work
+        setEditingOrderId(editOrderId);
+        setOrderLoaded(true);
       }
     }
-  }, [editOrderId, products, clearCart, addToCart]);
+  }, [editOrderId, products, clearCart, addToCart, orderLoaded, editingOrderId]);
   // Derived Data - merge database categories with product categories
   const categories = useMemo(() => {
     const productCats = new Set(products.map(p => p.category));
