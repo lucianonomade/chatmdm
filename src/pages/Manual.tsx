@@ -37,11 +37,10 @@ import {
   Database
 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { useNavigate } from "react-router-dom";
+
 
 export default function Manual() {
   const { companySettings } = useStore();
-  const navigate = useNavigate();
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '', 'height=800,width=1000');
@@ -1229,27 +1228,32 @@ export default function Manual() {
         {/* Quick Links */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
-            { icon: Home, title: "Dashboard", color: "text-blue-500", route: "/" },
-            { icon: ShoppingCart, title: "Vendas", color: "text-green-500", route: "/vendas" },
-            { icon: Package, title: "Produtos", color: "text-purple-500", route: "/produtos" },
-            { icon: Users, title: "Clientes", color: "text-orange-500", route: "/clientes" },
-            { icon: ClipboardList, title: "Ordens", color: "text-cyan-500", route: "/ordens-servico" },
-            { icon: DollarSign, title: "Financeiro", color: "text-emerald-500", route: "/financeiro" },
-            { icon: Wallet, title: "Caixa", color: "text-yellow-500", route: "/caixa" },
-            { icon: FileText, title: "Relatórios", color: "text-pink-500", route: "/relatorios" },
-            { icon: Truck, title: "Fornecedores", color: "text-indigo-500", route: "/fornecedores" },
-            { icon: Settings, title: "Configurações", color: "text-gray-500", route: "/configuracoes" },
-            { icon: Shield, title: "Segurança", color: "text-red-500", route: "/configuracoes" },
-            { icon: Database, title: "Backup", color: "text-teal-500", route: "/configuracoes" },
-            { icon: TestTube, title: "Testes", color: "text-lime-500", route: "/configuracoes" },
-            { icon: Link, title: "Integrações", color: "text-violet-500", route: "/configuracoes" },
-            { icon: Bell, title: "Notificações", color: "text-rose-500", route: "/configuracoes" },
-            { icon: Palette, title: "Temas", color: "text-fuchsia-500", route: "/configuracoes" },
+            { icon: Home, title: "Dashboard", color: "text-blue-500", anchor: "section-dashboard" },
+            { icon: ShoppingCart, title: "Vendas", color: "text-green-500", anchor: "section-vendas" },
+            { icon: Package, title: "Produtos", color: "text-purple-500", anchor: "section-produtos" },
+            { icon: Users, title: "Clientes", color: "text-orange-500", anchor: "section-clientes" },
+            { icon: ClipboardList, title: "Ordens", color: "text-cyan-500", anchor: "section-ordens" },
+            { icon: DollarSign, title: "Financeiro", color: "text-emerald-500", anchor: "section-financeiro" },
+            { icon: Wallet, title: "Caixa", color: "text-yellow-500", anchor: "section-caixa" },
+            { icon: FileText, title: "Relatórios", color: "text-pink-500", anchor: "section-relatorios" },
+            { icon: Truck, title: "Fornecedores", color: "text-indigo-500", anchor: "section-fornecedores" },
+            { icon: Settings, title: "Configurações", color: "text-gray-500", anchor: "section-configuracoes" },
+            { icon: Shield, title: "Segurança", color: "text-red-500", anchor: "section-seguranca" },
+            { icon: Database, title: "Backup", color: "text-teal-500", anchor: "section-backup" },
+            { icon: TestTube, title: "Testes", color: "text-lime-500", anchor: "section-testes" },
+            { icon: Link, title: "Integrações", color: "text-violet-500", anchor: "section-integracoes" },
+            { icon: Bell, title: "Notificações", color: "text-rose-500", anchor: "section-notificacoes" },
+            { icon: Palette, title: "Temas", color: "text-fuchsia-500", anchor: "section-temas" },
           ].map((item, i) => (
             <Card 
               key={i} 
               className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer hover:border-primary/50"
-              onClick={() => navigate(item.route)}
+              onClick={() => {
+                const el = document.getElementById(item.anchor);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
             >
               <item.icon className={`h-8 w-8 mx-auto mb-2 ${item.color}`} />
               <p className="text-sm font-medium">{item.title}</p>
@@ -1262,71 +1266,71 @@ export default function Manual() {
           <h2 className="text-xl font-semibold mb-4">📖 Conteúdo do Manual</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-3">
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-dashboard" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">1. Dashboard</h3>
                 <p className="text-sm text-muted-foreground">Painel principal com resumo de vendas, pedidos e gráficos</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-vendas" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">2. Vendas (PDV)</h3>
                 <p className="text-sm text-muted-foreground">Como realizar vendas, adicionar itens e finalizar pedidos</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-produtos" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">3. Produtos</h3>
                 <p className="text-sm text-muted-foreground">Cadastro, importação/exportação e controle de estoque</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-clientes" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">4. Clientes</h3>
                 <p className="text-sm text-muted-foreground">Cadastro e gerenciamento de clientes</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-ordens" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">5. Ordens de Serviço</h3>
                 <p className="text-sm text-muted-foreground">Acompanhamento de pedidos em formato Kanban</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-financeiro" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">6. Financeiro</h3>
                 <p className="text-sm text-muted-foreground">Controle de entradas, saídas e contas a receber</p>
               </div>
             </div>
             <div className="space-y-3">
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-caixa" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">7. Controle de Caixa</h3>
                 <p className="text-sm text-muted-foreground">Fluxo de caixa, suprimentos, sangrias e gastos fixos</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-relatorios" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">8. Relatórios</h3>
                 <p className="text-sm text-muted-foreground">Relatórios de vendas, estoque e inadimplência</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-fornecedores" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">9. Fornecedores</h3>
                 <p className="text-sm text-muted-foreground">Cadastro de fornecedores</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-configuracoes" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">10. Configurações</h3>
                 <p className="text-sm text-muted-foreground">Dados da empresa, usuários, temas e notificações</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-notificacoes" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">11. Perfis de Usuário</h3>
                 <p className="text-sm text-muted-foreground">Permissões de Admin, Gerente e Vendedor</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-seguranca" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">12. Segurança</h3>
                 <p className="text-sm text-muted-foreground">Multi-tenant, RLS e controle de acesso</p>
               </div>
             </div>
             <div className="space-y-3">
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-backup" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">13. Backup</h3>
                 <p className="text-sm text-muted-foreground">Backup automático e exportação de dados</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-testes" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">14. Qualidade e Testes</h3>
                 <p className="text-sm text-muted-foreground">Testes automatizados, E2E e acessibilidade</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-integracoes" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">15. Integrações</h3>
                 <p className="text-sm text-muted-foreground">WhatsApp, impressão, Excel e PWA</p>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
+              <div id="section-temas" className="p-3 bg-muted/50 rounded-lg scroll-mt-24">
                 <h3 className="font-medium">16. Dicas e Atalhos</h3>
                 <p className="text-sm text-muted-foreground">Atalhos de teclado, busca global e personalização</p>
               </div>
