@@ -674,6 +674,10 @@ export default function Manual() {
               <li>Mostra detalhamento no card "Total Saídas" e no resumo</li>
             </ul>
             <p>O percentual de comissão é definido nas configurações da empresa.</p>
+            
+            <div class="tip">
+              <strong>💡 Dica:</strong> Clique em "Débito de Comissões" no fluxo de caixa para abrir um dialog detalhado mostrando todos os pedidos que geraram comissão, com informações do cliente, vendedor, valor pago e comissão de cada venda.
+            </div>
           </div>
 
           <div class="section">
@@ -783,10 +787,19 @@ export default function Manual() {
             <p>O valor total de comissões também aparece na tela de Caixa:</p>
             <ul>
               <li>No card <strong>"Total Saídas"</strong> - mostra o valor de comissões incluído</li>
-              <li>No <strong>Fluxo de Caixa</strong> - aparece como "Débito de Comissões" em laranja</li>
+              <li>No <strong>Fluxo de Caixa</strong> - aparece como "Débito de Comissões" em laranja (clicável)</li>
               <li>No <strong>Resumo do Caixa</strong> - detalhamento separado das comissões</li>
             </ul>
             <p>As comissões são calculadas automaticamente sobre o valor pago das vendas.</p>
+            
+            <h4>📋 Detalhamento de Comissões</h4>
+            <p>Ao clicar em "Débito de Comissões" no fluxo de caixa, abre um dialog mostrando:</p>
+            <ul>
+              <li><strong>Lista de pedidos:</strong> Todos os pedidos que geraram comissão</li>
+              <li><strong>Informações por pedido:</strong> Número do pedido, cliente, vendedor, valor pago e comissão</li>
+              <li><strong>Resumo:</strong> Total de pedidos, valor total pago e comissão total</li>
+              <li><strong>Ação:</strong> Clique em qualquer pedido para ver seus detalhes completos</li>
+            </ul>
           </div>
 
           <div class="tip">
