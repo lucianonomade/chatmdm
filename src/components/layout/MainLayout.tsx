@@ -33,7 +33,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
   const effectiveSidebarCollapsed = isTablet ? true : sidebarCollapsed;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Sidebar 
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -42,15 +42,17 @@ export function MainLayout({ children, title }: MainLayoutProps) {
       />
       
       {/* Main Content */}
-      <div className={cn(
-        "transition-all duration-300",
-        // Desktop: margin based on sidebar collapsed state
-        // Tablet: collapsed sidebar margin
-        // Mobile: no margin (sidebar overlays)
-        !isMobile && !isTablet && (sidebarCollapsed ? "ml-16" : "ml-64"),
-        isTablet && "ml-16",
-        isMobile && "ml-0"
-      )}>
+      <div
+        className={cn(
+          "transition-all duration-300 overflow-x-hidden",
+          // Desktop: margin based on sidebar collapsed state
+          // Tablet: collapsed sidebar margin
+          // Mobile: no margin (sidebar overlays)
+          !isMobile && !isTablet && (sidebarCollapsed ? "ml-16" : "ml-64"),
+          isTablet && "ml-16",
+          isMobile && "ml-0"
+        )}
+      >
         {/* Header */}
         <header className="sticky top-0 z-30 h-14 md:h-16 bg-card/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-3 md:px-4 lg:px-6">
           <div className="flex items-center gap-2 md:gap-3">
@@ -101,7 +103,7 @@ export function MainLayout({ children, title }: MainLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-3 md:p-4 lg:p-6 animate-fade-in">
+        <main className="p-3 md:p-4 lg:p-6 animate-fade-in overflow-x-hidden min-w-0">
           <TrialBanner daysRemaining={daysRemaining} />
           <Breadcrumbs />
           {children}
