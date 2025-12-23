@@ -369,6 +369,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          recovery_email: string | null
           tenant_id: string | null
           trial_expired: boolean | null
           trial_started_at: string | null
@@ -379,6 +380,7 @@ export type Database = {
           email?: string | null
           id: string
           name: string
+          recovery_email?: string | null
           tenant_id?: string | null
           trial_expired?: boolean | null
           trial_started_at?: string | null
@@ -389,6 +391,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          recovery_email?: string | null
           tenant_id?: string | null
           trial_expired?: boolean | null
           trial_started_at?: string | null
