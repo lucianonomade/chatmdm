@@ -387,11 +387,28 @@ export default function Manual() {
               <span class="button-name">Venda Rápida:</span> Registra uma venda avulsa sem selecionar produto do catálogo. Útil para serviços personalizados.
             </div>
             <div class="button-desc">
-              <span class="button-name">Gerenciar Categorias:</span> Abre o gerenciador para criar, editar ou excluir categorias.
+              <span class="button-name">Gerenciar Categorias:</span> Abre o gerenciador para criar, editar ou excluir categorias. Você pode excluir categorias mesmo que tenham subcategorias ou produtos - os produtos serão movidos para "Sem Categoria".
             </div>
             <div class="button-desc">
-              <span class="button-name">Gerenciar Produtos:</span> Abre o gerenciador de produtos.
+              <span class="button-name">Gerenciar Subcategorias:</span> Abre o gerenciador para criar, editar ou excluir subcategorias dentro de cada categoria.
             </div>
+            <div class="button-desc">
+              <span class="button-name">Gerenciar Produtos:</span> Abre o gerenciador de produtos com listagem completa e barra de rolagem para ver todos os itens.
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>📝 Edição de Categorias</h3>
+            <p>Ao editar uma categoria, o sistema atualiza automaticamente:</p>
+            <ul>
+              <li>O nome da categoria na tabela de categorias</li>
+              <li>Todos os produtos que usam essa categoria</li>
+            </ul>
+            <p>Ao excluir uma categoria:</p>
+            <ul>
+              <li>Todas as subcategorias serão removidas</li>
+              <li>Os produtos serão movidos para "Sem Categoria"</li>
+            </ul>
           </div>
 
           <div class="tip">
