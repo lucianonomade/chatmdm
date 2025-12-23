@@ -81,38 +81,39 @@ export default function Auth() {
     
     setLoading(true);
     try {
-      // Look up email by name
-      const { data: userEmail, error: emailError } = await supabase
-        .rpc('get_email_by_name', { p_name: name.trim() });
-
-      if (emailError || !userEmail) {
-        toast({
-          title: "Usuário não encontrado",
-          description: "Não foi possível encontrar um usuário com esse nome.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Send password reset email
-      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      // Use custom edge function for password reset
+      // This handles recovery_email logic (sends to admin's email if configured)
+      const { data, error } = await supabase.functions.invoke('request-password-reset', {
+        body: {
+          name: name.trim(),
+          redirectUrl: `${window.location.origin}/reset-password`
+        }
       });
 
       if (error) {
         toast({
           title: "Erro",
-          description: error.message,
+          description: "Não foi possível processar a solicitação.",
           variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.adminNotified) {
+        // Password reset will be sent to admin's email
+        toast({
+          title: "Solicitação enviada!",
+          description: `O link de recuperação será enviado para o email do administrador.`,
         });
       } else {
         toast({
           title: "Email enviado!",
           description: "Verifique sua caixa de entrada para redefinir sua senha.",
         });
-        setMode('login');
-        setName("");
       }
+      
+      setMode('login');
+      setName("");
     } finally {
       setLoading(false);
     }

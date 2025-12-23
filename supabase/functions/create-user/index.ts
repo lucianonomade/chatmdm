@@ -62,14 +62,15 @@ serve(async (req) => {
       );
     }
 
-    // Get admin's tenant_id from profile
+    // Get admin's tenant_id and email from profile
     const { data: adminProfile } = await supabaseAdmin
       .from('profiles')
-      .select('tenant_id')
+      .select('tenant_id, email')
       .eq('id', callingUser.id)
       .single();
 
     const adminTenantId = adminProfile?.tenant_id;
+    const adminEmail = adminProfile?.email || callingUser.email;
 
     // Get request body
     const { email, password, name, role } = await req.json();
@@ -140,7 +141,7 @@ serve(async (req) => {
       );
     }
 
-    // Create profile for the new user
+    // Create profile for the new user with admin's email as recovery_email
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
@@ -149,12 +150,15 @@ serve(async (req) => {
         email: email,
         tenant_id: adminTenantId,
         trial_started_at: new Date().toISOString(),
-        trial_expired: false
+        trial_expired: false,
+        recovery_email: adminEmail // Admin's email for password recovery
       }, { onConflict: 'id' });
 
     if (profileError) {
       console.error('Create profile error:', profileError);
     }
+
+    console.log(`User ${email} created with recovery_email: ${adminEmail}`);
 
     // Create or update user role
     const { error: createRoleError } = await supabaseAdmin
