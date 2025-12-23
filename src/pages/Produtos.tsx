@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -507,6 +508,7 @@ export default function Produtos() {
 
         {/* Products Table */}
         <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+          <ScrollArea className="h-[calc(100vh-280px)] min-h-[400px]">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
@@ -596,6 +598,7 @@ export default function Produtos() {
               )}
             </TableBody>
           </Table>
+          </ScrollArea>
         </div>
       </div>
 
