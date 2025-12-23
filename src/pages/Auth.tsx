@@ -138,14 +138,14 @@ export default function Auth() {
         let userEmail = isEmail ? name : null;
 
         if (!isEmail) {
-          // Look up email by name using secure database function
+          // Look up email by name using public database function (no auth required)
           const { data: emailResult, error: emailError } = await supabase
-            .rpc('get_email_by_name', { p_name: name.trim() });
+            .rpc('get_email_by_name_public', { p_name: name.trim() });
 
           if (emailError || !emailResult) {
             toast({
               title: "Usuário não encontrado",
-              description: "Não encontramos esse nome. Tente entrar com seu EMAIL.",
+              description: "Não encontramos esse nome. Verifique se digitou corretamente.",
               variant: "destructive",
             });
             setLoading(false);
