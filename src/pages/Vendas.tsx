@@ -2179,6 +2179,7 @@ export default function Vendas() {
                         value={selectedQuantity}
                         onChange={(e) => {
                           const newQty = e.target.value;
+                          const oldQty = parseInt(selectedQuantity) || 1;
                           setSelectedQuantity(newQty);
                           const qty = parseInt(newQty) || 1;
                           const pricingMode = (selectedProductForVariation as any)?.pricing_mode;
@@ -2188,6 +2189,13 @@ export default function Vendas() {
                             if (width > 0 && height > 0 && currentBasePrice > 0) {
                               const total = width * height * currentBasePrice * qty;
                               setSelectedTotal(total.toFixed(2));
+                            }
+                          } else {
+                            // For regular products, recalculate total based on unit price
+                            const currentTotal = parseFloat(selectedTotal) || 0;
+                            if (currentTotal > 0 && oldQty > 0) {
+                              const unitPrice = currentTotal / oldQty;
+                              setSelectedTotal((unitPrice * qty).toFixed(2));
                             }
                           }
                         }}
