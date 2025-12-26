@@ -252,7 +252,17 @@ const renderProductionFields = (): string => {
 const renderFooter = (): string => {
   return `
     <div class="text-center py-2" style="margin-top: 20px; border-top: 1px dashed #000;">
-      Obrigado pela preferência!
+      <div style="margin-bottom: 10px;">Obrigado pela preferência!</div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <a href="https://www.instagram.com/maximaeimpressos" target="_blank" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #E4405F; font-size: 0.9em;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+          </svg>
+          <span style="font-weight: 500;">@maximaeimpressos</span>
+        </a>
+      </div>
     </div>
   `;
 };
