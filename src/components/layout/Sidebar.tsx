@@ -217,18 +217,18 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
         </nav>
 
         {/* Instagram Link */}
-        <div className={cn("border-t border-sidebar-border px-3 py-2", !showLabels && "flex justify-center")}>
+        <div className={cn("border-t border-sidebar-border px-3 py-1.5", !showLabels && "flex justify-center")}>
           <a
             href="https://www.instagram.com/maximaeimpressos"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "flex items-center gap-2 text-sidebar-foreground/70 hover:text-[#E4405F] transition-colors",
+              "flex items-center gap-1.5 text-sidebar-foreground/60 hover:text-[#E4405F] transition-colors text-xs",
               !showLabels && "justify-center"
             )}
           >
-            <Instagram className="h-5 w-5 flex-shrink-0" />
-            {showLabels && <span className="text-sm">@maximaeimpressos</span>}
+            <Instagram className="h-4 w-4 flex-shrink-0" />
+            {showLabels && <span>Siga-nos</span>}
           </a>
         </div>
 
