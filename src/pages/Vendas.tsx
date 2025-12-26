@@ -618,7 +618,9 @@ export default function Vendas() {
         };
 
         addToCart(productWithOverriddenPrice, quantity, undefined, {
-          variationNameOverride: cleanVariationName(variation.name)
+          variationNameOverride: cleanVariationName(variation.name),
+          finishing: selectedFinishings.join(', '),
+          customDescription: customDescription
         });
         toast.success("Item adicionado!");
         setVariationDialogOpen(false);
@@ -631,7 +633,10 @@ export default function Vendas() {
       addToCart({
         ...selectedProductForVariation,
         price: finalUnitPrice
-      }, quantity);
+      }, quantity, undefined, {
+        finishing: selectedFinishings.join(', '),
+        customDescription: customDescription
+      });
       toast.success("Item adicionado!");
       setVariationDialogOpen(false);
       return;
