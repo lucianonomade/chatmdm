@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useStore, ServiceOrder } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
+import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { escapeHtml, sanitizeUrl } from "@/lib/printUtils";
-import { ClipboardList, DollarSign, Wallet, CheckCircle2, Clock, ExternalLink, MoreVertical, ChevronDown, Printer } from "lucide-react";
+import { ClipboardList, DollarSign, Wallet, CheckCircle2, Clock, ChevronDown, Printer } from "lucide-react";
 
 interface DailyTasksDialogProps {
   open: boolean;
@@ -18,7 +19,9 @@ interface DailyTasksDialogProps {
 
 export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) {
   const navigate = useNavigate();
-  const { orders, fixedExpenses, companySettings } = useStore();
+  const { fixedExpenses } = useStore();
+  const { orders } = useSupabaseOrders();
+  const { settings: companySettings } = useSyncedCompanySettings();
   const { authUser } = useAuth();
 
   const accessibleOrders = authUser?.role === 'seller'
