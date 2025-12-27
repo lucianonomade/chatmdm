@@ -603,7 +603,7 @@ export default function ContasPagar() {
                           <TableCell className="text-muted-foreground">
                             {expense.date ? format(parseISO(expense.date), "dd/MM/yyyy", { locale: ptBR }) : "-"}
                           </TableCell>
-                          <TableCell className="font-medium">{expense.description}</TableCell>
+                          <TableCell className="font-medium">{expense.description.replace(/\s*\[.*\]$/, '')}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               {expense.supplierId ? (
@@ -1058,7 +1058,7 @@ export default function ContasPagar() {
                         className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50"
                       >
                         <div>
-                          <p className="font-medium">{expense.description}</p>
+                          <p className="font-medium">{expense.description.replace(/\s*\[.*\]$/, '')}</p>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(expense.date), "dd/MM/yyyy", { locale: ptBR })}
                             {expense.category && ` • ${expense.category}`}
