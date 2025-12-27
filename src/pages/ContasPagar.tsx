@@ -52,6 +52,7 @@ import {
   Edit2,
   Trash2,
   CreditCard,
+  Wallet,
 } from "lucide-react";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
@@ -129,6 +130,11 @@ export default function ContasPagar() {
   const [paymentItem, setPaymentItem] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [isPartialPayment, setIsPartialPayment] = useState(false);
+
+  // Commission payment state
+  const [commissionPaymentOpen, setCommissionPaymentOpen] = useState(false);
+  const [sellerToPayCommission, setSellerToPayCommission] = useState<SellerCommission | null>(null);
+  const [isPayingCommission, setIsPayingCommission] = useState(false);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
 
@@ -464,6 +470,37 @@ export default function ContasPagar() {
   const handleViewOrderDetails = (order: ServiceOrder) => {
     setSelectedOrder(order);
     setOrderDetailsOpen(true);
+  };
+
+  // Pay commission handler
+  const handlePayCommission = async () => {
+    if (!sellerToPayCommission) return;
+    
+    setIsPayingCommission(true);
+    try {
+      const [year, month] = selectedMonth.split('-').map(Number);
+      const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
+      
+      addExpense({
+        supplierId: '',
+        supplierName: sellerToPayCommission.sellerName,
+        description: `Comissão ${sellerToPayCommission.sellerName} - ${monthName}`,
+        amount: sellerToPayCommission.commissionAmount,
+        date: new Date().toISOString(),
+        category: 'Comissão',
+      });
+      
+      setCommissionPaymentOpen(false);
+      setSellerToPayCommission(null);
+    } finally {
+      setIsPayingCommission(false);
+    }
+  };
+
+  const openCommissionPaymentDialog = (seller: SellerCommission, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSellerToPayCommission(seller);
+    setCommissionPaymentOpen(true);
   };
 
   // Fixed Expense Handlers
@@ -1289,17 +1326,28 @@ export default function ContasPagar() {
                               </span>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleViewSellerDetails(seller);
-                                }}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver Vendas
-                              </Button>
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewSellerDetails(seller);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Ver Vendas
+                                </Button>
+                                <Button 
+                                  variant="default" 
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={(e) => openCommissionPaymentDialog(seller, e)}
+                                >
+                                  <Wallet className="h-4 w-4 mr-1" />
+                                  Pagar
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -2061,6 +2109,54 @@ export default function ContasPagar() {
                 disabled={isDeletingPurchase}
               >
                 {isDeletingPurchase ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Commission Payment Confirmation Dialog */}
+        <AlertDialog open={commissionPaymentOpen} onOpenChange={setCommissionPaymentOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-green-500" />
+                Pagar Comissão
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <p>Confirmar pagamento de comissão para:</p>
+                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Vendedor:</span>
+                      <span className="font-medium text-foreground">{sellerToPayCommission?.sellerName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Período:</span>
+                      <span className="font-medium text-foreground">
+                        {format(new Date(selectedMonth + '-01'), 'MMMM/yyyy', { locale: ptBR })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-lg pt-2 border-t">
+                      <span className="text-muted-foreground">Valor:</span>
+                      <span className="font-bold text-green-500">
+                        R$ {sellerToPayCommission?.commissionAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Este valor será registrado como despesa e debitado do fluxo de caixa.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handlePayCommission}
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isPayingCommission}
+              >
+                {isPayingCommission ? 'Pagando...' : 'Confirmar Pagamento'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
