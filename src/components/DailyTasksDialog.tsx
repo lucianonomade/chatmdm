@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useStore, ServiceOrder } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseFixedExpenses } from "@/hooks/useSupabaseFixedExpenses";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { escapeHtml, sanitizeUrl } from "@/lib/printUtils";
+import { ServiceOrder } from "@/lib/types";
 import { ClipboardList, DollarSign, Wallet, CheckCircle2, Clock, ChevronDown, Printer } from "lucide-react";
 
 interface DailyTasksDialogProps {
@@ -19,8 +20,8 @@ interface DailyTasksDialogProps {
 
 export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) {
   const navigate = useNavigate();
-  const { fixedExpenses } = useStore();
   const { orders } = useSupabaseOrders();
+  const { fixedExpenses } = useSupabaseFixedExpenses();
   const { settings: companySettings } = useSyncedCompanySettings();
   const { authUser } = useAuth();
 

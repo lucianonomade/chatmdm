@@ -20,14 +20,11 @@ export function useSupabaseFixedExpenses() {
   const { data: fixedExpenses = [], isLoading, error } = useQuery({
     queryKey: ['fixed_expenses', tenantId],
     queryFn: async () => {
-      console.log('Fetching fixed expenses for tenant:', tenantId);
       const { data, error } = await supabase
         .from('fixed_expenses')
         .select('*')
         .order('due_day', { ascending: true });
 
-      console.log('Fixed expenses result:', { data, error });
-      
       if (error) throw error;
 
       return data.map(e => ({
