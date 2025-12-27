@@ -241,27 +241,36 @@ export default function Relatorios() {
 
   // Purchases by supplier report data
   const supplierPurchasesData = useMemo(() => {
-    // Filter expenses by supplier if selected
-    let expensesToAnalyze = filteredExpenses.filter(e => e.supplierId || e.supplierName);
+    // Get expenses with supplier info
+    const expensesWithSupplier = filteredExpenses.filter(e => e.supplierId || e.supplierName);
     
-    if (fornecedor !== "todos") {
-      expensesToAnalyze = expensesToAnalyze.filter(e => e.supplierId === fornecedor || e.supplierName === fornecedor);
-    }
+    // If a specific supplier is selected, filter all data by that supplier
+    const isFiltered = fornecedor !== "todos";
+    
+    // Build supplier stats - only for selected supplier when filtered
+    const bySupplier = suppliers
+      .filter(supplier => !isFiltered || supplier.id === fornecedor)
+      .map(supplier => {
+        const supplierExpenses = expensesWithSupplier.filter(e => e.supplierId === supplier.id);
+        const total = supplierExpenses.reduce((acc, e) => acc + e.amount, 0);
+        return {
+          id: supplier.id,
+          name: supplier.name,
+          total,
+          count: supplierExpenses.length,
+          expenses: supplierExpenses,
+        };
+      })
+      .filter(s => s.total > 0)
+      .sort((a, b) => b.total - a.total);
 
-    const bySupplier = suppliers.map(supplier => {
-      const supplierExpenses = filteredExpenses.filter(e => e.supplierId === supplier.id);
-      const total = supplierExpenses.reduce((acc, e) => acc + e.amount, 0);
-      return {
-        id: supplier.id,
-        name: supplier.name,
-        total,
-        count: supplierExpenses.length,
-      };
-    }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+    // Calculate totals based on filter
+    const expensesToShow = isFiltered 
+      ? expensesWithSupplier.filter(e => e.supplierId === fornecedor)
+      : expensesWithSupplier;
+    const totalPurchased = expensesToShow.reduce((acc, e) => acc + e.amount, 0);
 
-    const totalPurchased = expensesToAnalyze.reduce((acc, e) => acc + e.amount, 0);
-
-    return { bySupplier, totalPurchased, expensesToAnalyze };
+    return { bySupplier, totalPurchased, expensesToAnalyze: expensesToShow };
   }, [filteredExpenses, suppliers, fornecedor]);
 
   // Top selling products report
@@ -699,7 +708,7 @@ export default function Relatorios() {
             
             {/* Row 2: Search and Actions */}
             <div className="flex flex-wrap gap-2 items-end">
-              <div className="flex-1 min-w-[150px] max-w-[250px] space-y-1.5">
+              <div className="flex-1 min-w-[150px] max-w-[250px] space-y-1.5 relative">
                 <Label className="text-xs">Buscar Cliente</Label>
                 <div className="relative">
                   <User className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
@@ -710,6 +719,33 @@ export default function Relatorios() {
                     className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
                   />
                 </div>
+                {/* Customer suggestions dropdown */}
+                {customerSearch && customerSearch.length >= 2 && (
+                  <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {customers
+                      .filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()))
+                      .slice(0, 8)
+                      .map(customer => (
+                        <button
+                          key={customer.id}
+                          type="button"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-2"
+                          onClick={() => setCustomerSearch(customer.name)}
+                        >
+                          <User className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{customer.name}</span>
+                          {customer.phone && (
+                            <span className="text-xs text-muted-foreground ml-auto">{customer.phone}</span>
+                          )}
+                        </button>
+                      ))}
+                    {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        Nenhum cliente encontrado
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button
