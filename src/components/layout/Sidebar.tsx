@@ -18,6 +18,7 @@ import {
   BookOpen,
   Percent,
   Instagram,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const menuItems = [
   { icon: Truck, label: "Fornecedores", path: "/fornecedores", roles: ['admin', 'manager'] },
   { icon: BarChart3, label: "Relatórios", path: "/relatorios", roles: ['admin', 'manager'] },
   { icon: Settings, label: "Ajustes", path: "/configuracoes", roles: ['admin'] },
+  { icon: ShieldCheck, label: "Gestão SaaS", path: "/saas", roles: ['superadmin'] },
   { icon: BookOpen, label: "Manual", path: "/manual", roles: ['admin', 'manager', 'seller'] },
 ];
 
@@ -111,12 +113,12 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
     <>
       {/* Mobile Overlay */}
       {isOpen && isMobile && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40"
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar */}
       <aside
         className={cn(
@@ -134,9 +136,9 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
           {showLabels && (
             <div className="flex-1 flex items-center justify-center overflow-hidden">
               {companySettings?.logoUrl ? (
-                <img 
-                  src={companySettings.logoUrl} 
-                  alt="Logo" 
+                <img
+                  src={companySettings.logoUrl}
+                  alt="Logo"
                   className="h-10 max-w-[140px] object-contain"
                 />
               ) : (
@@ -151,7 +153,7 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
               )}
             </div>
           )}
-          
+
           {/* Close button on mobile */}
           {isMobile && (
             <Button
@@ -163,7 +165,7 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
               <X className="h-4 w-4" />
             </Button>
           )}
-          
+
           {/* Collapse button on desktop (not tablet) */}
           {!isMobile && !isTablet && (
             <Button
@@ -251,9 +253,9 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
                   </p>
                   <p className="text-xs text-sidebar-foreground/60 truncate">{getRoleLabel()}</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive h-9 px-3 gap-2"
                   onClick={handleLogout}
                 >
@@ -266,9 +268,9 @@ export function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }: Sideba
           {!showLabels && (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="w-full mt-2 text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive h-8"
                   onClick={handleLogout}
                 >

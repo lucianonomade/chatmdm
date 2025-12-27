@@ -33,6 +33,7 @@ import Instalar from "./pages/Instalar";
 import ResetPassword from "./pages/ResetPassword";
 import Manual from "./pages/Manual";
 import NotFound from "./pages/NotFound";
+import SaaSManagement from "./pages/SaaS/SaaSManagement";
 
 const queryClient = new QueryClient();
 
@@ -139,7 +140,7 @@ function AppRoutes() {
       <Route path="/contas-pagar" element={<ProtectedRoute><ContasPagar /></ProtectedRoute>} />
       <Route path="/comissoes" element={<ProtectedRoute><Comissoes /></ProtectedRoute>} />
       <Route path="/manual" element={<ProtectedRoute><Manual /></ProtectedRoute>} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="/saas" element={<ProtectedRoute><SaaSManagement /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
