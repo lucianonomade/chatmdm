@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -41,7 +42,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { toast } from "sonner";
-import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +57,18 @@ export default function ContasReceber() {
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'pix' | 'card'>('cash');
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [enableInstallments, setEnableInstallments] = useState(false);
+  const [installmentsCount, setInstallmentsCount] = useState("2");
+  const [installmentDates, setInstallmentDates] = useState<Date[]>(() => {
+    const dates: Date[] = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date();
+      date.setMonth(date.getMonth() + i + 1);
+      dates.push(date);
+    }
+    return dates;
+  });
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [pendingOrdersDialogOpen, setPendingOrdersDialogOpen] = useState(false);
@@ -131,6 +144,17 @@ export default function ContasReceber() {
     e?.stopPropagation();
     setSelectedOrder(order);
     setPaymentAmount((order.remainingAmount || order.total).toFixed(2));
+    setPaymentDate(new Date());
+    setEnableInstallments(false);
+    setInstallmentsCount("2");
+    // Reset installment dates
+    const dates: Date[] = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date();
+      date.setMonth(date.getMonth() + i + 1);
+      dates.push(date);
+    }
+    setInstallmentDates(dates);
     setPaymentDialogOpen(true);
   };
 
@@ -156,31 +180,60 @@ export default function ContasReceber() {
     }
 
     const remainingBefore = selectedOrder.remainingAmount || selectedOrder.total;
-    const newRemaining = Math.max(0, remainingBefore - amount);
-    const newAmountPaid = (selectedOrder.amountPaid || 0) + amount;
+    
+    if (enableInstallments) {
+      // Create multiple payments as pending installments
+      const numInstallments = parseInt(installmentsCount);
+      const installmentAmount = amount / numInstallments;
+      
+      const newPayments = installmentDates.slice(0, numInstallments).map((date, idx) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        amount: installmentAmount,
+        date: date.toISOString(),
+        method: paymentMethod,
+        status: 'pending' as const,
+        installmentNumber: idx + 1,
+        totalInstallments: numInstallments
+      }));
+      
+      updateOrder({
+        id: selectedOrder.id,
+        data: {
+          paymentStatus: 'partial',
+          payments: [...(selectedOrder.payments || []), ...newPayments]
+        }
+      });
+      
+      toast.success(`Parcelamento em ${numInstallments}x de R$ ${installmentAmount.toFixed(2)} registrado!`);
+    } else {
+      // Single payment
+      const newRemaining = Math.max(0, remainingBefore - amount);
+      const newAmountPaid = (selectedOrder.amountPaid || 0) + amount;
 
-    const newPayment = {
-      id: Math.random().toString(36).substr(2, 9),
-      amount,
-      date: new Date().toISOString(),
-      method: paymentMethod
-    };
+      const newPayment = {
+        id: Math.random().toString(36).substr(2, 9),
+        amount,
+        date: paymentDate.toISOString(),
+        method: paymentMethod,
+        status: 'paid' as const
+      };
 
-    updateOrder({
-      id: selectedOrder.id,
-      data: {
-        amountPaid: newAmountPaid,
-        remainingAmount: newRemaining,
-        paymentStatus: newRemaining === 0 ? 'paid' : 'partial',
-        payments: [...(selectedOrder.payments || []), newPayment]
-      }
-    });
+      updateOrder({
+        id: selectedOrder.id,
+        data: {
+          amountPaid: newAmountPaid,
+          remainingAmount: newRemaining,
+          paymentStatus: newRemaining === 0 ? 'paid' : 'partial',
+          payments: [...(selectedOrder.payments || []), newPayment]
+        }
+      });
 
-    toast.success(
-      newRemaining === 0
-        ? "Pagamento quitado com sucesso!"
-        : `Pagamento de R$ ${amount.toFixed(2)} registrado. Restam R$ ${newRemaining.toFixed(2)}`
-    );
+      toast.success(
+        newRemaining === 0
+          ? "Pagamento quitado com sucesso!"
+          : `Pagamento de R$ ${amount.toFixed(2)} registrado. Restam R$ ${newRemaining.toFixed(2)}`
+      );
+    }
 
     setPaymentDialogOpen(false);
     setSelectedOrder(null);
@@ -726,6 +779,102 @@ export default function ContasReceber() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Payment Date or Installments */}
+              <div className="space-y-3 border-t pt-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold">Parcelar Recebimento</Label>
+                  <Switch
+                    checked={enableInstallments}
+                    onCheckedChange={setEnableInstallments}
+                  />
+                </div>
+
+                {enableInstallments ? (
+                  <div className="space-y-3 bg-muted/50 rounded-lg p-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Nº de Parcelas</Label>
+                      <Select value={installmentsCount} onValueChange={setInstallmentsCount}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover">
+                          {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => (
+                            <SelectItem key={n} value={n.toString()}>{n}x</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="text-sm text-muted-foreground">
+                      Valor de cada parcela: <strong className="text-foreground">
+                        R$ {(parseFloat(paymentAmount) / parseInt(installmentsCount) || 0).toFixed(2)}
+                      </strong>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs">Datas das Parcelas</Label>
+                      <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
+                        {Array.from({ length: parseInt(installmentsCount) }).map((_, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground w-6">{idx + 1}ª</span>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 justify-start text-left font-normal h-8 text-xs"
+                                >
+                                  <CalendarIcon className="mr-1 h-3 w-3" />
+                                  {format(installmentDates[idx], "dd/MM/yyyy", { locale: ptBR })}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={installmentDates[idx]}
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const newDates = [...installmentDates];
+                                      newDates[idx] = date;
+                                      setInstallmentDates(newDates);
+                                    }
+                                  }}
+                                  locale={ptBR}
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <Label className="text-xs">Data do Pagamento</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {format(paymentDate, "dd/MM/yyyy", { locale: ptBR })}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={paymentDate}
+                          onSelect={(date) => date && setPaymentDate(date)}
+                          locale={ptBR}
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2 pt-4">
