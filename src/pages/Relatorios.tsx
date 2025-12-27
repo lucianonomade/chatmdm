@@ -970,14 +970,15 @@ export default function Relatorios() {
       color: "text-success",
       bgColor: "bg-success/10",
     },
-    {
+    // Only show stock report if stock control is enabled
+    ...(companySettings?.usesStock !== false ? [{
       id: "estoque",
       title: "Relatório de Estoque",
       description: "Controle de produtos em estoque e alertas de estoque baixo",
       icon: Package,
       color: "text-info",
       bgColor: "bg-info/10",
-    },
+    }] : []),
     {
       id: "inadimplencia",
       title: "Relatório de Inadimplência",
@@ -1705,7 +1706,7 @@ export default function Relatorios() {
           </div>
         )}
 
-        {activeTab === "estoque" && (
+        {activeTab === "estoque" && companySettings?.usesStock !== false && (
           <div className="space-y-4">
             <div className="flex justify-end">
               <Button onClick={() => handlePrint("estoque")} variant="outline" className="gap-2">
