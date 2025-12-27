@@ -107,6 +107,10 @@ export default function ContasPagar() {
   const [installmentDetailsOpen, setInstallmentDetailsOpen] = useState(false);
   const [payingInstallmentId, setPayingInstallmentId] = useState<string | null>(null);
 
+  // Grouped installments dialog state
+  const [selectedGroupedInstallments, setSelectedGroupedInstallments] = useState<PendingInstallment[]>([]);
+  const [groupedInstallmentsOpen, setGroupedInstallmentsOpen] = useState(false);
+
   // Payment dialog state (for partial payments)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentType, setPaymentType] = useState<'fixed' | 'installment' | null>(null);
@@ -115,6 +119,34 @@ export default function ContasPagar() {
   const [isPartialPayment, setIsPartialPayment] = useState(false);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
+
+  // Group pending installments by description (same purchase)
+  const groupedPendingInstallments = useMemo(() => {
+    const groups = new Map<string, PendingInstallment[]>();
+    
+    pendingInstallments.forEach(installment => {
+      const key = `${installment.description}-${installment.supplierId || 'none'}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(installment);
+    });
+
+    return Array.from(groups.entries()).map(([key, installments]) => ({
+      key,
+      description: installments[0].description,
+      supplierName: installments[0].supplierName,
+      category: installments[0].category,
+      totalAmount: installments[0].totalAmount,
+      installments: installments.sort((a, b) => a.installmentNumber - b.installmentNumber),
+      pendingCount: installments.length,
+      totalPending: installments.reduce((sum, i) => sum + i.amount, 0),
+      nextDueDate: installments.reduce((earliest, i) => 
+        new Date(i.dueDate) < new Date(earliest) ? i.dueDate : earliest, 
+        installments[0].dueDate
+      ),
+    }));
+  }, [pendingInstallments]);
 
   // Check if a fixed expense was already paid for a specific month
   const isFixedExpensePaidForMonth = (fixedExpenseId: string, month: number, year: number): boolean => {
@@ -637,7 +669,7 @@ export default function ContasPagar() {
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <CreditCard className="h-5 w-5 text-destructive" />
-                      Parcelas Pendentes
+                      Compras Parceladas
                     </span>
                     <Badge variant="destructive" className="text-base px-3">
                       R$ {totalPendingAmount.toFixed(2)}
@@ -645,57 +677,55 @@ export default function ContasPagar() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {pendingInstallments.length === 0 ? (
+                  {groupedPendingInstallments.length === 0 ? (
                     <div className="text-center py-6 text-muted-foreground">
                       <CreditCard className="w-10 h-10 mx-auto mb-2 text-success opacity-50" />
                       <p className="text-sm font-medium text-success">Nenhuma parcela pendente!</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {pendingInstallments.map((installment) => {
-                        const isOverdue = new Date(installment.dueDate) < new Date();
+                      {groupedPendingInstallments.map((group) => {
+                        const isOverdue = new Date(group.nextDueDate) < new Date();
                         return (
                           <div 
-                            key={installment.id}
-                            className={`flex items-center justify-between p-3 rounded-lg bg-background border hover:shadow-md transition-all ${isOverdue ? 'border-destructive/50' : ''}`}
+                            key={group.key}
+                            className={`flex items-center justify-between p-3 rounded-lg bg-background border hover:shadow-md transition-all cursor-pointer ${isOverdue ? 'border-destructive/50' : ''}`}
+                            onClick={() => {
+                              setSelectedGroupedInstallments(group.installments);
+                              setGroupedInstallmentsOpen(true);
+                            }}
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isOverdue ? 'bg-destructive/10' : 'bg-warning/10'}`}>
                                 <CreditCard className={`h-5 w-5 ${isOverdue ? 'text-destructive' : 'text-warning'}`} />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="font-medium truncate">{installment.description}</p>
+                                <p className="font-medium truncate">{group.description}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  Parcela {installment.installmentNumber}/{installment.totalInstallments} • 
-                                  <span className={`ml-1 ${isOverdue ? 'text-destructive font-semibold' : ''}`}>
-                                    Venc: {format(new Date(installment.dueDate), "dd/MM/yyyy", { locale: ptBR })}
+                                  <Badge variant="secondary" className="mr-2 text-xs">
+                                    {group.pendingCount} parcela{group.pendingCount > 1 ? 's' : ''} pendente{group.pendingCount > 1 ? 's' : ''}
+                                  </Badge>
+                                  <span className={`${isOverdue ? 'text-destructive font-semibold' : ''}`}>
+                                    Próx. venc: {format(new Date(group.nextDueDate), "dd/MM/yyyy", { locale: ptBR })}
                                   </span>
-                                  {installment.supplierName && ` • ${installment.supplierName}`}
+                                  {group.supplierName && ` • ${group.supplierName}`}
                                 </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-destructive text-lg whitespace-nowrap">
-                                R$ {installment.amount.toFixed(2)}
-                              </span>
+                              <div className="text-right">
+                                <span className="font-bold text-destructive text-lg whitespace-nowrap">
+                                  R$ {group.totalPending.toFixed(2)}
+                                </span>
+                                <p className="text-xs text-muted-foreground">
+                                  Total: R$ {group.totalAmount.toFixed(2)}
+                                </p>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  setSelectedInstallment(installment);
-                                  setInstallmentDetailsOpen(true);
-                                }}
                               >
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="sm"
-                                className="bg-success hover:bg-success/90 text-success-foreground gap-1"
-                                onClick={() => handlePayInstallment(installment)}
-                                disabled={payingInstallmentId === installment.id || isPayingInstallment}
-                              >
-                                <DollarSign className="h-4 w-4" />
-                                {payingInstallmentId === installment.id ? 'Pagando...' : 'Pagar'}
                               </Button>
                             </div>
                           </div>
@@ -1655,6 +1685,89 @@ export default function ContasPagar() {
                     Confirmar Pagamento
                   </Button>
                 </DialogFooter>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Grouped Installments Dialog */}
+        <Dialog open={groupedInstallmentsOpen} onOpenChange={setGroupedInstallmentsOpen}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Parcelas do Pedido
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedGroupedInstallments.length > 0 && (
+              <div className="space-y-4 flex-1 overflow-y-auto">
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <p className="font-semibold">{selectedGroupedInstallments[0].description}</p>
+                  {selectedGroupedInstallments[0].supplierName && (
+                    <p className="text-sm text-muted-foreground">
+                      Fornecedor: {selectedGroupedInstallments[0].supplierName}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Valor total da compra: <span className="font-semibold">R$ {selectedGroupedInstallments[0].totalAmount.toFixed(2)}</span>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    Parcelas pendentes ({selectedGroupedInstallments.length})
+                  </p>
+                  {selectedGroupedInstallments.map((installment) => {
+                    const isOverdue = new Date(installment.dueDate) < new Date();
+                    return (
+                      <div 
+                        key={installment.id}
+                        className={`flex items-center justify-between p-3 rounded-lg border ${isOverdue ? 'border-destructive/50 bg-destructive/5' : 'bg-background'}`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">
+                              {installment.installmentNumber}/{installment.totalInstallments}
+                            </Badge>
+                            <span className={`text-sm ${isOverdue ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+                              Venc: {format(new Date(installment.dueDate), "dd/MM/yyyy", { locale: ptBR })}
+                            </span>
+                            {isOverdue && (
+                              <Badge variant="destructive" className="text-xs">Vencida</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-destructive">
+                            R$ {installment.amount.toFixed(2)}
+                          </span>
+                          <Button 
+                            size="sm"
+                            className="bg-success hover:bg-success/90 text-success-foreground gap-1"
+                            onClick={() => handlePayInstallment(installment)}
+                            disabled={payingInstallmentId === installment.id || isPayingInstallment}
+                          >
+                            <DollarSign className="h-4 w-4" />
+                            {payingInstallmentId === installment.id ? '...' : 'Pagar'}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="border-t pt-3 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total pendente</p>
+                    <p className="font-bold text-lg text-destructive">
+                      R$ {selectedGroupedInstallments.reduce((sum, i) => sum + i.amount, 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={() => setGroupedInstallmentsOpen(false)}>
+                    Fechar
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>
