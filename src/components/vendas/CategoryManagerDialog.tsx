@@ -50,6 +50,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
   // Add state
   const [showAddConfirm, setShowAddConfirm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [isRegisteringAll, setIsRegisteringAll] = useState(false);
   
   // Edit state
   const [editingCategory, setEditingCategory] = useState<ExtendedCategory | null>(null);
@@ -61,7 +62,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Combine categories from table AND unique categories from products
-  const allCategories = useMemo<ExtendedCategory[]>(() => {
+  const { allCategories, orphanCategories } = useMemo(() => {
     // Get category names from products that are not in the categories table
     const categoryNamesFromTable = new Set(categories.map(c => c.name.toLowerCase()));
     const orphanCategoryNames = new Set<string>();
@@ -80,17 +81,38 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
     }));
     
     // Create orphan categories with generated IDs
-    const orphanCategories: ExtendedCategory[] = Array.from(orphanCategoryNames).map(name => ({
+    const orphans: ExtendedCategory[] = Array.from(orphanCategoryNames).map(name => ({
       id: `orphan-${name}`,
       name,
       isOrphan: true,
     }));
     
     // Combine and sort alphabetically
-    return [...tableCategories, ...orphanCategories].sort((a, b) => 
+    const all = [...tableCategories, ...orphans].sort((a, b) => 
       a.name.localeCompare(b.name, 'pt-BR')
     );
+    
+    return { allCategories: all, orphanCategories: orphans };
   }, [categories, products]);
+
+  // Register all orphan categories
+  const handleRegisterAllOrphans = async () => {
+    if (orphanCategories.length === 0) return;
+    
+    setIsRegisteringAll(true);
+    try {
+      for (const orphan of orphanCategories) {
+        addCategory(orphan.name);
+        // Small delay to avoid overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      toast.success(`${orphanCategories.length} categoria(s) registrada(s) com sucesso!`);
+    } catch (error) {
+      toast.error("Erro ao registrar categorias");
+    } finally {
+      setIsRegisteringAll(false);
+    }
+  };
 
   const handleAddClick = () => {
     if (!newCategoryName.trim()) {
@@ -180,6 +202,24 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Register all orphan categories button */}
+            {orphanCategories.length > 0 && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                  {orphanCategories.length} categoria(s) encontrada(s) nos produtos que não estão registradas.
+                </p>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  onClick={handleRegisterAllOrphans}
+                  disabled={isRegisteringAll || isAdding}
+                  className="w-full"
+                >
+                  {isRegisteringAll ? "Registrando..." : `Registrar todas (${orphanCategories.length})`}
+                </Button>
+              </div>
+            )}
+
             {/* Add new category */}
             <div className="flex gap-2">
               <Input
