@@ -574,6 +574,74 @@ export default function Relatorios() {
           `).join("")}
         </table>
       `;
+    } else if (reportType === "inadimplencia-clientes") {
+      // Only customers with pending amounts
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        <div class="header">
+          <div class="company">${companySettings?.name || "Empresa"}</div>
+          <div class="title">CLIENTES COM PENDÊNCIAS</div>
+          <div class="period">Período: ${dateFrom || "Início"} até ${dateTo || "Hoje"}</div>
+          ${customerSearch ? `<div class="period">Filtro: ${customerSearch}</div>` : ''}
+          <div class="period">Emitido em: ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+        </div>
+        <div class="summary">
+          <div class="summary-item"><span>Total em Aberto:</span><span>R$ ${receivablesData.totalPending.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Clientes com Pendências:</span><span>${receivablesData.byCustomer.length}</span></div>
+        </div>
+        <table>
+          <tr><th>Cliente</th><th>Telefone</th><th>Pedidos</th><th>Valor Pendente</th></tr>
+          ${receivablesData.byCustomer.map((c) => `
+            <tr>
+              <td>${c.name}</td>
+              <td>${c.phone || '-'}</td>
+              <td>${c.orders}</td>
+              <td>R$ ${c.pendente.toFixed(2)}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="3">TOTAL</td>
+            <td>R$ ${receivablesData.totalPending.toFixed(2)}</td>
+          </tr>
+        </table>
+      `;
+    } else if (reportType === "inadimplencia-detalhes") {
+      // Detailed pending orders
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        <div class="header">
+          <div class="company">${companySettings?.name || "Empresa"}</div>
+          <div class="title">DETALHAMENTO DE PENDÊNCIAS</div>
+          <div class="period">Período: ${dateFrom || "Início"} até ${dateTo || "Hoje"}</div>
+          ${customerSearch ? `<div class="period">Cliente: ${customerSearch}</div>` : ''}
+          <div class="period">Emitido em: ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+        </div>
+        <div class="summary">
+          <div class="summary-item"><span>Total Pendente:</span><span>R$ ${receivablesData.totalPending.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Pedidos Pendentes:</span><span>${receivablesData.pendingOrders.length}</span></div>
+        </div>
+        <table>
+          <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Total</th><th>Pago</th><th>Pendente</th></tr>
+          ${receivablesData.pendingOrders.map((o) => `
+            <tr>
+              <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+              <td>#${o.id.slice(-4)}</td>
+              <td>${o.customerName}</td>
+              <td>R$ ${o.total.toFixed(2)}</td>
+              <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+              <td>R$ ${(o.total - (o.amountPaid || 0)).toFixed(2)}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="3">TOTAL</td>
+            <td>R$ ${receivablesData.pendingOrders.reduce((acc, o) => acc + o.total, 0).toFixed(2)}</td>
+            <td>R$ ${receivablesData.pendingOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}</td>
+            <td>R$ ${receivablesData.totalPending.toFixed(2)}</td>
+          </tr>
+        </table>
+      `;
     } else if (reportType === "cliente" && customerSearch && customerOrders.length > 0) {
       const totalCompras = customerOrders.reduce((acc, o) => acc + o.total, 0);
       const totalPago = customerOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0);
@@ -1605,7 +1673,13 @@ export default function Relatorios() {
             </div>
 
             <Card className="p-4">
-              <h3 className="font-semibold mb-3">Clientes com Pendências</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">Clientes com Pendências</h3>
+                <Button onClick={() => handlePrint("inadimplencia-clientes")} variant="outline" size="sm" className="gap-1">
+                  <Printer className="h-3.5 w-3.5" />
+                  Imprimir
+                </Button>
+              </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -1651,7 +1725,13 @@ export default function Relatorios() {
             </Card>
 
             <Card className="p-4">
-              <h3 className="font-semibold mb-3">Detalhamento de Pendências</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">Detalhamento de Pendências</h3>
+                <Button onClick={() => handlePrint("inadimplencia-detalhes")} variant="outline" size="sm" className="gap-1">
+                  <Printer className="h-3.5 w-3.5" />
+                  Imprimir
+                </Button>
+              </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
