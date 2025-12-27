@@ -1831,8 +1831,7 @@ export default function Vendas() {
                           onSelect={(d) => {
                             if (!d) return;
                             setPaymentDate(d);
-                            // Mantém o calendário aberto após selecionar (evita fechar/"limpar" em alguns browsers)
-                            requestAnimationFrame(() => setPaymentDatePopoverOpen(true));
+                            setPaymentDatePopoverOpen(false);
                           }}
                           initialFocus
                           className="pointer-events-auto"
@@ -1922,7 +1921,7 @@ export default function Vendas() {
                                       next[index] = d;
                                       return next;
                                     });
-                                    requestAnimationFrame(() => setInstallmentPopoverOpenIndex(index));
+                                    setInstallmentPopoverOpenIndex(null);
                                   }}
                                   initialFocus
                                   className="pointer-events-auto"
