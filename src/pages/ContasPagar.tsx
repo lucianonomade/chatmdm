@@ -996,6 +996,20 @@ export default function ContasPagar() {
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditPurchaseInstallments(group.installments);
+                                  setDeletePurchaseConfirmOpen(true);
+                                }}
+                                title="Excluir compra"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                title="Ver parcelas"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
