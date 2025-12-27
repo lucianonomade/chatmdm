@@ -8,10 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
 import { useSupabaseFixedExpenses } from "@/hooks/useSupabaseFixedExpenses";
+import { useSupabasePendingInstallments } from "@/hooks/useSupabasePendingInstallments";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { escapeHtml, sanitizeUrl } from "@/lib/printUtils";
 import { ServiceOrder } from "@/lib/types";
-import { ClipboardList, DollarSign, Wallet, CheckCircle2, Clock, ChevronDown, Printer } from "lucide-react";
+import { ClipboardList, DollarSign, Wallet, CheckCircle2, Clock, ChevronDown, Printer, AlertTriangle } from "lucide-react";
 
 interface DailyTasksDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
   const navigate = useNavigate();
   const { orders } = useSupabaseOrders();
   const { fixedExpenses } = useSupabaseFixedExpenses();
+  const { pendingInstallments } = useSupabasePendingInstallments();
   const { settings: companySettings } = useSyncedCompanySettings();
   const { authUser } = useAuth();
 
@@ -38,9 +40,16 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
   );
 
   const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
   const currentDay = today.getDate();
   const pendingFixedExpenses = fixedExpenses.filter(fe => fe.active && fe.dueDay >= currentDay);
-  const totalToPay = pendingFixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalFixedExpenses = pendingFixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+
+  // Get overdue and due today installments
+  const overdueInstallments = pendingInstallments.filter(i => i.dueDate <= todayStr);
+  const totalInstallments = overdueInstallments.reduce((acc, curr) => acc + curr.amount, 0);
+  
+  const totalToPay = totalFixedExpenses + totalInstallments;
 
   const handleNavigate = (path: string) => {
     onOpenChange(false);
@@ -348,7 +357,7 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
               </CardContent>
             </Card>
 
-            {/* Fixed Expenses - only for admin/manager */}
+            {/* Fixed Expenses and Installments - only for admin/manager */}
             {authUser?.role !== 'seller' && (
               <Card className="border-destructive/30 bg-destructive/5">
                 <CardHeader className="py-1.5 px-2">
@@ -363,13 +372,36 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-2 pb-2">
-                  {pendingFixedExpenses.length === 0 ? (
+                  {pendingFixedExpenses.length === 0 && overdueInstallments.length === 0 ? (
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5 py-1">
                       <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Todas as contas pagas
                     </p>
                   ) : (
                     <div className="space-y-1">
-                      {pendingFixedExpenses.slice(0, 3).map(expense => (
+                      {/* Overdue Installments */}
+                      {overdueInstallments.slice(0, 2).map(installment => (
+                        <div 
+                          key={installment.id} 
+                          className="flex items-center justify-between p-1.5 rounded bg-destructive/10 hover:bg-destructive/20 cursor-pointer"
+                          onClick={() => handleNavigate('/contas-pagar')}
+                        >
+                          <div className="flex-1 min-w-0 mr-2">
+                            <p className="text-xs font-medium truncate flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3 text-destructive" />
+                              {installment.description}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              Parcela {installment.installmentNumber}/{installment.totalInstallments} - Venc. {new Date(installment.dueDate + 'T12:00:00').toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span className="text-xs font-semibold text-destructive whitespace-nowrap shrink-0">
+                            R$ {installment.amount.toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
+                      
+                      {/* Fixed Expenses */}
+                      {pendingFixedExpenses.slice(0, overdueInstallments.length >= 2 ? 1 : 3 - overdueInstallments.length).map(expense => (
                         <div 
                           key={expense.id} 
                           className="flex items-center justify-between p-1.5 rounded bg-background/60 hover:bg-background"
@@ -383,9 +415,10 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                           </span>
                         </div>
                       ))}
-                      {pendingFixedExpenses.length > 3 && (
+                      
+                      {(pendingFixedExpenses.length + overdueInstallments.length) > 3 && (
                         <p className="text-[10px] text-muted-foreground text-center py-0.5">
-                          +{pendingFixedExpenses.length - 3} mais
+                          +{(pendingFixedExpenses.length + overdueInstallments.length) - 3} mais
                         </p>
                       )}
                     </div>
@@ -394,9 +427,9 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                     variant="outline" 
                     size="sm" 
                     className="w-full mt-1.5 text-destructive hover:text-destructive h-7 text-xs"
-                    onClick={() => handleNavigate('/caixa')}
+                    onClick={() => handleNavigate('/contas-pagar')}
                   >
-                    Ver Caixa
+                    Ver Contas a Pagar
                   </Button>
                 </CardContent>
               </Card>
