@@ -194,19 +194,45 @@ export function useSupabasePendingInstallments() {
       supplierName?: string;
       category?: string;
       notes?: string;
+      installmentUpdates?: Array<{
+        id: string;
+        amount?: number;
+        dueDate?: string;
+      }>;
     }) => {
+      // Update common fields for all installments
       const updateData: Record<string, unknown> = {};
       if (data.description !== undefined) updateData.description = data.description;
       if (data.supplierName !== undefined) updateData.supplier_name = data.supplierName;
       if (data.category !== undefined) updateData.category = data.category;
       if (data.notes !== undefined) updateData.notes = data.notes;
 
-      const { error } = await supabase
-        .from('pending_installments')
-        .update(updateData)
-        .in('id', data.installmentIds);
-      
-      if (error) throw error;
+      if (Object.keys(updateData).length > 0) {
+        const { error } = await supabase
+          .from('pending_installments')
+          .update(updateData)
+          .in('id', data.installmentIds);
+        
+        if (error) throw error;
+      }
+
+      // Update individual installment amounts and dates
+      if (data.installmentUpdates && data.installmentUpdates.length > 0) {
+        for (const update of data.installmentUpdates) {
+          const individualUpdate: Record<string, unknown> = {};
+          if (update.amount !== undefined) individualUpdate.amount = update.amount;
+          if (update.dueDate !== undefined) individualUpdate.due_date = update.dueDate;
+
+          if (Object.keys(individualUpdate).length > 0) {
+            const { error } = await supabase
+              .from('pending_installments')
+              .update(individualUpdate)
+              .eq('id', update.id);
+            
+            if (error) throw error;
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pending_installments'] });
@@ -215,6 +241,25 @@ export function useSupabasePendingInstallments() {
     onError: (error) => {
       console.error('Error updating purchase:', error);
       toast.error("Erro ao atualizar compra");
+    },
+  });
+
+  const deletePurchase = useMutation({
+    mutationFn: async (installmentIds: string[]) => {
+      const { error } = await supabase
+        .from('pending_installments')
+        .delete()
+        .in('id', installmentIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending_installments'] });
+      toast.success("Compra excluída!");
+    },
+    onError: (error) => {
+      console.error('Error deleting purchase:', error);
+      toast.error("Erro ao excluir compra");
     },
   });
 
@@ -229,9 +274,10 @@ export function useSupabasePendingInstallments() {
     deleteInstallment: deleteInstallment.mutate,
     updateInstallment: updateInstallment.mutate,
     updatePurchase: updatePurchase.mutate,
+    deletePurchase: deletePurchase.mutate,
     isAdding: addInstallments.isPending,
     isPaying: payInstallment.isPending,
-    isDeleting: deleteInstallment.isPending,
+    isDeleting: deleteInstallment.isPending || deletePurchase.isPending,
     isUpdating: updateInstallment.isPending || updatePurchase.isPending,
   };
 }

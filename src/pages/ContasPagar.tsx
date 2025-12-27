@@ -78,7 +78,7 @@ export default function ContasPagar() {
   const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense } = useSupabaseExpenses();
   const { orders, isLoading: ordersLoading } = useSupabaseOrders();
   const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense, isLoading: fixedLoading } = useSupabaseFixedExpenses();
-  const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase } = useSupabasePendingInstallments();
+  const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, deletePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase, isDeleting: isDeletingPurchase } = useSupabasePendingInstallments();
   const { authUser } = useAuth();
   const { settings: companySettings } = useSyncedCompanySettings();
   
@@ -118,6 +118,9 @@ export default function ContasPagar() {
   const [editPurchaseSupplier, setEditPurchaseSupplier] = useState("");
   const [editPurchaseCategory, setEditPurchaseCategory] = useState("");
   const [editPurchaseNotes, setEditPurchaseNotes] = useState("");
+  const [editInstallmentAmounts, setEditInstallmentAmounts] = useState<Record<string, string>>({});
+  const [editInstallmentDates, setEditInstallmentDates] = useState<Record<string, string>>({});
+  const [deletePurchaseConfirmOpen, setDeletePurchaseConfirmOpen] = useState(false);
 
   // Payment dialog state (for partial payments)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -272,11 +275,22 @@ export default function ContasPagar() {
   // Open edit purchase dialog
   const handleEditPurchase = (installments: PendingInstallment[]) => {
     if (installments.length === 0) return;
-    setEditPurchaseInstallments(installments);
-    setEditPurchaseDescription(installments[0].description);
-    setEditPurchaseSupplier(installments[0].supplierName || "");
-    setEditPurchaseCategory(installments[0].category || "");
-    setEditPurchaseNotes(installments[0].notes || "");
+    const sortedInstallments = [...installments].sort((a, b) => a.installmentNumber - b.installmentNumber);
+    setEditPurchaseInstallments(sortedInstallments);
+    setEditPurchaseDescription(sortedInstallments[0].description);
+    setEditPurchaseSupplier(sortedInstallments[0].supplierName || "");
+    setEditPurchaseCategory(sortedInstallments[0].category || "");
+    setEditPurchaseNotes(sortedInstallments[0].notes || "");
+    
+    // Initialize amounts and dates
+    const amounts: Record<string, string> = {};
+    const dates: Record<string, string> = {};
+    sortedInstallments.forEach(i => {
+      amounts[i.id] = i.amount.toFixed(2);
+      dates[i.id] = i.dueDate;
+    });
+    setEditInstallmentAmounts(amounts);
+    setEditInstallmentDates(dates);
     setEditPurchaseOpen(true);
   };
 
@@ -284,14 +298,34 @@ export default function ContasPagar() {
   const handleSaveEditPurchase = () => {
     if (!editPurchaseDescription.trim()) return;
     
+    // Build installment updates
+    const installmentUpdates = editPurchaseInstallments.map(i => {
+      const newAmount = parseFloat(editInstallmentAmounts[i.id] || "0");
+      const newDate = editInstallmentDates[i.id] || i.dueDate;
+      return {
+        id: i.id,
+        amount: newAmount !== i.amount ? newAmount : undefined,
+        dueDate: newDate !== i.dueDate ? newDate : undefined,
+      };
+    }).filter(u => u.amount !== undefined || u.dueDate !== undefined);
+
     updatePurchase({
       installmentIds: editPurchaseInstallments.map(i => i.id),
       description: editPurchaseDescription.trim(),
       supplierName: editPurchaseSupplier.trim() || undefined,
       category: editPurchaseCategory.trim() || undefined,
       notes: editPurchaseNotes.trim() || undefined,
+      installmentUpdates: installmentUpdates.length > 0 ? installmentUpdates : undefined,
     });
     
+    setEditPurchaseOpen(false);
+  };
+
+  // Delete purchase
+  const handleDeletePurchase = () => {
+    if (editPurchaseInstallments.length === 0) return;
+    deletePurchase(editPurchaseInstallments.map(i => i.id));
+    setDeletePurchaseConfirmOpen(false);
     setEditPurchaseOpen(false);
   };
 
@@ -1833,7 +1867,7 @@ export default function ContasPagar() {
 
         {/* Edit Purchase Dialog */}
         <Dialog open={editPurchaseOpen} onOpenChange={setEditPurchaseOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Edit2 className="h-5 w-5 text-primary" />
@@ -1841,52 +1875,107 @@ export default function ContasPagar() {
               </DialogTitle>
             </DialogHeader>
             
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-description">Descrição *</Label>
-                <Input
-                  id="edit-description"
-                  value={editPurchaseDescription}
-                  onChange={(e) => setEditPurchaseDescription(e.target.value)}
-                  placeholder="Descrição da compra"
-                />
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="edit-description">Descrição *</Label>
+                  <Input
+                    id="edit-description"
+                    value={editPurchaseDescription}
+                    onChange={(e) => setEditPurchaseDescription(e.target.value)}
+                    placeholder="Descrição da compra"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-supplier">Fornecedor</Label>
+                  <Input
+                    id="edit-supplier"
+                    value={editPurchaseSupplier}
+                    onChange={(e) => setEditPurchaseSupplier(e.target.value)}
+                    placeholder="Nome do fornecedor"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-category">Categoria</Label>
+                  <Input
+                    id="edit-category"
+                    value={editPurchaseCategory}
+                    onChange={(e) => setEditPurchaseCategory(e.target.value)}
+                    placeholder="Categoria"
+                  />
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="edit-notes">Observações</Label>
+                  <Input
+                    id="edit-notes"
+                    value={editPurchaseNotes}
+                    onChange={(e) => setEditPurchaseNotes(e.target.value)}
+                    placeholder="Observações"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-supplier">Fornecedor</Label>
-                <Input
-                  id="edit-supplier"
-                  value={editPurchaseSupplier}
-                  onChange={(e) => setEditPurchaseSupplier(e.target.value)}
-                  placeholder="Nome do fornecedor"
-                />
+              {/* Installments section */}
+              <div className="space-y-2 border-t pt-3">
+                <Label className="text-sm font-semibold">Parcelas ({editPurchaseInstallments.length})</Label>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {editPurchaseInstallments.map((installment) => (
+                    <div 
+                      key={installment.id}
+                      className="flex items-center gap-2 p-2 rounded-lg bg-muted/50"
+                    >
+                      <Badge variant="outline" className="shrink-0">
+                        {installment.installmentNumber}/{installment.totalInstallments}
+                      </Badge>
+                      <div className="flex-1 grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Valor (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={editInstallmentAmounts[installment.id] || ""}
+                            onChange={(e) => setEditInstallmentAmounts(prev => ({
+                              ...prev,
+                              [installment.id]: e.target.value
+                            }))}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Vencimento</Label>
+                          <Input
+                            type="date"
+                            value={editInstallmentDates[installment.id] || ""}
+                            onChange={(e) => setEditInstallmentDates(prev => ({
+                              ...prev,
+                              [installment.id]: e.target.value
+                            }))}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-category">Categoria</Label>
-                <Input
-                  id="edit-category"
-                  value={editPurchaseCategory}
-                  onChange={(e) => setEditPurchaseCategory(e.target.value)}
-                  placeholder="Categoria"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-notes">Observações</Label>
-                <Input
-                  id="edit-notes"
-                  value={editPurchaseNotes}
-                  onChange={(e) => setEditPurchaseNotes(e.target.value)}
-                  placeholder="Observações"
-                />
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                * As alterações serão aplicadas em {editPurchaseInstallments.length} parcela{editPurchaseInstallments.length > 1 ? 's' : ''}
-              </p>
-
-              <DialogFooter className="gap-2">
+            <div className="border-t pt-3 space-y-3">
+              <Button 
+                variant="destructive" 
+                className="w-full gap-2"
+                onClick={() => setDeletePurchaseConfirmOpen(true)}
+                disabled={isDeletingPurchase}
+              >
+                <Trash2 className="h-4 w-4" />
+                Excluir Compra
+              </Button>
+              
+              <DialogFooter className="gap-2 sm:gap-2">
                 <Button variant="outline" onClick={() => setEditPurchaseOpen(false)}>
                   Cancelar
                 </Button>
@@ -1900,6 +1989,28 @@ export default function ContasPagar() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Purchase Confirmation */}
+        <AlertDialog open={deletePurchaseConfirmOpen} onOpenChange={setDeletePurchaseConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir Compra</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir esta compra? Todas as {editPurchaseInstallments.length} parcela{editPurchaseInstallments.length > 1 ? 's' : ''} serão removidas. Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeletePurchase} 
+                className="bg-destructive hover:bg-destructive/90"
+                disabled={isDeletingPurchase}
+              >
+                {isDeletingPurchase ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   );
