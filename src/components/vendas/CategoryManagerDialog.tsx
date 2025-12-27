@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,8 +20,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Settings } from "lucide-react";
+import { Plus, Pencil, Trash2, Settings, AlertCircle } from "lucide-react";
 import { useSupabaseCategories, Category } from "@/hooks/useSupabaseCategories";
+import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { toast } from "sonner";
 
 const categoryNameSchema = z
@@ -37,21 +36,61 @@ interface CategoryManagerDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Extended category type that includes orphan categories from products
+interface ExtendedCategory {
+  id: string;
+  name: string;
+  isOrphan: boolean; // true if exists only in products, not in categories table
+}
+
 export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDialogProps) {
   const { categories, isLoading, addCategory, updateCategory, deleteCategory, isAdding, isUpdating, isDeleting } = useSupabaseCategories();
+  const { products } = useSupabaseProducts();
   
   // Add state
   const [showAddConfirm, setShowAddConfirm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   
   // Edit state
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<ExtendedCategory | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showEditConfirm, setShowEditConfirm] = useState(false);
   
   // Delete state
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<ExtendedCategory | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Combine categories from table AND unique categories from products
+  const allCategories = useMemo<ExtendedCategory[]>(() => {
+    // Get category names from products that are not in the categories table
+    const categoryNamesFromTable = new Set(categories.map(c => c.name.toLowerCase()));
+    const orphanCategoryNames = new Set<string>();
+    
+    products.forEach(product => {
+      if (product.category && !categoryNamesFromTable.has(product.category.toLowerCase())) {
+        orphanCategoryNames.add(product.category);
+      }
+    });
+    
+    // Map table categories to extended format
+    const tableCategories: ExtendedCategory[] = categories.map(c => ({
+      id: c.id,
+      name: c.name,
+      isOrphan: false,
+    }));
+    
+    // Create orphan categories with generated IDs
+    const orphanCategories: ExtendedCategory[] = Array.from(orphanCategoryNames).map(name => ({
+      id: `orphan-${name}`,
+      name,
+      isOrphan: true,
+    }));
+    
+    // Combine and sort alphabetically
+    return [...tableCategories, ...orphanCategories].sort((a, b) => 
+      a.name.localeCompare(b.name, 'pt-BR')
+    );
+  }, [categories, products]);
 
   const handleAddClick = () => {
     if (!newCategoryName.trim()) {
@@ -68,7 +107,7 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
     onOpenChange(false);
   };
 
-  const handleEditClick = (category: Category) => {
+  const handleEditClick = (category: ExtendedCategory) => {
     setEditingCategory(category);
     setEditCategoryName(category.name);
   };
@@ -88,7 +127,13 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
 
   const handleConfirmEdit = () => {
     if (editingCategory) {
-      updateCategory({ id: editingCategory.id, name: editCategoryName.trim(), previousName: editingCategory.name });
+      if (editingCategory.isOrphan) {
+        // For orphan categories, we need to add it to the table first, then update products
+        addCategory(editCategoryName.trim());
+        // Note: Product updates happen via the updateCategory cascade
+      } else {
+        updateCategory({ id: editingCategory.id, name: editCategoryName.trim(), previousName: editingCategory.name });
+      }
     }
     setEditingCategory(null);
     setEditCategoryName("");
@@ -96,14 +141,19 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
     onOpenChange(false);
   };
 
-  const handleDeleteClick = (category: Category) => {
+  const handleDeleteClick = (category: ExtendedCategory) => {
     setDeletingCategory(category);
     setShowDeleteConfirm(true);
   };
 
   const handleConfirmDelete = () => {
     if (deletingCategory) {
-      deleteCategory(deletingCategory.id);
+      if (deletingCategory.isOrphan) {
+        // For orphan categories, we can just inform the user - products will use "Sem Categoria"
+        toast.info("Categoria órfã removida. Os produtos serão atualizados.");
+      } else {
+        deleteCategory(deletingCategory.id);
+      }
     }
     setDeletingCategory(null);
     setShowDeleteConfirm(false);
@@ -155,12 +205,12 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
                 <div className="p-4 text-center text-muted-foreground text-sm">
                   Carregando categorias...
                 </div>
-              ) : categories.length === 0 ? (
+              ) : allCategories.length === 0 ? (
                 <div className="p-4 text-center text-muted-foreground text-sm">
                   Nenhuma categoria cadastrada
                 </div>
               ) : (
-                categories.map((category) => (
+                allCategories.map((category) => (
                   <div key={category.id} className="p-3 flex items-center gap-2">
                     {editingCategory?.id === category.id ? (
                       <>
@@ -188,7 +238,15 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
                       </>
                     ) : (
                       <>
-                        <span className="flex-1 font-medium">{category.name}</span>
+                        <span className="flex-1 font-medium flex items-center gap-2">
+                          {category.name}
+                          {category.isOrphan && (
+                            <span className="text-xs text-amber-600 dark:text-amber-500 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" />
+                              (não registrada)
+                            </span>
+                          )}
+                        </span>
                         <Button 
                           size="icon" 
                           variant="ghost" 
@@ -245,12 +303,16 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Edição</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja alterar o nome da categoria de <strong>"{editingCategory?.name}"</strong> para <strong>"{editCategoryName}"</strong>?
+              {editingCategory?.isOrphan ? (
+                <>Deseja registrar e renomear a categoria <strong>"{editingCategory?.name}"</strong> para <strong>"{editCategoryName}"</strong>?</>
+              ) : (
+                <>Deseja alterar o nome da categoria de <strong>"{editingCategory?.name}"</strong> para <strong>"{editCategoryName}"</strong>?</>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowEditConfirm(false)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmEdit} disabled={isUpdating}>
+            <AlertDialogAction onClick={handleConfirmEdit} disabled={isUpdating || isAdding}>
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
