@@ -22,6 +22,17 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Search,
   Truck,
@@ -36,10 +47,15 @@ import {
   ShoppingCart,
   Eye,
   Calendar,
+  CalendarDays,
+  Plus,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseFixedExpenses, FixedExpense } from "@/hooks/useSupabaseFixedExpenses";
 import { useAuth } from "@/hooks/useAuth";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
@@ -59,6 +75,7 @@ export default function ContasPagar() {
   const { suppliers, isLoading: suppliersLoading } = useSupabaseSuppliers();
   const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading } = useSupabaseExpenses();
   const { orders, isLoading: ordersLoading } = useSupabaseOrders();
+  const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense, isLoading: fixedLoading } = useSupabaseFixedExpenses();
   const { authUser } = useAuth();
   const { settings: companySettings } = useSyncedCompanySettings();
   
@@ -70,8 +87,18 @@ export default function ContasPagar() {
   const [sellerDetailsOpen, setSellerDetailsOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  
+  // Fixed expense form state
+  const [fixedExpenseOpen, setFixedExpenseOpen] = useState(false);
+  const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
+  const [fixedExpenseName, setFixedExpenseName] = useState("");
+  const [fixedExpenseAmount, setFixedExpenseAmount] = useState("");
+  const [fixedExpenseDueDay, setFixedExpenseDueDay] = useState("1");
+  const [fixedExpenseCategory, setFixedExpenseCategory] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
 
-  const isLoading = suppliersLoading || expensesLoading || ordersLoading;
+  const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading;
 
   const usesCommission = companySettings?.usesCommission || false;
   const commissionPercentage = companySettings?.commissionPercentage || 0;
@@ -172,6 +199,76 @@ export default function ContasPagar() {
   const handleViewOrderDetails = (order: ServiceOrder) => {
     setSelectedOrder(order);
     setOrderDetailsOpen(true);
+  };
+
+  // Fixed Expense Handlers
+  const resetFixedExpenseForm = () => {
+    setFixedExpenseName("");
+    setFixedExpenseAmount("");
+    setFixedExpenseDueDay("1");
+    setFixedExpenseCategory("");
+    setEditingFixedExpense(null);
+    setFixedExpenseOpen(false);
+  };
+
+  const handleOpenFixedExpenseForm = (expense?: FixedExpense) => {
+    if (expense) {
+      setEditingFixedExpense(expense);
+      setFixedExpenseName(expense.name);
+      setFixedExpenseAmount(expense.amount.toString());
+      setFixedExpenseDueDay(expense.dueDay.toString());
+      setFixedExpenseCategory(expense.category);
+    } else {
+      resetFixedExpenseForm();
+    }
+    setFixedExpenseOpen(true);
+  };
+
+  const handleSaveFixedExpense = () => {
+    const amount = parseFloat(fixedExpenseAmount);
+    const dueDay = parseInt(fixedExpenseDueDay);
+
+    if (!fixedExpenseName.trim()) {
+      return;
+    }
+    if (!amount || amount <= 0) {
+      return;
+    }
+    if (!dueDay || dueDay < 1 || dueDay > 31) {
+      return;
+    }
+
+    if (editingFixedExpense) {
+      updateFixedExpense({
+        id: editingFixedExpense.id,
+        name: fixedExpenseName,
+        amount,
+        dueDay,
+        category: fixedExpenseCategory || 'Geral',
+        active: editingFixedExpense.active,
+      });
+    } else {
+      addFixedExpense({
+        name: fixedExpenseName,
+        amount,
+        dueDay,
+        category: fixedExpenseCategory || 'Geral',
+        active: true,
+      });
+    }
+    resetFixedExpenseForm();
+  };
+
+  const handleDeleteFixedExpense = () => {
+    if (expenseToDelete) {
+      deleteFixedExpense(expenseToDelete);
+      setExpenseToDelete(null);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
+  const handleToggleFixedExpense = (id: string, active: boolean) => {
+    updateFixedExpense({ id, active });
   };
 
   const handlePrint = () => {
@@ -372,10 +469,14 @@ export default function ContasPagar() {
 
         {/* Tabs */}
         <Tabs defaultValue="despesas">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="despesas" className="gap-2">
               <DollarSign className="h-4 w-4" />
               Todas Despesas
+            </TabsTrigger>
+            <TabsTrigger value="gastos-fixos" className="gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Gastos Fixos
             </TabsTrigger>
             <TabsTrigger value="fornecedores" className="gap-2">
               <Truck className="h-4 w-4" />
@@ -470,6 +571,122 @@ export default function ContasPagar() {
                   </span>
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* Fixed Expenses Tab */}
+          <TabsContent value="gastos-fixos">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold">Gastos Fixos Mensais</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Total mensal: R$ {totalFixedExpenses.toFixed(2)}
+                  </p>
+                </div>
+                <Button onClick={() => handleOpenFixedExpenseForm()} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Novo Gasto Fixo
+                </Button>
+              </div>
+              
+              <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Nome</TableHead>
+                      <TableHead className="font-semibold">Categoria</TableHead>
+                      <TableHead className="font-semibold text-center">Dia Venc.</TableHead>
+                      <TableHead className="font-semibold text-right">Valor</TableHead>
+                      <TableHead className="font-semibold text-center">Ativo</TableHead>
+                      <TableHead className="font-semibold text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      <TableSkeleton />
+                    ) : fixedExpenses.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                              <CalendarDays className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">Nenhum gasto fixo cadastrado</p>
+                              <p className="text-sm text-muted-foreground">
+                                Cadastre aluguel, contas fixas e outras despesas mensais
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      fixedExpenses.map((expense) => (
+                        <TableRow 
+                          key={expense.id}
+                          className={`hover:bg-hover/10 transition-all ${!expense.active ? 'opacity-50' : ''}`}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <CalendarDays className="h-5 w-5 text-primary" />
+                              </div>
+                              <span className="font-medium">{expense.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{expense.category}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary">Dia {expense.dueDay}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-warning">
+                            R$ {expense.amount.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Switch
+                              checked={expense.active}
+                              onCheckedChange={(checked) => handleToggleFixedExpense(expense.id, checked)}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleOpenFixedExpenseForm(expense)}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => {
+                                  setExpenseToDelete(expense.id);
+                                  setDeleteConfirmOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                {fixedExpenses.length > 0 && (
+                  <div className="p-4 border-t bg-muted/30 flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {fixedExpenses.filter(e => e.active).length} gastos ativos de {fixedExpenses.length} total
+                    </span>
+                    <span className="font-bold text-lg">
+                      Total Ativo: R$ {totalFixedExpenses.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
 
@@ -883,6 +1100,93 @@ export default function ContasPagar() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Fixed Expense Form Dialog */}
+        <Dialog open={fixedExpenseOpen} onOpenChange={setFixedExpenseOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {editingFixedExpense ? "Editar Gasto Fixo" : "Novo Gasto Fixo"}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fixedExpenseName">Nome *</Label>
+                <Input
+                  id="fixedExpenseName"
+                  placeholder="Ex: Aluguel, Internet, Luz..."
+                  value={fixedExpenseName}
+                  onChange={(e) => setFixedExpenseName(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fixedExpenseAmount">Valor (R$) *</Label>
+                  <Input
+                    id="fixedExpenseAmount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0,00"
+                    value={fixedExpenseAmount}
+                    onChange={(e) => setFixedExpenseAmount(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fixedExpenseDueDay">Dia Vencimento *</Label>
+                  <Input
+                    id="fixedExpenseDueDay"
+                    type="number"
+                    min="1"
+                    max="31"
+                    value={fixedExpenseDueDay}
+                    onChange={(e) => setFixedExpenseDueDay(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fixedExpenseCategory">Categoria</Label>
+                <Input
+                  id="fixedExpenseCategory"
+                  placeholder="Ex: Aluguel, Serviços, Utilidades..."
+                  value={fixedExpenseCategory}
+                  onChange={(e) => setFixedExpenseCategory(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={resetFixedExpenseForm}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveFixedExpense}>
+                {editingFixedExpense ? "Salvar" : "Cadastrar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este gasto fixo? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setExpenseToDelete(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteFixedExpense} className="bg-destructive hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   );

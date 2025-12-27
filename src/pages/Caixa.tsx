@@ -14,6 +14,7 @@ import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
 import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
+import { useSupabaseFixedExpenses } from "@/hooks/useSupabaseFixedExpenses";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,8 @@ export default function Caixa() {
   const [isOpen, setIsOpen] = useState(true);
   const { orders } = useSupabaseOrders();
   const { expenses, addExpense: addSupabaseExpense, supplierBalances, getSupplierBalance } = useSupabaseExpenses();
-  const { suppliers, fixedExpenses, addFixedExpense, updateFixedExpense, removeFixedExpense, applyFixedExpenses, addExpense: addLocalExpense } = useStore();
+  const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense } = useSupabaseFixedExpenses();
+  const { suppliers, addExpense: addLocalExpense } = useStore();
   const { authUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [suprimentoValue, setSuprimentoValue] = useState("");
@@ -44,7 +46,7 @@ export default function Caixa() {
   const [fixedExpenseAmount, setFixedExpenseAmount] = useState("");
   const [fixedExpenseDueDay, setFixedExpenseDueDay] = useState("1");
   const [fixedExpenseCategory, setFixedExpenseCategory] = useState("");
-  const [editingFixedExpense, setEditingFixedExpense] = useState<string | null>(null);
+  const [editingFixedExpenseId, setEditingFixedExpenseId] = useState<string | null>(null);
 
   // Order details dialog state
   const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null);
@@ -58,10 +60,6 @@ export default function Caixa() {
   const [comissoesDialogOpen, setComissoesDialogOpen] = useState(false);
   
   const { settings: companySettings } = useSyncedCompanySettings();
-  // Apply fixed expenses on mount
-  useEffect(() => {
-    applyFixedExpenses();
-  }, []);
 
   // Access Control: Sellers cannot access Cash Register
   if (authUser?.role === 'seller') {
@@ -227,14 +225,14 @@ export default function Caixa() {
       return;
     }
 
-    if (editingFixedExpense) {
-      updateFixedExpense(editingFixedExpense, {
+    if (editingFixedExpenseId) {
+      updateFixedExpense({
+        id: editingFixedExpenseId,
         name: fixedExpenseName,
         amount,
         dueDay,
         category: fixedExpenseCategory || 'Geral'
       });
-      toast.success("Gasto fixo atualizado");
     } else {
       addFixedExpense({
         name: fixedExpenseName,
@@ -243,7 +241,6 @@ export default function Caixa() {
         category: fixedExpenseCategory || 'Geral',
         active: true
       });
-      toast.success("Gasto fixo cadastrado");
     }
 
     resetFixedExpenseForm();
@@ -254,7 +251,7 @@ export default function Caixa() {
     setFixedExpenseAmount("");
     setFixedExpenseDueDay("1");
     setFixedExpenseCategory("");
-    setEditingFixedExpense(null);
+    setEditingFixedExpenseId(null);
     setFixedExpenseOpen(false);
   };
 
@@ -263,22 +260,17 @@ export default function Caixa() {
     setFixedExpenseAmount(expense.amount.toString());
     setFixedExpenseDueDay(expense.dueDay.toString());
     setFixedExpenseCategory(expense.category);
-    setEditingFixedExpense(expense.id);
+    setEditingFixedExpenseId(expense.id);
     setFixedExpenseOpen(true);
   };
 
   const handleDeleteFixedExpense = (id: string) => {
-    removeFixedExpense(id);
-    toast.success("Gasto fixo removido");
+    deleteFixedExpense(id);
   };
 
   const handleToggleFixedExpense = (id: string, active: boolean) => {
-    updateFixedExpense(id, { active });
-    toast.success(active ? "Gasto fixo ativado" : "Gasto fixo desativado");
+    updateFixedExpense({ id, active });
   };
-
-  // Calculate total fixed expenses
-  const totalFixedExpenses = fixedExpenses.filter(e => e.active).reduce((acc, e) => acc + e.amount, 0);
 
   const filteredTransactions = transactions.filter(t =>
     t.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -622,7 +614,7 @@ export default function Caixa() {
                   </DialogTrigger>
                   <DialogContent aria-describedby={undefined}>
                     <DialogHeader>
-                      <DialogTitle>{editingFixedExpense ? 'Editar Gasto Fixo' : 'Cadastrar Gasto Fixo'}</DialogTitle>
+                      <DialogTitle>{editingFixedExpenseId ? 'Editar Gasto Fixo' : 'Cadastrar Gasto Fixo'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
@@ -664,7 +656,7 @@ export default function Caixa() {
                         />
                       </div>
                       <Button onClick={handleAddFixedExpense} className="w-full">
-                        {editingFixedExpense ? 'Salvar Alterações' : 'Cadastrar Gasto'}
+                        {editingFixedExpenseId ? 'Salvar Alterações' : 'Cadastrar Gasto'}
                       </Button>
                     </div>
                   </DialogContent>
