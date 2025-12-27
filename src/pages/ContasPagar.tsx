@@ -76,7 +76,7 @@ interface SellerCommission {
 
 export default function ContasPagar() {
   const { suppliers, isLoading: suppliersLoading } = useSupabaseSuppliers();
-  const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense, deleteExpense, isDeleting: isDeletingExpense } = useSupabaseExpenses();
+  const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense, updateExpense, deleteExpense, isUpdating: isUpdatingExpense, isDeleting: isDeletingExpense } = useSupabaseExpenses();
   const { orders, isLoading: ordersLoading } = useSupabaseOrders();
   const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense, isLoading: fixedLoading } = useSupabaseFixedExpenses();
   const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, deletePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase, isDeleting: isDeletingPurchase } = useSupabasePendingInstallments();
@@ -148,6 +148,10 @@ export default function ContasPagar() {
   // Expense delete confirmation state
   const [expenseToDeleteId, setExpenseToDeleteId] = useState<string | null>(null);
   const [deleteExpenseConfirmOpen, setDeleteExpenseConfirmOpen] = useState(false);
+
+  // Expense edit state
+  const [editExpenseOpen, setEditExpenseOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<{id: string; description: string; amount: string; category: string; supplierName: string} | null>(null);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
 
@@ -1101,18 +1105,37 @@ export default function ContasPagar() {
                             R$ {expense.amount.toFixed(2)}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => {
-                                setExpenseToDeleteId(expense.id);
-                                setDeleteExpenseConfirmOpen(true);
-                              }}
-                              title="Excluir despesa"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingExpense({
+                                    id: expense.id,
+                                    description: expense.description.replace(/\s*\[.*\]$/, ''),
+                                    amount: expense.amount.toFixed(2),
+                                    category: expense.category || '',
+                                    supplierName: expense.supplierName || '',
+                                  });
+                                  setEditExpenseOpen(true);
+                                }}
+                                title="Editar despesa"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  setExpenseToDeleteId(expense.id);
+                                  setDeleteExpenseConfirmOpen(true);
+                                }}
+                                title="Excluir despesa"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -2711,6 +2734,81 @@ export default function ContasPagar() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Edit Expense Dialog */}
+        <Dialog open={editExpenseOpen} onOpenChange={setEditExpenseOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Despesa</DialogTitle>
+            </DialogHeader>
+            {editingExpense && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-expense-description">Descrição</Label>
+                  <Input
+                    id="edit-expense-description"
+                    value={editingExpense.description}
+                    onChange={(e) => setEditingExpense({ ...editingExpense, description: e.target.value })}
+                    placeholder="Descrição da despesa"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-expense-amount">Valor (R$)</Label>
+                  <Input
+                    id="edit-expense-amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editingExpense.amount}
+                    onChange={(e) => setEditingExpense({ ...editingExpense, amount: e.target.value })}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-expense-category">Categoria</Label>
+                  <Input
+                    id="edit-expense-category"
+                    value={editingExpense.category}
+                    onChange={(e) => setEditingExpense({ ...editingExpense, category: e.target.value })}
+                    placeholder="Ex: Equipamento, Material, etc."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-expense-supplier">Fornecedor</Label>
+                  <Input
+                    id="edit-expense-supplier"
+                    value={editingExpense.supplierName}
+                    onChange={(e) => setEditingExpense({ ...editingExpense, supplierName: e.target.value })}
+                    placeholder="Nome do fornecedor"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditExpenseOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (editingExpense) {
+                    updateExpense({
+                      id: editingExpense.id,
+                      description: editingExpense.description,
+                      amount: parseFloat(editingExpense.amount) || 0,
+                      category: editingExpense.category,
+                      supplierName: editingExpense.supplierName,
+                    });
+                    setEditExpenseOpen(false);
+                    setEditingExpense(null);
+                  }
+                }}
+                disabled={isUpdatingExpense || !editingExpense?.description.trim()}
+              >
+                {isUpdatingExpense ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );

@@ -87,6 +87,32 @@ export function useSupabaseExpenses() {
     },
   });
 
+  const updateExpense = useMutation({
+    mutationFn: async ({ id, ...expense }: Partial<Expense> & { id: string }) => {
+      const { error } = await supabase
+        .from('expenses')
+        .update({
+          supplier_id: expense.supplierId || null,
+          supplier_name: expense.supplierName,
+          description: expense.description,
+          amount: expense.amount,
+          date: expense.date,
+          category: expense.category,
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast.success("Despesa atualizada!");
+    },
+    onError: (error) => {
+      console.error('Error updating expense:', error);
+      toast.error("Erro ao atualizar despesa");
+    },
+  });
+
   const deleteExpense = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -116,8 +142,10 @@ export function useSupabaseExpenses() {
     getSupplierBalance,
     totalExpenses,
     addExpense: addExpense.mutate,
+    updateExpense: updateExpense.mutate,
     deleteExpense: deleteExpense.mutate,
     isAdding: addExpense.isPending,
+    isUpdating: updateExpense.isPending,
     isDeleting: deleteExpense.isPending,
   };
 }
