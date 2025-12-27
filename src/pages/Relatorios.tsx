@@ -579,6 +579,97 @@ export default function Relatorios() {
           </tr>
         </table>
       `;
+    } else if (reportType === "vendedor-resumo") {
+      // Only seller summary
+      const sellerData = salesData.bySeller.find(s => s.name === vendedor);
+      const sellerTotal = sellerData?.total || 0;
+      const sellerQty = sellerData?.quantidade || 0;
+      const sellerOrders = filteredOrders;
+      const sellerRecebido = sellerOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0);
+      const sellerPendente = sellerTotal - sellerRecebido;
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDEDOR-RESUMO", `RESUMO DE VENDAS - ${vendedor.toUpperCase()}`)}
+        <div class="summary">
+          <div class="summary-item"><span>Vendedor:</span><span>${vendedor}</span></div>
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${sellerTotal.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Recebido:</span><span>R$ ${sellerRecebido.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Pendente:</span><span>R$ ${sellerPendente.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Quantidade de Pedidos:</span><span>${sellerQty}</span></div>
+        </div>
+      `;
+    } else if (reportType === "vendedor-detalhes") {
+      // Only seller details
+      const sellerData = salesData.bySeller.find(s => s.name === vendedor);
+      const sellerTotal = sellerData?.total || 0;
+      const sellerOrders = filteredOrders;
+      const sellerRecebido = sellerOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0);
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDEDOR-DETALHES", `DETALHAMENTO DE VENDAS - ${vendedor.toUpperCase()}`)}
+        <h3>Vendas de ${vendedor}</h3>
+        <table>
+          <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Total</th><th>Pago</th><th>Status</th></tr>
+          ${sellerOrders.map((o) => `
+            <tr>
+              <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+              <td>#${o.id.slice(-4)}</td>
+              <td>${o.customerName}</td>
+              <td>R$ ${o.total.toFixed(2)}</td>
+              <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+              <td>${o.paymentStatus === 'paid' ? 'Pago' : o.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="3">TOTAL</td>
+            <td>R$ ${sellerTotal.toFixed(2)}</td>
+            <td>R$ ${sellerRecebido.toFixed(2)}</td>
+            <td></td>
+          </tr>
+        </table>
+      `;
+    } else if (reportType === "vendedor-completo") {
+      // Seller summary + details
+      const sellerData = salesData.bySeller.find(s => s.name === vendedor);
+      const sellerTotal = sellerData?.total || 0;
+      const sellerQty = sellerData?.quantidade || 0;
+      const sellerOrders = filteredOrders;
+      const sellerRecebido = sellerOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0);
+      const sellerPendente = sellerTotal - sellerRecebido;
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDEDOR-COMPLETO", `RELATÓRIO DE VENDAS - ${vendedor.toUpperCase()}`)}
+        <div class="summary">
+          <div class="summary-item"><span>Vendedor:</span><span>${vendedor}</span></div>
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${sellerTotal.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Recebido:</span><span>R$ ${sellerRecebido.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Pendente:</span><span>R$ ${sellerPendente.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Quantidade de Pedidos:</span><span>${sellerQty}</span></div>
+        </div>
+        <h3>Detalhamento de Vendas</h3>
+        <table>
+          <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Total</th><th>Pago</th><th>Status</th></tr>
+          ${sellerOrders.map((o) => `
+            <tr>
+              <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+              <td>#${o.id.slice(-4)}</td>
+              <td>${o.customerName}</td>
+              <td>R$ ${o.total.toFixed(2)}</td>
+              <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+              <td>${o.paymentStatus === 'paid' ? 'Pago' : o.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="3">TOTAL</td>
+            <td>R$ ${sellerTotal.toFixed(2)}</td>
+            <td>R$ ${sellerRecebido.toFixed(2)}</td>
+            <td></td>
+          </tr>
+        </table>
+      `;
     } else if (reportType === "estoque") {
       content = `
         ${headerStyle}
@@ -1431,10 +1522,26 @@ export default function Relatorios() {
             {/* Seller Sales Table - Shows when a seller is selected */}
             {vendedor !== "todos" && (
               <Card className="p-4 border-2 border-primary/30">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <User className="h-4 w-4 text-primary" />
-                  Vendas de {vendedor} ({filteredOrders.length} pedidos)
-                </h3>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <User className="h-4 w-4 text-primary" />
+                    Vendas de {vendedor} ({filteredOrders.length} pedidos)
+                  </h3>
+                  <div className="flex flex-wrap gap-1">
+                    <Button onClick={() => handlePrint("vendedor-resumo")} variant="outline" size="sm" className="gap-1 h-7 text-xs">
+                      <Printer className="h-3 w-3" />
+                      Resumo
+                    </Button>
+                    <Button onClick={() => handlePrint("vendedor-detalhes")} variant="outline" size="sm" className="gap-1 h-7 text-xs">
+                      <Printer className="h-3 w-3" />
+                      Detalhes
+                    </Button>
+                    <Button onClick={() => handlePrint("vendedor-completo")} variant="default" size="sm" className="gap-1 h-7 text-xs">
+                      <Printer className="h-3 w-3" />
+                      Completo
+                    </Button>
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
