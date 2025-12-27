@@ -371,11 +371,15 @@ export default function ContasPagar() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="fornecedores">
+        <Tabs defaultValue="despesas">
           <TabsList>
+            <TabsTrigger value="despesas" className="gap-2">
+              <DollarSign className="h-4 w-4" />
+              Todas Despesas
+            </TabsTrigger>
             <TabsTrigger value="fornecedores" className="gap-2">
               <Truck className="h-4 w-4" />
-              Fornecedores
+              Por Fornecedor
             </TabsTrigger>
             {usesCommission && (
               <TabsTrigger value="comissoes" className="gap-2">
@@ -384,6 +388,90 @@ export default function ContasPagar() {
               </TabsTrigger>
             )}
           </TabsList>
+
+          {/* All Expenses Tab */}
+          <TabsContent value="despesas">
+            <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Data</TableHead>
+                    <TableHead className="font-semibold">Descrição</TableHead>
+                    <TableHead className="font-semibold">Fornecedor</TableHead>
+                    <TableHead className="font-semibold">Categoria</TableHead>
+                    <TableHead className="font-semibold text-right">Valor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableSkeleton />
+                  ) : expenses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                            <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">Nenhuma despesa registrada</p>
+                            <p className="text-sm text-muted-foreground">
+                              Registre compras pelo PDV para vê-las aqui
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    expenses
+                      .filter(e => 
+                        e.description.toLowerCase().includes(search.toLowerCase()) ||
+                        e.supplierName?.toLowerCase().includes(search.toLowerCase()) ||
+                        e.category?.toLowerCase().includes(search.toLowerCase())
+                      )
+                      .map((expense) => (
+                        <TableRow 
+                          key={expense.id}
+                          className="hover:bg-hover/10 transition-all"
+                        >
+                          <TableCell className="text-muted-foreground">
+                            {expense.date ? format(parseISO(expense.date), "dd/MM/yyyy", { locale: ptBR }) : "-"}
+                          </TableCell>
+                          <TableCell className="font-medium">{expense.description}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {expense.supplierId ? (
+                                <>
+                                  <Truck className="h-4 w-4 text-primary" />
+                                  <span>{expense.supplierName}</span>
+                                </>
+                              ) : (
+                                <span className="text-muted-foreground">Compra Avulsa</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{expense.category || "Outros"}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-warning">
+                            R$ {expense.amount.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
+              {expenses.length > 0 && (
+                <div className="p-4 border-t bg-muted/30 flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Total de {expenses.length} despesas
+                  </span>
+                  <span className="font-bold text-lg">
+                    Total: R$ {expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </TabsContent>
 
           {/* Fornecedores Tab */}
           <TabsContent value="fornecedores">
