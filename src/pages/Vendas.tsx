@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
+import { format, addMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useSearchParams } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +41,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Plus,
   Minus,
@@ -85,6 +88,7 @@ import {
   Shirt,
   Award,
   Calendar,
+  CalendarIcon,
   ClipboardList,
   FileCheck,
   Megaphone,
@@ -193,7 +197,9 @@ export default function Vendas() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'pix' | 'card' | null>(null);
   const [amountPaid, setAmountPaid] = useState<string>("");
   const [installments, setInstallments] = useState<number>(1);
-  
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [installmentDates, setInstallmentDates] = useState<Date[]>([]);
+
   // Receipt state
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
   const [lastSaleTotal, setLastSaleTotal] = useState(0);
@@ -394,6 +400,38 @@ export default function Vendas() {
   }, [searchTerm]);
 
   const cartTotal = cart.reduce((acc, item) => acc + item.total, 0);
+
+  const paidValue = useMemo(() => {
+    const paid = amountPaid === "" ? cartTotal : parseFloat(amountPaid.replace(",", "."));
+    return isNaN(paid) ? cartTotal : paid;
+  }, [amountPaid, cartTotal]);
+
+  const remainingToPay = useMemo(() => {
+    return Math.max(0, cartTotal - paidValue);
+  }, [cartTotal, paidValue]);
+
+  useEffect(() => {
+    if (paymentDialogOpen) {
+      setPaymentDate(new Date());
+    }
+  }, [paymentDialogOpen]);
+
+  useEffect(() => {
+    if (!paymentDialogOpen) return;
+    if (remainingToPay <= 0) {
+      setInstallmentDates([]);
+      return;
+    }
+
+    setInstallmentDates((prev) => {
+      const next = [...prev];
+      const base = new Date();
+      for (let i = 0; i < installments; i++) {
+        next[i] = next[i] ?? addMonths(base, i + 1);
+      }
+      return next.slice(0, installments);
+    });
+  }, [installments, remainingToPay, paymentDialogOpen]);
 
   // Category icon helper
   const getCategoryIcon = (category: string) => {
@@ -1732,60 +1770,124 @@ export default function Vendas() {
                       <Label className="text-xs text-orange-500">Restante a Pagar</Label>
                       <div className="h-11 flex items-center justify-center bg-orange-50 dark:bg-orange-500/10 rounded-lg border border-orange-200 dark:border-orange-500/20">
                         <span className="text-lg font-bold text-orange-500">
-                          R$ {(() => {
-                            const paid = amountPaid === "" ? cartTotal : parseFloat(amountPaid.replace(',', '.'));
-                            const val = isNaN(paid) ? cartTotal : Math.max(0, cartTotal - paid);
-                            return val.toFixed(2);
-                          })()}
+                          R$ {remainingToPay.toFixed(2)}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Parcelamento - só aparece quando cartão selecionado ou quando há restante */}
-                  {(() => {
-                    const paid = amountPaid === "" ? cartTotal : parseFloat(amountPaid.replace(',', '.'));
-                    const remaining = isNaN(paid) ? 0 : Math.max(0, cartTotal - paid);
-                    return remaining > 0 && (
-                      <div className="space-y-2 p-3 bg-orange-50 dark:bg-orange-500/10 rounded-lg border border-orange-200 dark:border-orange-500/20">
-                        <Label className="text-xs text-orange-600 font-medium">Parcelar Restante (R$ {remaining.toFixed(2)})</Label>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setInstallments(Math.max(1, installments - 1))}
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <div className="w-12 h-8 flex items-center justify-center bg-background rounded border font-bold">
-                              {installments}x
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setInstallments(installments + 1)}
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
+                  {/* Data do pagamento */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Data do Pagamento</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal h-11"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {format(paymentDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={paymentDate}
+                          onSelect={(d) => d && setPaymentDate(d)}
+                          initialFocus
+                          className="pointer-events-auto"
+                          locale={ptBR}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Parcelamento - aparece quando há restante */}
+                  {remainingToPay > 0 && (
+                    <div className="space-y-2 p-3 bg-orange-50 dark:bg-orange-500/10 rounded-lg border border-orange-200 dark:border-orange-500/20">
+                      <Label className="text-xs text-orange-600 font-medium">
+                        Parcelar Restante (R$ {remainingToPay.toFixed(2)})
+                      </Label>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setInstallments(Math.max(1, installments - 1))}
+                            disabled={installments <= 1}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <div className="w-12 h-8 flex items-center justify-center bg-background rounded border font-bold">
+                            {installments}x
                           </div>
-                          <div className="flex-1 text-right">
-                            <span className="text-sm text-muted-foreground">Parcela: </span>
-                            <span className="font-bold text-orange-600">R$ {(remaining / installments).toFixed(2)}</span>
-                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setInstallments(Math.min(12, installments + 1))}
+                            disabled={installments >= 12}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
                         </div>
-                        {installments > 1 && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            {installments}x de R$ {(remaining / installments).toFixed(2)} = R$ {remaining.toFixed(2)} restante
-                          </p>
-                        )}
+                        <div className="flex-1 text-right">
+                          <span className="text-sm text-muted-foreground">Parcela: </span>
+                          <span className="font-bold text-orange-600">
+                            R$ {(remainingToPay / installments).toFixed(2)}
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })()}
+
+                      {installments > 1 && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          {installments}x de R$ {(remainingToPay / installments).toFixed(2)} = R$ {remainingToPay.toFixed(2)} restante
+                        </p>
+                      )}
+
+                      {/* Datas das parcelas */}
+                      <div className="space-y-2 pt-1">
+                        <Label className="text-xs text-muted-foreground">Datas das Parcelas</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {installmentDates.map((date, index) => (
+                            <Popover key={index}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="justify-start text-left font-normal h-9 text-xs"
+                                >
+                                  <CalendarIcon className="mr-1.5 h-3 w-3" />
+                                  <span className="font-semibold mr-1">{index + 1}ª</span>
+                                  {format(date, "dd/MM/yyyy", { locale: ptBR })}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={date}
+                                  onSelect={(d) => {
+                                    if (!d) return;
+                                    setInstallmentDates((prev) => {
+                                      const next = [...prev];
+                                      next[index] = d;
+                                      return next;
+                                    });
+                                  }}
+                                  initialFocus
+                                  className="pointer-events-auto"
+                                  locale={ptBR}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Forma de Pagamento */}
                   <div className="space-y-2">
