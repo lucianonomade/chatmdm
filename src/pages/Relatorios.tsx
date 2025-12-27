@@ -408,8 +408,141 @@ export default function Relatorios() {
 
   // Handle print order
   const handlePrintOrder = (type: 'production' | 'receipt' | 'order' | 'quote') => {
-    // Print functionality - could be extended
-    console.log('Print order:', type);
+    if (!selectedOrder || !companySettings) return;
+    
+    // Import dynamically to avoid circular deps, or use the printUtils
+    const printWindow = window.open('', '', `height=600,width=${type === 'receipt' ? 400 : 800}`);
+    if (!printWindow) return;
+
+    const showPrices = type !== 'production';
+    const title = type === 'production' ? 'ORDEM DE PRODUÇÃO' : 
+                  type === 'receipt' ? 'RECIBO' : 
+                  type === 'order' ? 'PEDIDO' : 'ORÇAMENTO';
+
+    const paid = selectedOrder.amountPaid ?? (selectedOrder.paymentStatus === 'paid' ? selectedOrder.total : 0);
+    const remaining = selectedOrder.remainingAmount ?? (selectedOrder.total - paid);
+    const phones = [companySettings.phone, companySettings.phone2].filter(Boolean).join(' | ');
+    
+    const getPaymentMethodLabel = (method: string | null | undefined): string => {
+      const labels: Record<string, string> = { cash: 'Dinheiro', pix: 'PIX', card: 'Cartão' };
+      return method ? labels[method] || method : 'Não informado';
+    };
+
+    let itemsHtml = '';
+    if (type === 'receipt') {
+      selectedOrder.items.forEach((item: any) => {
+        itemsHtml += `
+          <div style="margin-bottom: 8px;">
+            <div style="font-weight: bold;">${item.quantity}x ${item.name || 'Produto'}</div>
+            ${item.variationName ? `<div style="font-size: 0.9em;">${item.variationName}</div>` : ''}
+            ${showPrices ? `<div style="text-align: right;">R$ ${(item.total || 0).toFixed(2)}</div>` : ''}
+          </div>
+        `;
+      });
+    } else {
+      itemsHtml = `<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead><tr>
+          <th style="border-bottom: 1px solid #ddd; padding: 8px; text-align: left; width: 60%;">Item / Detalhes</th>
+          <th style="border-bottom: 1px solid #ddd; padding: 8px; text-align: center; width: 10%;">Qtd</th>
+          ${showPrices ? '<th style="border-bottom: 1px solid #ddd; padding: 8px; text-align: right; width: 15%;">Unit.</th><th style="border-bottom: 1px solid #ddd; padding: 8px; text-align: right; width: 15%;">Total</th>' : ''}
+        </tr></thead><tbody>`;
+      
+      selectedOrder.items.forEach((item: any) => {
+        const unitPrice = (item.total || 0) / (item.quantity || 1);
+        itemsHtml += `
+          <tr>
+            <td style="padding: 8px 8px 20px 8px; border-bottom: 1px solid #ddd;">
+              <div style="font-weight: bold; font-size: 1.2em;">${item.name || 'Produto'}</div>
+              ${item.variationName ? `<div>${item.variationName}</div>` : ''}
+              ${item.dimensions ? `<div style="font-size: 0.9em;">Medidas: ${item.dimensions}</div>` : ''}
+              ${item.finishing ? `<div style="border: 2px solid #333; padding: 8px 12px; margin-top: 8px; font-size: 15px; font-weight: bold; background: #eee; display: inline-block;">ACABAMENTO: ${(item.finishing || '').toUpperCase()}</div>` : ''}
+              ${item.customDescription ? `<div style="border: 2px solid #000; padding: 15px; margin-top: 8px; font-size: 16px; font-weight: bold; background: #f8f9fa;">OBS: ${(item.customDescription || '').toUpperCase()}</div>` : ''}
+            </td>
+            <td style="text-align: center; vertical-align: top; font-size: 1.2em; font-weight: bold; padding: 8px; border-bottom: 1px solid #ddd;">${item.quantity || 1}</td>
+            ${showPrices ? `
+              <td style="text-align: right; vertical-align: top; padding: 8px; border-bottom: 1px solid #ddd;">R$ ${unitPrice.toFixed(2)}</td>
+              <td style="text-align: right; vertical-align: top; padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(item.total || 0).toFixed(2)}</td>
+            ` : ''}
+          </tr>
+        `;
+      });
+      itemsHtml += '</tbody></table>';
+    }
+
+    const totalsHtml = showPrices ? `
+      <div style="margin-top: 20px; text-align: right; font-size: 1.2em; font-weight: bold;">
+        <div>TOTAL: R$ ${selectedOrder.total.toFixed(2)}</div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px dashed #ccc;">
+          <div style="font-size: 0.9em; margin-bottom: 4px;">
+            <strong>Forma de Pagamento:</strong> ${getPaymentMethodLabel(selectedOrder.paymentMethod)}
+          </div>
+          ${paid > 0 ? `<div style="font-size: 0.9em; color: #28a745; margin-top: 4px;"><strong>Valor Pago:</strong> R$ ${paid.toFixed(2)}</div>` : ''}
+          ${remaining > 0 ? `<div style="font-size: 0.9em; color: #dc3545; margin-top: 4px;"><strong>Falta Pagar:</strong> R$ ${remaining.toFixed(2)}</div>` : `<div style="font-size: 0.9em; color: #28a745; margin-top: 4px;"><strong>PAGAMENTO TOTAL REALIZADO</strong></div>`}
+        </div>
+      </div>
+    ` : '';
+
+    const productionFields = type === 'production' ? `
+      <div style="margin-top: 40px; border: 2px solid #000; padding: 10px;">
+        <div style="font-weight: bold; margin-bottom: 40px;">OBSERVAÇÕES DE PRODUÇÃO:</div>
+        <div style="border-bottom: 1px dotted #999; margin-bottom: 20px;"></div>
+        <div style="border-bottom: 1px dotted #999; margin-bottom: 20px;"></div>
+      </div>
+      <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+        <div style="border-top: 1px solid #000; width: 40%; text-align: center; padding-top: 5px;">Visto Produção</div>
+        <div style="border-top: 1px solid #000; width: 40%; text-align: center; padding-top: 5px;">Visto Conferência</div>
+      </div>
+    ` : '';
+
+    const html = `
+      <html>
+        <head>
+          <title>${title} #${selectedOrder.id}</title>
+          <style>
+            body { font-family: 'Courier New', monospace; padding: 20px; font-size: ${type === 'receipt' ? '12px' : '14px'}; max-width: ${type === 'receipt' ? '300px' : '100%'}; margin: 0 auto; }
+            .action-bar { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 10px; }
+            .action-btn { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+            .action-btn.print { background: #22c55e; }
+            .action-btn.close { background: #ef4444; }
+            @media print { .action-bar { display: none !important; } body { margin: 0; padding: 10px; } }
+          </style>
+        </head>
+        <body>
+          <div class="action-bar">
+            <button class="action-btn print" onclick="window.print()">🖨️ Imprimir</button>
+            <button class="action-btn close" onclick="window.close()">✕ Fechar</button>
+          </div>
+          <div style="margin-bottom: 20px; text-align: center;">
+            ${companySettings.logoUrl ? `<img src="${companySettings.logoUrl}" alt="Logo" style="max-height: 60px; max-width: 150px; margin-bottom: 10px;" />` : `<div style="font-weight: bold; font-size: 1.2em;">${companySettings.name || 'Empresa'}</div>`}
+            ${companySettings.cnpj ? `<div style="font-size: 0.9em;">CNPJ: ${companySettings.cnpj}</div>` : ''}
+            <div>${companySettings.address || ''}</div>
+            <div>${phones}</div>
+            <div style="margin-top: 10px; font-weight: bold; font-size: 1.5em;">${title}</div>
+          </div>
+          <div style="padding-bottom: 8px; border-bottom: 1px dashed #000; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <div><strong>Data:</strong> ${new Date(selectedOrder.createdAt).toLocaleString('pt-BR')}</div>
+                <div><strong>Referência:</strong> #${selectedOrder.id}</div>
+                ${type === 'quote' ? '<div style="font-size: 0.8em; margin-top: 5px;">Válido por 7 dias</div>' : ''}
+              </div>
+              <div style="text-align: right;">
+                <div><strong>Cliente:</strong> ${selectedOrder.customerName}</div>
+                ${selectedOrder.sellerName ? `<div><strong>Vendedor:</strong> ${selectedOrder.sellerName}</div>` : ''}
+              </div>
+            </div>
+          </div>
+          ${itemsHtml}
+          ${totalsHtml}
+          ${productionFields}
+          ${type !== 'production' ? '<div style="text-align: center; padding: 8px; margin-top: 20px; border-top: 1px dashed #000;">Obrigado pela preferência!</div>' : ''}
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
   };
 
   // Handle customer row click to show all orders
