@@ -67,7 +67,7 @@ export default function Relatorios() {
     return format(date, "dd/MM/yyyy");
   };
 
-  // Filter orders by date, seller, and role-based access
+  // Filter orders by date, seller, search term, and role-based access
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       // Sellers can only see their own orders
@@ -84,9 +84,18 @@ export default function Relatorios() {
       if (toDate && orderDate > toDate) return false;
       if (vendedor !== "todos" && order.sellerName !== vendedor) return false;
 
+      // Search filter
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const matchesCustomer = order.customerName?.toLowerCase().includes(search);
+        const matchesSeller = order.sellerName?.toLowerCase().includes(search);
+        const matchesId = order.id.toLowerCase().includes(search);
+        if (!matchesCustomer && !matchesSeller && !matchesId) return false;
+      }
+
       return true;
     });
-  }, [orders, dateFrom, dateTo, vendedor, isSeller, currentUserName]);
+  }, [orders, dateFrom, dateTo, vendedor, isSeller, currentUserName, searchTerm]);
 
   // Filter expenses by date
   const filteredExpenses = useMemo(() => {
@@ -156,17 +165,27 @@ export default function Relatorios() {
     };
   }, [filteredOrders, sellers, filteredExpenses, fixedExpenses]);
 
-  // Stock report data
+  // Stock report data with search filter
   const stockData = useMemo(() => {
     const MIN_STOCK = 5;
-    const lowStock = products.filter((p) => p.stock <= MIN_STOCK);
-    const totalValue = products.reduce((acc, p) => acc + p.price * p.stock, 0);
-    const totalItems = products.reduce((acc, p) => acc + p.stock, 0);
+    
+    // Apply search filter to products
+    const filteredProducts = searchTerm 
+      ? products.filter((p) => {
+          const search = searchTerm.toLowerCase();
+          return p.name.toLowerCase().includes(search) || 
+                 p.category.toLowerCase().includes(search);
+        })
+      : products;
+    
+    const lowStock = filteredProducts.filter((p) => p.stock <= MIN_STOCK);
+    const totalValue = filteredProducts.reduce((acc, p) => acc + p.price * p.stock, 0);
+    const totalItems = filteredProducts.reduce((acc, p) => acc + p.stock, 0);
 
-    return { products, lowStock, totalValue, totalItems, MIN_STOCK };
-  }, [products]);
+    return { products: filteredProducts, lowStock, totalValue, totalItems, MIN_STOCK };
+  }, [products, searchTerm]);
 
-  // Receivables report data
+  // Receivables report data with search filter
   const receivablesData = useMemo(() => {
     const pendingOrders = filteredOrders.filter((o) => (o.amountPaid || 0) < o.total);
     const totalPending = pendingOrders.reduce((acc, o) => acc + (o.total - (o.amountPaid || 0)), 0);
@@ -182,10 +201,17 @@ export default function Relatorios() {
         };
       })
       .filter((c) => c.pendente > 0)
+      .filter((c) => {
+        // Apply search filter
+        if (!searchTerm) return true;
+        const search = searchTerm.toLowerCase();
+        return c.name.toLowerCase().includes(search) || 
+               c.phone?.toLowerCase().includes(search);
+      })
       .sort((a, b) => b.pendente - a.pendente);
 
     return { pendingOrders, totalPending, byCustomer };
-  }, [filteredOrders, customers]);
+  }, [filteredOrders, customers, searchTerm]);
 
   const handlePrint = (reportType: string) => {
     const printWindow = window.open("", "_blank");
