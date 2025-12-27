@@ -611,6 +611,11 @@ export default function ContasPagar() {
                                   <Truck className="h-4 w-4 text-primary" />
                                   <span>{expense.supplierName}</span>
                                 </>
+                              ) : expense.category === 'Gasto Fixo' ? (
+                                <>
+                                  <CalendarDays className="h-4 w-4 text-warning" />
+                                  <span className="text-warning">Gasto Fixo</span>
+                                </>
                               ) : (
                                 <span className="text-muted-foreground">Compra Avulsa</span>
                               )}
