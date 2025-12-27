@@ -135,6 +135,12 @@ export default function ContasPagar() {
   const [commissionPaymentOpen, setCommissionPaymentOpen] = useState(false);
   const [sellerToPayCommission, setSellerToPayCommission] = useState<SellerCommission | null>(null);
   const [isPayingCommission, setIsPayingCommission] = useState(false);
+  
+  // Per-order commission payment state
+  const [selectedOrdersForCommission, setSelectedOrdersForCommission] = useState<Set<string>>(new Set());
+  const [orderCommissionDialogOpen, setOrderCommissionDialogOpen] = useState(false);
+  const [orderToPayCommission, setOrderToPayCommission] = useState<ServiceOrder | null>(null);
+  const [isPayingOrderCommission, setIsPayingOrderCommission] = useState(false);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
 
@@ -502,6 +508,105 @@ export default function ContasPagar() {
     setSellerToPayCommission(seller);
     setCommissionPaymentOpen(true);
   };
+
+  // Toggle order selection for commission payment
+  const toggleOrderSelection = (orderId: string) => {
+    setSelectedOrdersForCommission(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(orderId)) {
+        newSet.delete(orderId);
+      } else {
+        newSet.add(orderId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select/deselect all orders for a seller
+  const toggleAllOrdersForSeller = (orders: ServiceOrder[], isSelected: boolean) => {
+    setSelectedOrdersForCommission(prev => {
+      const newSet = new Set(prev);
+      orders.forEach(order => {
+        if (isSelected) {
+          newSet.delete(order.id);
+        } else {
+          newSet.add(order.id);
+        }
+      });
+      return newSet;
+    });
+  };
+
+  // Pay commission for selected orders
+  const handlePaySelectedOrdersCommission = async () => {
+    if (!selectedSeller || selectedOrdersForCommission.size === 0) return;
+    
+    setIsPayingOrderCommission(true);
+    try {
+      const [year, month] = selectedMonth.split('-').map(Number);
+      const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
+      const commissionRate = commissionPercentage / 100;
+      
+      const selectedOrders = selectedSeller.orders.filter(o => selectedOrdersForCommission.has(o.id));
+      const totalCommission = selectedOrders.reduce((sum, o) => sum + (o.amountPaid || 0) * commissionRate, 0);
+      
+      addExpense({
+        supplierId: '',
+        supplierName: selectedSeller.sellerName,
+        description: `Comissão ${selectedSeller.sellerName} - ${monthName} (${selectedOrders.length} pedido${selectedOrders.length > 1 ? 's' : ''})`,
+        amount: totalCommission,
+        date: new Date().toISOString(),
+        category: 'Comissão',
+      });
+      
+      setSelectedOrdersForCommission(new Set());
+    } finally {
+      setIsPayingOrderCommission(false);
+    }
+  };
+
+  // Pay commission for a single order
+  const handlePaySingleOrderCommission = async () => {
+    if (!orderToPayCommission) return;
+    
+    setIsPayingOrderCommission(true);
+    try {
+      const [year, month] = selectedMonth.split('-').map(Number);
+      const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
+      const commissionRate = commissionPercentage / 100;
+      const commissionAmount = (orderToPayCommission.amountPaid || 0) * commissionRate;
+      
+      addExpense({
+        supplierId: '',
+        supplierName: orderToPayCommission.sellerName || 'Vendedor',
+        description: `Comissão pedido #${orderToPayCommission.id} - ${monthName}`,
+        amount: commissionAmount,
+        date: new Date().toISOString(),
+        category: 'Comissão',
+      });
+      
+      setOrderCommissionDialogOpen(false);
+      setOrderToPayCommission(null);
+    } finally {
+      setIsPayingOrderCommission(false);
+    }
+  };
+
+  // Open dialog to pay commission for a single order
+  const openOrderCommissionDialog = (order: ServiceOrder, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOrderToPayCommission(order);
+    setOrderCommissionDialogOpen(true);
+  };
+
+  // Calculate total commission for selected orders
+  const selectedOrdersCommissionTotal = useMemo(() => {
+    if (!selectedSeller) return 0;
+    const commissionRate = commissionPercentage / 100;
+    return selectedSeller.orders
+      .filter(o => selectedOrdersForCommission.has(o.id))
+      .reduce((sum, o) => sum + (o.amountPaid || 0) * commissionRate, 0);
+  }, [selectedSeller, selectedOrdersForCommission, commissionPercentage]);
 
   // Fixed Expense Handlers
   const resetFixedExpenseForm = () => {
@@ -1433,7 +1538,10 @@ export default function ContasPagar() {
         </Dialog>
 
         {/* Seller Commission Details Dialog */}
-        <Dialog open={sellerDetailsOpen} onOpenChange={setSellerDetailsOpen}>
+        <Dialog open={sellerDetailsOpen} onOpenChange={(open) => {
+          setSellerDetailsOpen(open);
+          if (!open) setSelectedOrdersForCommission(new Set());
+        }}>
           <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -1464,37 +1572,103 @@ export default function ContasPagar() {
                   </div>
                 </div>
 
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700 gap-2"
+                    onClick={(e) => openCommissionPaymentDialog(selectedSeller, e)}
+                  >
+                    <Wallet className="h-4 w-4" />
+                    Pagar Todas Comissões
+                  </Button>
+                  {selectedOrdersForCommission.size > 0 && (
+                    <Button 
+                      variant="outline"
+                      className="gap-2 border-green-500 text-green-600 hover:bg-green-50"
+                      onClick={handlePaySelectedOrdersCommission}
+                      disabled={isPayingOrderCommission}
+                    >
+                      <DollarSign className="h-4 w-4" />
+                      {isPayingOrderCommission 
+                        ? 'Pagando...' 
+                        : `Pagar Selecionados (${selectedOrdersForCommission.size}) - R$ ${selectedOrdersCommissionTotal.toFixed(2)}`
+                      }
+                    </Button>
+                  )}
+                </div>
+
                 {/* Orders List */}
                 <div>
-                  <h4 className="font-semibold mb-3">Vendas do Período</h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold">Vendas do Período</h4>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleAllOrdersForSeller(
+                          selectedSeller.orders, 
+                          selectedOrdersForCommission.size === selectedSeller.orders.length
+                        )}
+                      >
+                        {selectedOrdersForCommission.size === selectedSeller.orders.length 
+                          ? 'Desmarcar Todos' 
+                          : 'Selecionar Todos'
+                        }
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-2 max-h-[400px] overflow-y-auto">
                     {selectedSeller.orders.map((order) => {
                       const commission = (order.amountPaid || 0) * (commissionPercentage / 100);
+                      const isSelected = selectedOrdersForCommission.has(order.id);
                       return (
                         <div 
                           key={order.id} 
-                          className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleViewOrderDetails(order)}
+                          className={`flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 transition-colors ${
+                            isSelected ? 'border-green-500 bg-green-50/50' : ''
+                          }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <ShoppingCart className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium">Venda #{order.id}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(parseISO(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                                {' • '}{order.customerName}
-                              </p>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleOrderSelection(order.id)}
+                              className="h-4 w-4 rounded border-border text-green-600 focus:ring-green-500"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div 
+                              className="flex items-center gap-3 cursor-pointer"
+                              onClick={() => handleViewOrderDetails(order)}
+                            >
+                              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <ShoppingCart className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Venda #{order.id}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(parseISO(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                                  {' • '}{order.customerName}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm text-muted-foreground">
-                              Valor: R$ {(order.amountPaid || 0).toFixed(2)}
-                            </p>
-                            <p className="font-bold text-green-500">
-                              Comissão: R$ {commission.toFixed(2)}
-                            </p>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-sm text-muted-foreground">
+                                Valor: R$ {(order.amountPaid || 0).toFixed(2)}
+                              </p>
+                              <p className="font-bold text-green-500">
+                                Comissão: R$ {commission.toFixed(2)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-100"
+                              onClick={(e) => openOrderCommissionDialog(order, e)}
+                            >
+                              <Wallet className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       );
@@ -1505,7 +1679,10 @@ export default function ContasPagar() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setSellerDetailsOpen(false)}>
+              <Button variant="outline" onClick={() => {
+                setSellerDetailsOpen(false);
+                setSelectedOrdersForCommission(new Set());
+              }}>
                 Fechar
               </Button>
             </DialogFooter>
@@ -2157,6 +2334,62 @@ export default function ContasPagar() {
                 disabled={isPayingCommission}
               >
                 {isPayingCommission ? 'Pagando...' : 'Confirmar Pagamento'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Single Order Commission Payment Confirmation Dialog */}
+        <AlertDialog open={orderCommissionDialogOpen} onOpenChange={setOrderCommissionDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-green-500" />
+                Pagar Comissão do Pedido
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <p>Confirmar pagamento de comissão para:</p>
+                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pedido:</span>
+                      <span className="font-medium text-foreground">#{orderToPayCommission?.id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cliente:</span>
+                      <span className="font-medium text-foreground">{orderToPayCommission?.customerName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Vendedor:</span>
+                      <span className="font-medium text-foreground">{orderToPayCommission?.sellerName || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Valor do Pedido:</span>
+                      <span className="font-medium text-foreground">
+                        R$ {(orderToPayCommission?.amountPaid || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-lg pt-2 border-t">
+                      <span className="text-muted-foreground">Comissão ({commissionPercentage}%):</span>
+                      <span className="font-bold text-green-500">
+                        R$ {((orderToPayCommission?.amountPaid || 0) * (commissionPercentage / 100)).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Este valor será registrado como despesa e debitado do fluxo de caixa.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handlePaySingleOrderCommission}
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isPayingOrderCommission}
+              >
+                {isPayingOrderCommission ? 'Pagando...' : 'Confirmar Pagamento'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
