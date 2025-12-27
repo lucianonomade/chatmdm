@@ -211,11 +211,22 @@ export default function Relatorios() {
     return { products: filteredProducts, lowStock, totalValue, totalItems, MIN_STOCK };
   }, [products, searchTerm]);
 
-  // Receivables report data with search filter
+  // Receivables report data with customer search filter (for inadimplencia tab)
   const receivablesData = useMemo(() => {
-    const pendingOrders = filteredOrders.filter((o) => (o.amountPaid || 0) < o.total);
+    // Get all pending orders first
+    let pendingOrders = filteredOrders.filter((o) => (o.amountPaid || 0) < o.total);
+    
+    // If customer search is active, filter by customer name
+    if (customerSearch) {
+      const search = customerSearch.toLowerCase();
+      pendingOrders = pendingOrders.filter((o) => 
+        o.customerName?.toLowerCase().includes(search)
+      );
+    }
+    
     const totalPending = pendingOrders.reduce((acc, o) => acc + (o.total - (o.amountPaid || 0)), 0);
 
+    // Group by customer - only customers with pending amounts
     const byCustomer = customers
       .map((customer) => {
         const customerOrders = pendingOrders.filter((o) => o.customerName === customer.name);
@@ -224,20 +235,21 @@ export default function Relatorios() {
           ...customer,
           pendente,
           orders: customerOrders.length,
+          orderDetails: customerOrders,
         };
       })
       .filter((c) => c.pendente > 0)
       .filter((c) => {
-        // Apply search filter
-        if (!searchTerm) return true;
-        const search = searchTerm.toLowerCase();
+        // Apply customer search filter
+        if (!customerSearch) return true;
+        const search = customerSearch.toLowerCase();
         return c.name.toLowerCase().includes(search) || 
                c.phone?.toLowerCase().includes(search);
       })
       .sort((a, b) => b.pendente - a.pendente);
 
     return { pendingOrders, totalPending, byCustomer };
-  }, [filteredOrders, customers, searchTerm]);
+  }, [filteredOrders, customers, customerSearch]);
 
   // Purchases by supplier report data
   const supplierPurchasesData = useMemo(() => {
@@ -1535,11 +1547,26 @@ export default function Relatorios() {
 
         {activeTab === "inadimplencia" && (
           <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button onClick={() => handlePrint("inadimplencia")} variant="outline" className="gap-2">
-                <Printer className="h-4 w-4" />
-                Imprimir Relatório
-              </Button>
+            <div className="flex justify-between items-center">
+              {customerSearch && receivablesData.byCustomer.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  Mostrando pendências de: <span className="font-semibold text-foreground">{customerSearch}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="ml-2 h-6 text-xs"
+                    onClick={() => setCustomerSearch("")}
+                  >
+                    Limpar filtro
+                  </Button>
+                </div>
+              )}
+              <div className="ml-auto">
+                <Button onClick={() => handlePrint("inadimplencia")} variant="outline" className="gap-2">
+                  <Printer className="h-4 w-4" />
+                  Imprimir Relatório
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Card className="p-4 border-2 border-destructive/30 shadow-md shadow-destructive/10 cursor-pointer transition-all duration-200 hover:bg-destructive/10 hover:border-destructive/50 hover:shadow-lg hover:shadow-destructive/20">
