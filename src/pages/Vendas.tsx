@@ -201,6 +201,8 @@ export default function Vendas() {
   const [installments, setInstallments] = useState<number>(1);
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [installmentDates, setInstallmentDates] = useState<Date[]>([]);
+  const [paymentDatePopoverOpen, setPaymentDatePopoverOpen] = useState(false);
+  const [installmentPopoverOpenIndex, setInstallmentPopoverOpenIndex] = useState<number | null>(null);
 
   // Receipt state
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
@@ -1807,7 +1809,11 @@ export default function Vendas() {
                   {/* Data do pagamento */}
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Data do Pagamento</Label>
-                    <Popover>
+                    <Popover
+                      open={paymentDatePopoverOpen}
+                      onOpenChange={setPaymentDatePopoverOpen}
+                      modal={false}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -1820,8 +1826,14 @@ export default function Vendas() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <CalendarComponent
                           mode="single"
+                          required
                           selected={paymentDate}
-                          onSelect={(d) => d && setPaymentDate(d)}
+                          onSelect={(d) => {
+                            if (!d) return;
+                            setPaymentDate(d);
+                            // Mantém o calendário aberto após selecionar (evita fechar/"limpar" em alguns browsers)
+                            requestAnimationFrame(() => setPaymentDatePopoverOpen(true));
+                          }}
                           initialFocus
                           className="pointer-events-auto"
                           locale={ptBR}
@@ -1882,7 +1894,12 @@ export default function Vendas() {
                         <Label className="text-xs text-muted-foreground">Datas das Parcelas</Label>
                         <div className="grid grid-cols-2 gap-2">
                           {installmentDates.map((date, index) => (
-                            <Popover key={index}>
+                            <Popover
+                              key={index}
+                              open={installmentPopoverOpenIndex === index}
+                              onOpenChange={(o) => setInstallmentPopoverOpenIndex(o ? index : null)}
+                              modal={false}
+                            >
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
@@ -1896,6 +1913,7 @@ export default function Vendas() {
                               <PopoverContent className="w-auto p-0" align="start">
                                 <CalendarComponent
                                   mode="single"
+                                  required
                                   selected={date}
                                   onSelect={(d) => {
                                     if (!d) return;
@@ -1904,6 +1922,7 @@ export default function Vendas() {
                                       next[index] = d;
                                       return next;
                                     });
+                                    requestAnimationFrame(() => setInstallmentPopoverOpenIndex(index));
                                   }}
                                   initialFocus
                                   className="pointer-events-auto"
