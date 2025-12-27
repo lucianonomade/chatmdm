@@ -251,6 +251,56 @@ export default function Relatorios() {
     return { pendingOrders, totalPending, byCustomer };
   }, [filteredOrders, customers, customerSearch]);
 
+  // Commission report data
+  const commissionData = useMemo(() => {
+    const commissionRate = companySettings?.usesCommission ? (companySettings?.commissionPercentage || 0) / 100 : 0;
+    
+    if (commissionRate === 0) {
+      return {
+        enabled: false,
+        rate: 0,
+        percentage: 0,
+        totalCommission: 0,
+        bySeller: [],
+        allOrders: [],
+      };
+    }
+
+    // Only calculate commission on paid amounts
+    const ordersWithCommission = filteredOrders
+      .filter(order => (order.amountPaid || 0) > 0)
+      .map(order => ({
+        ...order,
+        commissionValue: (order.amountPaid || 0) * commissionRate
+      }));
+
+    const totalCommission = ordersWithCommission.reduce((acc, order) => acc + order.commissionValue, 0);
+
+    // Group by seller
+    const bySeller = sellers.map((seller) => {
+      const sellerOrders = ordersWithCommission.filter((o) => o.sellerName === seller.name);
+      const totalSales = sellerOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0);
+      const commission = sellerOrders.reduce((acc, o) => acc + o.commissionValue, 0);
+      return {
+        id: seller.id,
+        name: seller.name,
+        totalSales,
+        commission,
+        ordersCount: sellerOrders.length,
+        orders: sellerOrders,
+      };
+    }).filter(s => s.commission > 0).sort((a, b) => b.commission - a.commission);
+
+    return {
+      enabled: true,
+      rate: commissionRate,
+      percentage: companySettings?.commissionPercentage || 0,
+      totalCommission,
+      bySeller,
+      allOrders: ordersWithCommission,
+    };
+  }, [filteredOrders, sellers, companySettings]);
+
   // Purchases by supplier report data
   const supplierPurchasesData = useMemo(() => {
     // Get expenses with supplier info
@@ -949,6 +999,129 @@ export default function Relatorios() {
           </tr>
         </table>
       `;
+    } else if (reportType === "comissoes") {
+      // Full commission report
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("COMISSOES", "COMISSÕES DOS VENDEDORES")}
+        <div class="summary">
+          <div class="summary-item"><span>Taxa de Comissão:</span><span>${commissionData.percentage}%</span></div>
+          <div class="summary-item"><span>Total em Comissões:</span><span>R$ ${commissionData.totalCommission.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total de Vendedores:</span><span>${commissionData.bySeller.length}</span></div>
+          <div class="summary-item"><span>Total de Vendas:</span><span>${commissionData.allOrders.length}</span></div>
+        </div>
+        <h3>Comissões por Vendedor</h3>
+        <table>
+          <tr><th>Vendedor</th><th>Qtd Vendas</th><th>Total Vendido</th><th>Comissão</th></tr>
+          ${commissionData.bySeller.map((s) => `
+            <tr>
+              <td>${s.name}</td>
+              <td>${s.ordersCount}</td>
+              <td>R$ ${s.totalSales.toFixed(2)}</td>
+              <td>R$ ${s.commission.toFixed(2)}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>${commissionData.allOrders.length}</td>
+            <td>R$ ${commissionData.allOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}</td>
+            <td>R$ ${commissionData.totalCommission.toFixed(2)}</td>
+          </tr>
+        </table>
+        <h3>Detalhamento de Vendas</h3>
+        <table>
+          <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor Pago</th><th>Comissão</th></tr>
+          ${commissionData.allOrders.map((o) => `
+            <tr>
+              <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+              <td>#${o.id.slice(-4)}</td>
+              <td>${o.customerName}</td>
+              <td>${o.sellerName || "-"}</td>
+              <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+              <td>R$ ${o.commissionValue.toFixed(2)}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="4">TOTAL</td>
+            <td>R$ ${commissionData.allOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}</td>
+            <td>R$ ${commissionData.totalCommission.toFixed(2)}</td>
+          </tr>
+        </table>
+      `;
+    } else if (reportType === "comissoes-resumo") {
+      // Only commission summary by seller
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("COMISSOES-RESUMO", "RESUMO DE COMISSÕES")}
+        <div class="summary">
+          <div class="summary-item"><span>Taxa de Comissão:</span><span>${commissionData.percentage}%</span></div>
+          <div class="summary-item"><span>Total em Comissões:</span><span>R$ ${commissionData.totalCommission.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total de Vendedores:</span><span>${commissionData.bySeller.length}</span></div>
+        </div>
+        <h3>Comissões por Vendedor</h3>
+        <table>
+          <tr><th>Vendedor</th><th>Qtd Vendas</th><th>Total Vendido</th><th>Comissão</th><th>%</th></tr>
+          ${commissionData.bySeller.map((s) => `
+            <tr>
+              <td>${s.name}</td>
+              <td>${s.ordersCount}</td>
+              <td>R$ ${s.totalSales.toFixed(2)}</td>
+              <td>R$ ${s.commission.toFixed(2)}</td>
+              <td>${commissionData.totalCommission > 0 ? ((s.commission / commissionData.totalCommission) * 100).toFixed(1) : 0}%</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>${commissionData.allOrders.length}</td>
+            <td>R$ ${commissionData.allOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}</td>
+            <td>R$ ${commissionData.totalCommission.toFixed(2)}</td>
+            <td>100%</td>
+          </tr>
+        </table>
+      `;
+    } else if (reportType.startsWith("comissoes-vendedor-")) {
+      // Commission for specific seller
+      const sellerName = reportType.replace("comissoes-vendedor-", "");
+      const sellerData = commissionData.bySeller.find(s => s.name === sellerName);
+      if (sellerData) {
+        content = `
+          ${headerStyle}
+          ${actionBar}
+          <div class="header">
+            <div class="company">${companySettings?.name || "Empresa"}</div>
+            <div class="title">COMISSÃO - ${sellerName.toUpperCase()}</div>
+            <div class="period">Período: ${dateFrom || "Início"} até ${dateTo || "Hoje"}</div>
+            <div class="period">Emitido em: ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+          </div>
+          <div class="summary">
+            <div class="summary-item"><span>Vendedor:</span><span>${sellerName}</span></div>
+            <div class="summary-item"><span>Taxa de Comissão:</span><span>${commissionData.percentage}%</span></div>
+            <div class="summary-item"><span>Total Vendido:</span><span>R$ ${sellerData.totalSales.toFixed(2)}</span></div>
+            <div class="summary-item"><span>Total em Comissão:</span><span>R$ ${sellerData.commission.toFixed(2)}</span></div>
+            <div class="summary-item"><span>Quantidade de Vendas:</span><span>${sellerData.ordersCount}</span></div>
+          </div>
+          <h3>Detalhamento de Vendas</h3>
+          <table>
+            <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Valor Pago</th><th>Comissão</th></tr>
+            ${sellerData.orders.map((o) => `
+              <tr>
+                <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+                <td>#${o.id.slice(-4)}</td>
+                <td>${o.customerName}</td>
+                <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+                <td>R$ ${o.commissionValue.toFixed(2)}</td>
+              </tr>
+            `).join("")}
+            <tr class="total-row">
+              <td colspan="3">TOTAL</td>
+              <td>R$ ${sellerData.totalSales.toFixed(2)}</td>
+              <td>R$ ${sellerData.commission.toFixed(2)}</td>
+            </tr>
+          </table>
+        `;
+      }
     }
 
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Relatório</title></head><body>${content}</body></html>`);
@@ -987,6 +1160,15 @@ export default function Relatorios() {
       color: "text-destructive",
       bgColor: "bg-destructive/10",
     },
+    // Only show commission report if commission is enabled
+    ...(companySettings?.usesCommission ? [{
+      id: "comissoes",
+      title: "Relatório de Comissões",
+      description: "Comissões dos vendedores sobre vendas realizadas",
+      icon: DollarSign,
+      color: "text-orange-500",
+      bgColor: "bg-orange-500/10",
+    }] : []),
   ];
 
   return (
@@ -1982,6 +2164,167 @@ export default function Relatorios() {
                 </Table>
               </div>
             </Card>
+          </div>
+        )}
+
+        {/* Commissions Report */}
+        {activeTab === "comissoes" && companySettings?.usesCommission && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button onClick={() => handlePrint("comissoes-resumo")} variant="outline" size="sm" className="gap-1">
+                <Printer className="h-3.5 w-3.5" />
+                Resumo
+              </Button>
+              <Button onClick={() => handlePrint("comissoes")} className="gap-2 gradient-primary text-primary-foreground">
+                <FileText className="h-4 w-4" />
+                Relatório Completo
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="p-4 border-2 border-orange-500/30 shadow-md shadow-orange-500/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-500/10">
+                    <DollarSign className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Comissões</p>
+                    <p className="text-lg font-bold text-orange-500">R$ {commissionData.totalCommission.toFixed(2)}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 border-2 border-success/30 shadow-md shadow-success/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-success/10">
+                    <TrendingUp className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Vendas</p>
+                    <p className="text-lg font-bold">R$ {commissionData.allOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 border-2 border-primary/30 shadow-md shadow-primary/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Vendedores</p>
+                    <p className="text-lg font-bold">{commissionData.bySeller.length}</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 border-2 border-info/30 shadow-md shadow-info/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-info/10">
+                    <ShoppingCart className="h-5 w-5 text-info" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Taxa</p>
+                    <p className="text-lg font-bold">{commissionData.percentage}%</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Commission by Seller */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">Comissões por Vendedor</h3>
+                <Button onClick={() => handlePrint("comissoes-resumo")} variant="ghost" size="sm" className="gap-1 h-7">
+                  <Printer className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              {commissionData.bySeller.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Vendedor</TableHead>
+                        <TableHead className="text-center">Vendas</TableHead>
+                        <TableHead className="text-right">Total Vendido</TableHead>
+                        <TableHead className="text-right">Comissão</TableHead>
+                        <TableHead className="text-center">Ação</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {commissionData.bySeller.map((seller) => (
+                        <TableRow key={seller.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200">
+                          <TableCell className="font-medium">{seller.name}</TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline">{seller.ordersCount}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">R$ {seller.totalSales.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-bold text-orange-500">
+                            R$ {seller.commission.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="gap-1 h-7 text-xs"
+                              onClick={() => handlePrint(`comissoes-vendedor-${seller.name}`)}
+                            >
+                              <Printer className="h-3 w-3" />
+                              Imprimir
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Nenhuma comissão no período selecionado</p>
+                </div>
+              )}
+            </Card>
+
+            {/* Detailed Commission Orders */}
+            {commissionData.allOrders.length > 0 && (
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3">Detalhamento de Vendas com Comissão</h3>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Pedido</TableHead>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Vendedor</TableHead>
+                        <TableHead className="text-right">Valor Pago</TableHead>
+                        <TableHead className="text-right">Comissão</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {commissionData.allOrders.slice(0, 50).map((order) => (
+                        <TableRow 
+                          key={order.id} 
+                          className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer"
+                          onClick={() => handleOrderClick(order)}
+                        >
+                          <TableCell>{safeFormatDate(order.createdAt)}</TableCell>
+                          <TableCell>#{order.id.slice(-4)}</TableCell>
+                          <TableCell>{order.customerName}</TableCell>
+                          <TableCell>{order.sellerName || "-"}</TableCell>
+                          <TableCell className="text-right">R$ {(order.amountPaid || 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-medium text-orange-500">
+                            R$ {order.commissionValue.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {commissionData.allOrders.length > 50 && (
+                    <p className="text-xs text-muted-foreground text-center mt-2">
+                      Mostrando 50 de {commissionData.allOrders.length} vendas. Use a impressão para ver todos.
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
         )}
       </div>
