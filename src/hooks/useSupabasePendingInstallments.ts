@@ -78,7 +78,7 @@ export function useSupabasePendingInstallments() {
       
       for (let i = 1; i <= data.installments; i++) {
         const dueDate = new Date(data.startDate);
-        dueDate.setMonth(dueDate.getMonth() + i);
+        dueDate.setMonth(dueDate.getMonth() + (i - 1));
         
         installmentsToInsert.push({
           expense_id: data.expenseId || null,

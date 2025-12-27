@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   ShoppingBag,
   Plus,
@@ -31,8 +39,9 @@ import {
   Check,
   AlertCircle,
   CreditCard,
-  Calendar,
+  CalendarIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { useSupabasePendingInstallments } from "@/hooks/useSupabasePendingInstallments";
@@ -70,6 +79,12 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
   const [enableInstallments, setEnableInstallments] = useState(false);
   const [paidAmount, setPaidAmount] = useState("");
   const [installmentsCount, setInstallmentsCount] = useState("2");
+  const [entryDate, setEntryDate] = useState<Date>(new Date());
+  const [firstInstallmentDate, setFirstInstallmentDate] = useState<Date>(() => {
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    return nextMonth;
+  });
   
   // New supplier form state
   const [newSupplierName, setNewSupplierName] = useState("");
@@ -87,6 +102,10 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
     setEnableInstallments(false);
     setPaidAmount("");
     setInstallmentsCount("2");
+    setEntryDate(new Date());
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    setFirstInstallmentDate(nextMonth);
     setNewSupplierName("");
     setNewSupplierPhone("");
     setNewSupplierEmail("");
@@ -154,7 +173,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
             ? `${description.trim()} (Entrada)` 
             : description.trim(),
           amount: expenseAmount,
-          date: new Date().toISOString(),
+          date: entryDate.toISOString(),
           category: category || "Compras",
         });
       }
@@ -169,7 +188,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
         totalAmount: parsedAmount,
         installments: installments,
         amountPerInstallment: installmentValue,
-        startDate: new Date(),
+        startDate: firstInstallmentDate,
         category: category || "Compras",
         notes: notes.trim() || undefined,
       });
@@ -432,6 +451,62 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                     </div>
                   </div>
 
+                  {/* Date pickers */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Data da Entrada</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-9 justify-start text-left font-normal",
+                              !entryDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {entryDate ? format(entryDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={entryDate}
+                            onSelect={(date) => date && setEntryDate(date)}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">1ª Parcela</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-9 justify-start text-left font-normal",
+                              !firstInstallmentDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {firstInstallmentDate ? format(firstInstallmentDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={firstInstallmentDate}
+                            onSelect={(date) => date && setFirstInstallmentDate(date)}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+
                   {remainingAmount > 0 && (
                     <div className="bg-background rounded-lg p-2 border">
                       <div className="flex justify-between text-sm">
@@ -443,8 +518,8 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                         <span className="font-semibold">{installments}x de R$ {installmentValue.toFixed(2)}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        Parcelas irão para Contas a Pagar
+                        <CalendarIcon className="h-3 w-3" />
+                        1ª parcela em {format(firstInstallmentDate, "dd/MM/yyyy", { locale: ptBR })}
                       </p>
                     </div>
                   )}
