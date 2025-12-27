@@ -492,6 +492,93 @@ export default function Relatorios() {
           </tr>
         </table>
       `;
+    } else if (reportType === "vendas-resumo") {
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDAS-RESUMO", "RESUMO DE VENDAS")}
+        <div class="summary">
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${salesData.totalVendas.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Recebido:</span><span>R$ ${salesData.totalRecebido.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Pendente:</span><span>R$ ${salesData.totalPendente.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Quantidade de Vendas:</span><span>${salesData.qtdVendas}</span></div>
+          <div class="summary-item"><span>Gastos Fixos:</span><span>R$ ${salesData.fixedExpensesApplied.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Outras Despesas:</span><span>R$ ${salesData.otherExpensesTotal.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total Despesas:</span><span>R$ ${salesData.totalExpenses.toFixed(2)}</span></div>
+          <div class="summary-item" style="font-weight: bold; ${salesData.lucroLiquido >= 0 ? 'color: green;' : 'color: red;'}"><span>Lucro Líquido:</span><span>R$ ${salesData.lucroLiquido.toFixed(2)}</span></div>
+        </div>
+      `;
+    } else if (reportType === "vendas-pagamento") {
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDAS-PAGAMENTO", "VENDAS POR FORMA DE PAGAMENTO")}
+        <div class="summary">
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${salesData.totalVendas.toFixed(2)}</span></div>
+        </div>
+        <h3>Por Forma de Pagamento</h3>
+        <table>
+          <tr><th>Forma de Pagamento</th><th>Valor</th><th>%</th></tr>
+          <tr><td>Dinheiro</td><td>R$ ${salesData.byPaymentMethod.cash.toFixed(2)}</td><td>${salesData.totalVendas > 0 ? ((salesData.byPaymentMethod.cash / salesData.totalVendas) * 100).toFixed(1) : 0}%</td></tr>
+          <tr><td>Cartão</td><td>R$ ${salesData.byPaymentMethod.card.toFixed(2)}</td><td>${salesData.totalVendas > 0 ? ((salesData.byPaymentMethod.card / salesData.totalVendas) * 100).toFixed(1) : 0}%</td></tr>
+          <tr><td>PIX</td><td>R$ ${salesData.byPaymentMethod.pix.toFixed(2)}</td><td>${salesData.totalVendas > 0 ? ((salesData.byPaymentMethod.pix / salesData.totalVendas) * 100).toFixed(1) : 0}%</td></tr>
+          <tr class="total-row"><td>TOTAL</td><td>R$ ${salesData.totalVendas.toFixed(2)}</td><td>100%</td></tr>
+        </table>
+      `;
+    } else if (reportType === "vendas-vendedor") {
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDAS-VENDEDOR", "VENDAS POR VENDEDOR")}
+        <div class="summary">
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${salesData.totalVendas.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Total de Vendedores:</span><span>${salesData.bySeller.length}</span></div>
+        </div>
+        <h3>Por Vendedor</h3>
+        <table>
+          <tr><th>Vendedor</th><th>Qtd Vendas</th><th>Total</th><th>%</th></tr>
+          ${salesData.bySeller.map((s) => `
+            <tr>
+              <td>${s.name}</td>
+              <td>${s.quantidade}</td>
+              <td>R$ ${s.total.toFixed(2)}</td>
+              <td>${salesData.totalVendas > 0 ? ((s.total / salesData.totalVendas) * 100).toFixed(1) : 0}%</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row"><td>TOTAL</td><td>${salesData.qtdVendas}</td><td>R$ ${salesData.totalVendas.toFixed(2)}</td><td>100%</td></tr>
+        </table>
+      `;
+    } else if (reportType === "vendas-detalhes") {
+      content = `
+        ${headerStyle}
+        ${actionBar}
+        ${header.replace("VENDAS-DETALHES", "DETALHAMENTO DE VENDAS")}
+        <div class="summary">
+          <div class="summary-item"><span>Total de Vendas:</span><span>R$ ${salesData.totalVendas.toFixed(2)}</span></div>
+          <div class="summary-item"><span>Quantidade de Vendas:</span><span>${salesData.qtdVendas}</span></div>
+        </div>
+        <h3>Detalhamento de Vendas</h3>
+        <table>
+          <tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Total</th><th>Pago</th><th>Status</th></tr>
+          ${filteredOrders.map((o) => `
+            <tr>
+              <td>${o.createdAt ? (isNaN(new Date(o.createdAt).getTime()) ? "-" : format(new Date(o.createdAt), "dd/MM/yyyy")) : "-"}</td>
+              <td>#${o.id.slice(-4)}</td>
+              <td>${o.customerName}</td>
+              <td>${o.sellerName || "-"}</td>
+              <td>R$ ${o.total.toFixed(2)}</td>
+              <td>R$ ${(o.amountPaid || 0).toFixed(2)}</td>
+              <td>${o.paymentStatus === 'paid' ? 'Pago' : o.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}</td>
+            </tr>
+          `).join("")}
+          <tr class="total-row">
+            <td colspan="4">TOTAL</td>
+            <td>R$ ${salesData.totalVendas.toFixed(2)}</td>
+            <td>R$ ${salesData.totalRecebido.toFixed(2)}</td>
+            <td></td>
+          </tr>
+        </table>
+      `;
     } else if (reportType === "estoque") {
       content = `
         ${headerStyle}
@@ -1056,14 +1143,18 @@ export default function Relatorios() {
         {/* Report Content */}
         {activeTab === "vendas" && (
           <div className="space-y-4">
-            <div className="flex justify-end gap-2">
-              <Button onClick={() => handlePrint("vendas")} variant="outline" className="gap-2">
-                <Printer className="h-4 w-4" />
-                Imprimir
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button onClick={() => handlePrint("vendas-resumo")} variant="outline" size="sm" className="gap-1">
+                <Printer className="h-3.5 w-3.5" />
+                Resumo
+              </Button>
+              <Button onClick={() => handlePrint("vendas-detalhes")} variant="outline" size="sm" className="gap-1">
+                <Printer className="h-3.5 w-3.5" />
+                Detalhes
               </Button>
               <Button onClick={() => handlePrint("vendas")} className="gap-2 gradient-primary text-primary-foreground">
                 <FileText className="h-4 w-4" />
-                Exportar PDF
+                Relatório Completo
               </Button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
@@ -1177,7 +1268,12 @@ export default function Relatorios() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="p-4">
-                <h3 className="font-semibold mb-3">Por Forma de Pagamento</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Por Forma de Pagamento</h3>
+                  <Button onClick={() => handlePrint("vendas-pagamento")} variant="ghost" size="sm" className="gap-1 h-7">
+                    <Printer className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
                     <span>Dinheiro</span>
@@ -1195,7 +1291,14 @@ export default function Relatorios() {
               </Card>
 
               <Card className="p-4">
-                <h3 className="font-semibold mb-3">Por Vendedor</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Por Vendedor</h3>
+                  {salesData.bySeller.length > 0 && (
+                    <Button onClick={() => handlePrint("vendas-vendedor")} variant="ghost" size="sm" className="gap-1 h-7">
+                      <Printer className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-2">
                   {salesData.bySeller.map((seller) => (
                     <div key={seller.name} className="flex justify-between items-center p-2 bg-muted/50 rounded">
