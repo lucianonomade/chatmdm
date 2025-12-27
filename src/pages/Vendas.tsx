@@ -1768,12 +1768,12 @@ export default function Vendas() {
                   FINALIZAR
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden" aria-describedby={undefined}>
-                <DialogHeader className="p-5 pb-3 border-b pr-12 mt-2">
+              <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden max-h-[90vh] flex flex-col" aria-describedby={undefined}>
+                <DialogHeader className="p-5 pb-3 border-b pr-12 mt-2 shrink-0">
                   <DialogTitle className="text-xl font-bold text-center">Pagamento</DialogTitle>
                 </DialogHeader>
 
-                <div className="p-5 space-y-5">
+                <div className="p-5 space-y-4 overflow-y-auto flex-1">
                   {/* Total */}
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-muted-foreground">Total da Venda</span>
@@ -1982,8 +1982,10 @@ export default function Vendas() {
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Confirmar */}
+                {/* Confirmar - Footer fixo */}
+                <div className="p-5 pt-3 border-t shrink-0">
                   <Button
                     className="w-full h-12 text-base font-bold"
                     disabled={!paymentMethod}
