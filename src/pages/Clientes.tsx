@@ -29,15 +29,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { MaskedInput } from "@/components/ui/masked-input";
-import { Plus, Search, Edit, Trash2, User, Phone, Loader2, Users, Download, Upload, FileSpreadsheet } from "lucide-react";
+import { Plus, Search, Edit, Trash2, User, Phone, Loader2, Users, Download, Upload } from "lucide-react";
 import { useSupabaseCustomers } from "@/hooks/useSupabaseCustomers";
 import { Customer } from "@/lib/types";
 import { toast } from "sonner";
@@ -218,46 +212,45 @@ export default function Clientes() {
             />
           </div>
           
-          <div className="flex gap-2">
-            {/* Import/Export Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2 h-10 text-sm">
-                  <FileSpreadsheet className="h-4 w-4" />
-                  <span className="hidden sm:inline">Excel</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExport} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Exportar Clientes
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2" disabled={isImporting}>
-                  <Upload className="h-4 w-4" />
-                  {isImporting ? "Importando..." : "Importar Clientes"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDownloadTemplate} className="gap-2">
-                  <FileSpreadsheet className="h-4 w-4" />
-                  Baixar Template
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Hidden file input for import */}
+          <div className="grid grid-cols-2 sm:flex gap-2 flex-wrap">
+            {/* Hidden file input */}
             <input
-              ref={fileInputRef}
               type="file"
-              accept=".xlsx,.xls"
+              ref={fileInputRef}
               onChange={handleImport}
+              accept=".xlsx,.xls"
               className="hidden"
             />
-
+            
+            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" onClick={handleExport}>
+              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Exportar</span>
+              <span className="sm:hidden">Export</span>
+            </Button>
+            
+            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" onClick={handleDownloadTemplate}>
+              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Template</span>
+              <span className="sm:hidden">Templ.</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-1 text-xs sm:text-sm" 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting}
+            >
+              {isImporting ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" /> : <Upload className="h-3 w-3 sm:h-4 sm:w-4" />}
+              <span className="hidden sm:inline">{isImporting ? "Importando..." : "Importar"}</span>
+              <span className="sm:hidden">{isImporting ? "..." : "Import"}</span>
+            </Button>
+            
             <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
               <DialogTrigger asChild>
-                <Button className="gradient-primary text-primary-foreground gap-2 h-10 text-sm" onClick={() => handleOpenDialog()}>
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Novo Cliente</span>
-                  <span className="sm:hidden">Novo</span>
+                <Button size="sm" className="gradient-primary text-primary-foreground gap-1 text-xs sm:text-sm col-span-2 sm:col-span-1" onClick={() => handleOpenDialog()}>
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  Novo Cliente
                 </Button>
               </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
