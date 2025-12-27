@@ -71,6 +71,8 @@ export default function Relatorios() {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [customerOrdersDialogOpen, setCustomerOrdersDialogOpen] = useState(false);
   const [selectedCustomerName, setSelectedCustomerName] = useState("");
+  const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+  const [statsDialogType, setStatsDialogType] = useState<'all' | 'paid' | 'pending' | 'qty'>('all');
 
   // Check if user is seller (restricted access)
   const isSeller = authUser?.role === 'seller';
@@ -285,6 +287,30 @@ export default function Relatorios() {
       return order.customerName === selectedCustomerName;
     });
   }, [orders, selectedCustomerName, isSeller, currentUserName]);
+
+  // Get orders for stats dialog based on type
+  const statsDialogOrders = useMemo(() => {
+    if (statsDialogType === 'paid') {
+      return filteredOrders.filter(o => o.paymentStatus === 'paid');
+    } else if (statsDialogType === 'pending') {
+      return filteredOrders.filter(o => o.paymentStatus !== 'paid');
+    }
+    return filteredOrders;
+  }, [filteredOrders, statsDialogType]);
+
+  const statsDialogTitle = useMemo(() => {
+    switch (statsDialogType) {
+      case 'paid': return 'Vendas Recebidas';
+      case 'pending': return 'Vendas Pendentes';
+      case 'qty': return 'Todas as Vendas';
+      default: return 'Todas as Vendas';
+    }
+  }, [statsDialogType]);
+
+  const handleStatsCardClick = (type: 'all' | 'paid' | 'pending' | 'qty') => {
+    setStatsDialogType(type);
+    setStatsDialogOpen(true);
+  };
 
   const handlePrint = (reportType: string) => {
     const printWindow = window.open("", "_blank");
@@ -704,7 +730,10 @@ export default function Relatorios() {
               </Button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-              <Card className="p-2.5 sm:p-4 border-2 border-success/30 shadow-md shadow-success/10 cursor-pointer transition-all duration-200 hover:bg-success/10 hover:border-success/50 hover:shadow-lg hover:shadow-success/20">
+              <Card 
+                className="p-2.5 sm:p-4 border-2 border-success/30 shadow-md shadow-success/10 cursor-pointer transition-all duration-200 hover:bg-success/10 hover:border-success/50 hover:shadow-lg hover:shadow-success/20"
+                onClick={() => handleStatsCardClick('all')}
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-success/10 shrink-0">
                     <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
@@ -715,7 +744,10 @@ export default function Relatorios() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-2.5 sm:p-4 border-2 border-info/30 shadow-md shadow-info/10 cursor-pointer transition-all duration-200 hover:bg-info/10 hover:border-info/50 hover:shadow-lg hover:shadow-info/20">
+              <Card 
+                className="p-2.5 sm:p-4 border-2 border-info/30 shadow-md shadow-info/10 cursor-pointer transition-all duration-200 hover:bg-info/10 hover:border-info/50 hover:shadow-lg hover:shadow-info/20"
+                onClick={() => handleStatsCardClick('paid')}
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-info/10 shrink-0">
                     <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-info" />
@@ -726,7 +758,10 @@ export default function Relatorios() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-2.5 sm:p-4 border-2 border-warning/30 shadow-md shadow-warning/10 cursor-pointer transition-all duration-200 hover:bg-warning/10 hover:border-warning/50 hover:shadow-lg hover:shadow-warning/20">
+              <Card 
+                className="p-2.5 sm:p-4 border-2 border-warning/30 shadow-md shadow-warning/10 cursor-pointer transition-all duration-200 hover:bg-warning/10 hover:border-warning/50 hover:shadow-lg hover:shadow-warning/20"
+                onClick={() => handleStatsCardClick('pending')}
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-warning/10 shrink-0">
                     <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
@@ -737,7 +772,10 @@ export default function Relatorios() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-2.5 sm:p-4 border-2 border-primary/30 shadow-md shadow-primary/10 cursor-pointer transition-all duration-200 hover:bg-hover/10 hover:border-hover/50 hover:shadow-lg hover:shadow-hover/20">
+              <Card 
+                className="p-2.5 sm:p-4 border-2 border-primary/30 shadow-md shadow-primary/10 cursor-pointer transition-all duration-200 hover:bg-hover/10 hover:border-hover/50 hover:shadow-lg hover:shadow-hover/20"
+                onClick={() => handleStatsCardClick('qty')}
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
                     <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1348,6 +1386,96 @@ export default function Relatorios() {
                 })}
               </TableBody>
             </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Stats Dialog - Shows orders based on card clicked */}
+      <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              {statsDialogTitle} ({statsDialogOrders.length} pedidos)
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="p-3 bg-muted/50">
+                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="text-lg font-bold">
+                  R$ {statsDialogOrders.reduce((acc, o) => acc + o.total, 0).toFixed(2)}
+                </p>
+              </Card>
+              <Card className="p-3 bg-success/10">
+                <p className="text-xs text-muted-foreground">Recebido</p>
+                <p className="text-lg font-bold text-success">
+                  R$ {statsDialogOrders.reduce((acc, o) => acc + (o.amountPaid || 0), 0).toFixed(2)}
+                </p>
+              </Card>
+              <Card className="p-3 bg-destructive/10">
+                <p className="text-xs text-muted-foreground">Pendente</p>
+                <p className="text-lg font-bold text-destructive">
+                  R$ {statsDialogOrders.reduce((acc, o) => acc + (o.total - (o.amountPaid || 0)), 0).toFixed(2)}
+                </p>
+              </Card>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Pedido</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Vendedor</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Pago</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-center">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {statsDialogOrders.map((order) => {
+                    const isPaid = order.paymentStatus === 'paid';
+                    const isPartial = order.paymentStatus === 'partial';
+                    return (
+                      <TableRow 
+                        key={order.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          setStatsDialogOpen(false);
+                          handleOrderClick(order);
+                        }}
+                      >
+                        <TableCell>{safeFormatDate(order.createdAt)}</TableCell>
+                        <TableCell>#{order.id.slice(-4)}</TableCell>
+                        <TableCell>{order.customerName}</TableCell>
+                        <TableCell>{order.sellerName || "-"}</TableCell>
+                        <TableCell>R$ {order.total.toFixed(2)}</TableCell>
+                        <TableCell>R$ {(order.amountPaid || 0).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={isPaid ? "default" : isPartial ? "secondary" : "destructive"}
+                            className={isPaid ? "bg-success text-success-foreground" : ""}
+                          >
+                            {isPaid ? "Pago" : isPartial ? "Parcial" : "Pendente"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-7 w-7 p-0"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
