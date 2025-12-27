@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { useSupabaseFixedExpenses } from "@/hooks/useSupabaseFixedExpenses";
 import { useSupabasePendingInstallments } from "@/hooks/useSupabasePendingInstallments";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
@@ -22,6 +23,7 @@ interface DailyTasksDialogProps {
 export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) {
   const navigate = useNavigate();
   const { orders } = useSupabaseOrders();
+  const { expenses } = useSupabaseExpenses();
   const { fixedExpenses } = useSupabaseFixedExpenses();
   const { pendingInstallments } = useSupabasePendingInstallments();
   const { settings: companySettings } = useSyncedCompanySettings();
@@ -41,10 +43,29 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
 
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
-  const currentDay = today.getDate();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
   
-  // Fixed expenses: only show overdue (dueDay < currentDay) or due today (dueDay === currentDay)
-  const dueOrOverdueFixedExpenses = fixedExpenses.filter(fe => fe.active && fe.dueDay <= currentDay);
+  // Fixed expenses: only show overdue or due today AND not already paid in the current month
+  const dueOrOverdueFixedExpenses = fixedExpenses.filter(fe => {
+    if (!fe.active) return false;
+
+    const wasPaidThisMonth = expenses.some(e => {
+      if (e.category !== 'Gasto Fixo') return false;
+      if (!e.description?.includes(`[${fe.id}]`)) return false;
+      if (!e.date) return false;
+
+      const d = new Date(e.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    if (wasPaidThisMonth) return false;
+
+    const dueDate = new Date(currentYear, currentMonth, fe.dueDay);
+    const dueDateStr = dueDate.toISOString().split('T')[0];
+
+    return dueDateStr <= todayStr;
+  });
   const totalFixedExpenses = dueOrOverdueFixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
 
   // Installments: overdue or due today
