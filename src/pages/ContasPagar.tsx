@@ -58,7 +58,7 @@ import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
 import { useSupabaseFixedExpenses, FixedExpense } from "@/hooks/useSupabaseFixedExpenses";
 import { useAuth } from "@/hooks/useAuth";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ServiceOrder } from "@/lib/types";
 
@@ -101,26 +101,54 @@ export default function ContasPagar() {
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading;
 
-  // Check if a fixed expense was already paid this month
-  const isFixedExpensePaidThisMonth = (fixedExpenseId: string): boolean => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
+  // Check if a fixed expense was already paid for a specific month
+  const isFixedExpensePaidForMonth = (fixedExpenseId: string, month: number, year: number): boolean => {
     return expenses.some(e => 
       e.category === 'Gasto Fixo' && 
       e.description.includes(`[${fixedExpenseId}]`) &&
-      new Date(e.date).getMonth() === currentMonth &&
-      new Date(e.date).getFullYear() === currentYear
+      new Date(e.date).getMonth() === month &&
+      new Date(e.date).getFullYear() === year
     );
   };
 
-  // Filter to show only unpaid fixed expenses for the current month
-  const unpaidFixedExpenses = fixedExpenses.filter(fe => 
-    fe.active && !isFixedExpensePaidThisMonth(fe.id)
-  );
+  // Generate list of pending fixed expenses with their due dates (current month + next month)
+  const pendingFixedExpenses = useMemo(() => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const nextMonthDate = addMonths(today, 1);
+    const nextMonth = nextMonthDate.getMonth();
+    const nextYear = nextMonthDate.getFullYear();
+
+    const pending: Array<{ expense: FixedExpense; dueDate: Date; monthLabel: string }> = [];
+
+    fixedExpenses.filter(fe => fe.active).forEach(expense => {
+      // Check current month
+      if (!isFixedExpensePaidForMonth(expense.id, currentMonth, currentYear)) {
+        const dueDate = new Date(currentYear, currentMonth, expense.dueDay);
+        pending.push({
+          expense,
+          dueDate,
+          monthLabel: format(dueDate, "dd/MM", { locale: ptBR })
+        });
+      }
+      
+      // Check next month
+      if (!isFixedExpensePaidForMonth(expense.id, nextMonth, nextYear)) {
+        const dueDate = new Date(nextYear, nextMonth, expense.dueDay);
+        pending.push({
+          expense,
+          dueDate,
+          monthLabel: format(dueDate, "dd/MM", { locale: ptBR })
+        });
+      }
+    });
+
+    // Sort by due date
+    return pending.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  }, [fixedExpenses, expenses]);
   
-  const totalUnpaidFixedExpenses = unpaidFixedExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalPendingFixedExpenses = pendingFixedExpenses.reduce((sum, p) => sum + p.expense.amount, 0);
 
   // Handle paying a fixed expense
   const handlePayFixedExpense = (expense: FixedExpense) => {
@@ -621,24 +649,24 @@ export default function ContasPagar() {
                   <CardTitle className="text-lg flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5 text-destructive" />
-                      Contas a Pagar Este Mês
+                      Contas a Pagar
                     </span>
                     <Badge variant="destructive" className="text-base px-3">
-                      R$ {totalUnpaidFixedExpenses.toFixed(2)}
+                      R$ {totalPendingFixedExpenses.toFixed(2)}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {unpaidFixedExpenses.length === 0 ? (
+                  {pendingFixedExpenses.length === 0 ? (
                     <div className="text-center py-6 text-muted-foreground">
                       <DollarSign className="w-10 h-10 mx-auto mb-2 text-success opacity-50" />
-                      <p className="text-sm font-medium text-success">Todas as contas do mês estão pagas!</p>
+                      <p className="text-sm font-medium text-success">Todas as contas estão pagas!</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {unpaidFixedExpenses.map((expense) => (
+                      {pendingFixedExpenses.map((item, index) => (
                         <div 
-                          key={expense.id}
+                          key={`${item.expense.id}-${item.dueDate.getTime()}`}
                           className="flex items-center justify-between p-3 rounded-lg bg-background border hover:shadow-md transition-all"
                         >
                           <div className="flex items-center gap-3">
@@ -646,24 +674,24 @@ export default function ContasPagar() {
                               <CalendarDays className="h-5 w-5 text-destructive" />
                             </div>
                             <div>
-                              <p className="font-medium">{expense.name}</p>
+                              <p className="font-medium">{item.expense.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                Vencimento: Dia {expense.dueDay} • {expense.category}
+                                Vencimento: <span className="font-semibold text-destructive">{item.monthLabel}</span> • {item.expense.category}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className="font-bold text-destructive text-lg">
-                              R$ {expense.amount.toFixed(2)}
+                              R$ {item.expense.amount.toFixed(2)}
                             </span>
                             <Button 
                               size="sm"
                               className="bg-success hover:bg-success/90 text-success-foreground gap-1"
-                              onClick={() => handlePayFixedExpense(expense)}
-                              disabled={payingExpenseId === expense.id}
+                              onClick={() => handlePayFixedExpense(item.expense)}
+                              disabled={payingExpenseId === item.expense.id}
                             >
                               <DollarSign className="h-4 w-4" />
-                              {payingExpenseId === expense.id ? 'Pagando...' : 'Pagar'}
+                              {payingExpenseId === item.expense.id ? 'Pagando...' : 'Pagar'}
                             </Button>
                           </div>
                         </div>
@@ -720,7 +748,8 @@ export default function ContasPagar() {
                       </TableRow>
                     ) : (
                       fixedExpenses.map((expense) => {
-                        const isPaid = isFixedExpensePaidThisMonth(expense.id);
+                        const today = new Date();
+                        const isPaidThisMonth = isFixedExpensePaidForMonth(expense.id, today.getMonth(), today.getFullYear());
                         return (
                           <TableRow 
                             key={expense.id}
@@ -728,8 +757,8 @@ export default function ContasPagar() {
                           >
                             <TableCell>
                               <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isPaid ? 'bg-success/10' : 'bg-primary/10'}`}>
-                                  <CalendarDays className={`h-5 w-5 ${isPaid ? 'text-success' : 'text-primary'}`} />
+                                <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isPaidThisMonth ? 'bg-success/10' : 'bg-primary/10'}`}>
+                                  <CalendarDays className={`h-5 w-5 ${isPaidThisMonth ? 'text-success' : 'text-primary'}`} />
                                 </div>
                                 <span className="font-medium">{expense.name}</span>
                               </div>
@@ -746,15 +775,15 @@ export default function ContasPagar() {
                             <TableCell className="text-center">
                               {!expense.active ? (
                                 <Badge variant="outline" className="text-muted-foreground">Inativo</Badge>
-                              ) : isPaid ? (
-                                <Badge className="bg-success/10 text-success border-success/30">Pago</Badge>
+                              ) : isPaidThisMonth ? (
+                                <Badge className="bg-success/10 text-success border-success/30">Pago este mês</Badge>
                               ) : (
                                 <Badge variant="destructive">Pendente</Badge>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                {expense.active && !isPaid && (
+                                {expense.active && !isPaidThisMonth && (
                                   <Button 
                                     size="sm"
                                     className="bg-success hover:bg-success/90 text-success-foreground"
