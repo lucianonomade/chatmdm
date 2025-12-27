@@ -155,7 +155,7 @@ export default function Caixa() {
         id: expense.id,
         orderId: '',
         customer: expense.supplierName,
-        desc: expense.description,
+        desc: expense.description.replace(/\s*\[.*\]$/, ''),
         type: 'out' as const,
         value: expense.amount,
         time: formatTime(expense.date),

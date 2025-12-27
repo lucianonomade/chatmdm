@@ -138,7 +138,7 @@ export default function Financeiro() {
     ...expenses.map(e => ({
       id: e.id,
       orderId: null as string | null,
-      descricao: e.description,
+      descricao: e.description.replace(/\s*\[.*\]$/, ''),
       tipo: 'saida' as const,
       valor: e.amount,
       data: e.date,
@@ -810,7 +810,7 @@ export default function Financeiro() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="font-bold">{expense.description}</p>
+                      <p className="font-bold">{expense.description.replace(/\s*\[.*\]$/, '')}</p>
                       <p className="text-sm text-muted-foreground">{expense.supplierName || 'Sem fornecedor'}</p>
                     </div>
                     <Badge className="bg-destructive/10 text-destructive border-destructive/20">
