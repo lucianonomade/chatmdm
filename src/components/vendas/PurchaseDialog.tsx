@@ -64,7 +64,7 @@ const EXPENSE_CATEGORIES = [
 
 export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
   const { suppliers, addSupplier, isAdding: isAddingSupplier } = useSupabaseSuppliers();
-  const { addExpense, getSupplierBalance, isAdding: isAddingExpense } = useSupabaseExpenses();
+  const { addExpense, isAdding: isAddingExpense } = useSupabaseExpenses();
   const { addInstallments, isAdding: isAddingInstallments } = useSupabasePendingInstallments();
   
   // Purchase form state
@@ -281,9 +281,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                     </p>
                   )}
                   
-                  {filteredSuppliers.map(supplier => {
-                    const balance = getSupplierBalance(supplier.id);
-                    return (
+                  {filteredSuppliers.map(supplier => (
                       <div
                         key={supplier.id}
                         className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
@@ -301,19 +299,12 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                               <span className="truncate">{supplier.phone}</span>
                             </p>
                           )}
-                          {balance > 0 && (
-                            <p className="text-xs text-warning flex items-center gap-1">
-                              <AlertCircle className="h-3 w-3 flex-shrink-0" />
-                              Saldo: R$ {balance.toFixed(2)}
-                            </p>
-                          )}
                         </div>
                         {selectedSupplier === supplier.id && (
                           <Check className="w-4 h-4 text-primary flex-shrink-0" />
                         )}
                       </div>
-                    );
-                  })}
+                    ))}
                 </div>
               </TabsContent>
               

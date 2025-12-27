@@ -38,7 +38,7 @@ interface CategoryManagerDialogProps {
 }
 
 export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDialogProps) {
-  const { categories, addCategory, updateCategory, deleteCategory, isAdding, isUpdating, isDeleting } = useSupabaseCategories();
+  const { categories, isLoading, addCategory, updateCategory, deleteCategory, isAdding, isUpdating, isDeleting } = useSupabaseCategories();
   
   // Add state
   const [showAddConfirm, setShowAddConfirm] = useState(false);
@@ -150,8 +150,12 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
             </div>
 
             {/* Categories list */}
-            <div className="border rounded-lg divide-y max-h-[300px] overflow-y-auto">
-              {categories.length === 0 ? (
+            <div className="border rounded-lg divide-y max-h-[400px] overflow-y-auto">
+              {isLoading ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  Carregando categorias...
+                </div>
+              ) : categories.length === 0 ? (
                 <div className="p-4 text-center text-muted-foreground text-sm">
                   Nenhuma categoria cadastrada
                 </div>
