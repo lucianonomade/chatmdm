@@ -25,6 +25,7 @@ export interface PaymentData {
   method: PaymentMethod;
   paymentDate: Date;
   installments: { date: Date; amount: number }[];
+  cardInstallments?: number; // Number of installments for card payment
 }
 
 interface PaymentDialogProps {
@@ -54,6 +55,7 @@ export function PaymentDialog({
   const [paymentDate, setPaymentDate] = useState<Date>(new Date());
   const [installmentsCount, setInstallmentsCount] = useState(2);
   const [installmentDates, setInstallmentDates] = useState<Date[]>([]);
+  const [cardInstallments, setCardInstallments] = useState(1); // For card payment installments
 
   // Reset states when dialog opens
   useEffect(() => {
@@ -82,9 +84,10 @@ export function PaymentDialog({
     const paymentData: PaymentData = {
       method: paymentMethod,
       paymentDate,
-      installments: remaining > 0 
+      installments: remaining > 0
         ? installmentDates.map(date => ({ date, amount: installmentValue }))
-        : []
+        : [],
+      cardInstallments: paymentMethod === 'card' ? cardInstallments : undefined
     };
 
     onFinishSale(paymentMethod, paymentData);
@@ -103,7 +106,7 @@ export function PaymentDialog({
         <DialogHeader className="p-6 pb-4 pr-12 mt-2">
           <DialogTitle className="text-2xl font-bold text-center">Pagamento</DialogTitle>
         </DialogHeader>
-        
+
         <div className="px-6 pb-6 space-y-5">
           {/* Total da Venda */}
           <div className="bg-muted/30 rounded-xl p-4">
@@ -241,6 +244,38 @@ export function PaymentDialog({
               </button>
             </div>
           </div>
+
+          {/* Card Installments - Only show when card is selected and paying full amount */}
+          {paymentMethod === 'card' && remaining === 0 && (
+            <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/20">
+              <Label className="text-sm font-medium text-primary">Parcelamento no Cartão</Label>
+
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 2, 3, 4, 6, 8, 10, 12].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setCardInstallments(num)}
+                    className={cn(
+                      "rounded-lg border-2 px-3 py-2.5 transition-all text-center",
+                      cardInstallments === num
+                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                        : "border-border bg-background hover:border-primary/50 hover:bg-muted"
+                    )}
+                  >
+                    <div className="text-xs font-semibold">{num}x</div>
+                    <div className="text-[10px] font-medium opacity-80">
+                      R$ {(cartTotal / num).toFixed(2)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                {cardInstallments}x de R$ {(cartTotal / cardInstallments).toFixed(2)} = R$ {cartTotal.toFixed(2)}
+              </p>
+            </div>
+          )}
 
           {/* Data de Pagamento da Entrada */}
           <div className="space-y-2">

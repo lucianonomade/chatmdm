@@ -3,13 +3,14 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useStore } from '@/lib/store';
 
-type AppRole = 'admin' | 'manager' | 'seller';
+type AppRole = 'superadmin' | 'admin' | 'manager' | 'seller';
 
 interface AuthUser {
   id: string;
   email: string;
   name: string;
   role: AppRole;
+  tenant_id: string;
 }
 
 interface AuthContextType {
@@ -30,17 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const ensureUserRecords = async (accessToken: string) => {
+  const ensureUserRecords = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ensure-user`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-    } catch {
-      // ignore (best-effort)
+      await supabase.functions.invoke('ensure-user');
+    } catch (error) {
+      console.error('Error ensuring user records:', error);
     }
   };
 
@@ -49,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Fetch profile
       const { data: profile } = await supabase
         .from('profiles')
-        .select('name')
+        .select('name, tenant_id')
         .eq('id', userId)
         .maybeSingle();
 
@@ -66,27 +61,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: email || '',
           name: profile.name,
           role: roleData.role as AppRole,
+          tenant_id: profile.tenant_id,
         });
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Track previous user ID to detect user changes
   const prevUserIdRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    // Get last logged user ID from localStorage
-    const getLastUserId = () => localStorage.getItem('last_logged_user_id');
-    const setLastUserId = (id: string | null) => {
-      if (id) {
-        localStorage.setItem('last_logged_user_id', id);
-      } else {
-        localStorage.removeItem('last_logged_user_id');
-      }
-    };
+  const getLastUserId = () => localStorage.getItem('last_logged_user_id');
+  const setLastUserId = (id: string | null) => {
+    if (id) {
+      localStorage.setItem('last_logged_user_id', id);
+    } else {
+      localStorage.removeItem('last_logged_user_id');
+    }
+  };
 
+  useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -111,14 +108,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           setTimeout(() => {
-            ensureUserRecords(session.access_token)
-              .finally(() => fetchUserProfile(session.user.id, session.user.email ?? undefined));
+            ensureUserRecords()
+              .finally(() => {
+                fetchUserProfile(session.user.id, session.user.email ?? undefined);
+              });
           }, 0);
         } else {
           setAuthUser(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
@@ -136,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setLastUserId(session.user.id);
         prevUserIdRef.current = session.user.id;
-        ensureUserRecords(session.access_token)
+        ensureUserRecords()
           .finally(() => fetchUserProfile(session.user.id, session.user.email ?? undefined));
       }
 
@@ -152,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
-    
+
     if (error) {
       return { error };
     }
@@ -168,8 +166,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profile && profile.active === false) {
         // Sign out the user immediately
         await supabase.auth.signOut();
-        return { 
-          error: new Error('Sua conta está desativada. Entre em contato com o administrador.') 
+        return {
+          error: new Error('Sua conta está desativada. Entre em contato com o administrador.')
         };
       }
     }
@@ -179,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, name: string, companyName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -210,14 +208,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      authUser, 
-      loading, 
-      signIn, 
-      signUp, 
-      signOut 
+    <AuthContext.Provider value={{
+      user,
+      session,
+      authUser,
+      loading,
+      signIn,
+      signUp,
+      signOut
     }}>
       {children}
     </AuthContext.Provider>

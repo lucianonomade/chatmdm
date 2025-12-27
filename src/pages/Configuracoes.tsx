@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MaskedInput } from "@/components/ui/masked-input";
@@ -14,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -22,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, KeyRound, UserX, UserCheck, Percent } from "lucide-react";
+import { Building2, User, Printer, Bell, Edit, Palette, Upload, ImageIcon, Package, Trash2, Loader2, Download, HelpCircle, UserPlus, KeyRound, UserX, UserCheck, Percent, CreditCard, ShieldCheck, CheckCircle2, QrCode, Copy, Check } from "lucide-react";
 import { SoundSettingsCard } from "@/components/SoundSettingsCard";
 import { Slider } from "@/components/ui/slider";
 import { useStore } from "@/lib/store";
@@ -47,28 +49,28 @@ const COLOR_PRESETS = [
 
 export default function Configuracoes() {
   const { companySettings, updateCompanySettings } = useStore();
-  const { 
-    settings: cloudSettings, 
-    updateSettings: updateCloudSettings, 
+  const {
+    settings: cloudSettings,
+    updateSettings: updateCloudSettings,
     isLoading: isLoadingCloud,
-    isUpdating: isUpdatingSettings 
+    isUpdating: isUpdatingSettings
   } = useCompanySettings();
-  const { 
-    users: supabaseUsers, 
-    isLoading: isLoadingUsers, 
-    updateUserRole, 
+  const {
+    users: supabaseUsers,
+    isLoading: isLoadingUsers,
+    updateUserRole,
     updateUserName,
     createUser,
     toggleUserStatus,
     isUpdatingRole,
     isUpdatingName,
     isCreatingUser,
-    isTogglingStatus 
+    isTogglingStatus
   } = useSupabaseUsers();
   const { authUser } = useAuth();
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Company form state
   const [companyData, setCompanyData] = useState({
     name: "",
@@ -102,7 +104,7 @@ export default function Configuracoes() {
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [userData, setUserData] = useState({
     name: "",
-    role: "seller" as "admin" | "manager" | "seller",
+    role: "seller" as "superadmin" | "admin" | "manager" | "seller",
   });
 
   // Create user dialog state
@@ -111,7 +113,7 @@ export default function Configuracoes() {
     email: "",
     password: "",
     name: "",
-    role: "seller" as "admin" | "manager" | "seller",
+    role: "seller" as "superadmin" | "admin" | "manager" | "seller",
   });
 
   // Reset password dialog state
@@ -183,6 +185,140 @@ export default function Configuracoes() {
     }
   }, [cloudSettings]);
 
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [tenantInfo, setTenantInfo] = useState<any>(null);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [pixData, setPixData] = useState<{ qrCode: string; copyPaste: string; id: string } | null>(null);
+  const [showPixDialog, setShowPixDialog] = useState(false);
+  const [showBillingForm, setShowBillingForm] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const [billingForm, setBillingForm] = useState({
+    name: "",
+    email: "",
+    taxId: "",
+    cellphone: "",
+  });
+
+  useEffect(() => {
+    const fetchTenantInfo = async () => {
+      console.log('Fetching tenant info for:', authUser?.tenant_id);
+      if (!authUser?.tenant_id) return;
+      try {
+        const { data, error: tenantError } = await supabase
+          .from('tenants')
+          .select('*')
+          .eq('id', authUser.tenant_id)
+          .single();
+
+        if (tenantError) throw tenantError;
+        setTenantInfo(data);
+
+        const { data: payData, error: payError } = await supabase
+          .from('tenant_payments')
+          .select('*')
+          .eq('tenant_id', authUser.tenant_id)
+          .order('created_at', { ascending: false });
+
+        if (payError) throw payError;
+        setPayments(payData || []);
+      } catch (error) {
+        console.error('Error fetching tenant/payment info:', error);
+      }
+    };
+    fetchTenantInfo();
+  }, [authUser]);
+
+  const handleCreateBilling = async (amount: number, installments: number = 1) => {
+    setBillingLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-abacate-billing', {
+        body: {
+          amount: amount,
+          description: `Renovação de Assinatura - 30 dias (${installments}x)`,
+          installments: installments,
+          customer: {
+            name: billingForm.name,
+            email: billingForm.email,
+            taxId: billingForm.taxId,
+            cellphone: billingForm.cellphone
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Edge Function Error Details:', error);
+        throw new Error(error.message || "Erro no servidor de pagamentos");
+      }
+
+      if (data.qrCode) {
+        setPixData(data);
+        setShowPixDialog(true);
+      } else if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Error creating billing:', error);
+      toast.error(error.message || "Erro ao gerar cobrança");
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  const startBillingProcess = () => {
+    // Pre-fill with user/company data if available
+    setBillingForm({
+      name: authUser?.name || companyData.name || "",
+      email: authUser?.email || companyData.email || "",
+      taxId: companyData.cnpj || "",
+      cellphone: companyData.phone || "",
+    });
+    setShowBillingForm(true);
+  };
+
+  const copyToClipboard = () => {
+    if (pixData?.copyPaste) {
+      navigator.clipboard.writeText(pixData.copyPaste);
+      setCopied(true);
+      toast.success("Código PIX copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // Poll for payment status
+  useEffect(() => {
+    let interval: number;
+    if (showPixDialog && pixData?.id) {
+      interval = window.setInterval(async () => {
+        const { data } = await supabase
+          .from('tenant_payments')
+          .select('status')
+          .eq('abacate_billing_id', pixData.id)
+          .single();
+
+        if (data?.status === 'PAID') {
+          toast.success("Pagamento confirmado!");
+          setShowPixDialog(false);
+          // Refresh tenant info to show active status
+          const { data: updatedTenant } = await supabase
+            .from('tenants')
+            .select('*')
+            .eq('id', authUser?.tenant_id)
+            .single();
+          setTenantInfo(updatedTenant);
+
+          const { data: payData } = await supabase
+            .from('tenant_payments')
+            .select('*')
+            .eq('tenant_id', authUser?.tenant_id)
+            .order('created_at', { ascending: false });
+          setPayments(payData || []);
+        }
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [showPixDialog, pixData, authUser]);
+
   const handleSaveCompany = () => {
     updateCompanySettings(companyData);
     updateCloudSettings(companyData);
@@ -195,7 +331,7 @@ export default function Configuracoes() {
         toast.error("Imagem muito grande. Máximo 2MB.");
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
@@ -218,14 +354,14 @@ export default function Configuracoes() {
   const hexToHsl = (hex: string): string => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     if (!result) return "221 83% 53%";
-    
+
     let r = parseInt(result[1], 16) / 255;
     let g = parseInt(result[2], 16) / 255;
     let b = parseInt(result[3], 16) / 255;
-    
+
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h = 0, s = 0, l = (max + min) / 2;
-    
+
     if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -235,7 +371,7 @@ export default function Configuracoes() {
         case b: h = ((r - g) / d + 4) / 6; break;
       }
     }
-    
+
     return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
   };
 
@@ -243,47 +379,47 @@ export default function Configuracoes() {
   const hslToHex = (hslStr: string): string => {
     const parts = hslStr.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
     if (!parts) return "#3b82f6";
-    
+
     const h = parseInt(parts[1]) / 360;
     const s = parseInt(parts[2]) / 100;
     const l = parseInt(parts[3]) / 100;
-    
+
     const hue2rgb = (p: number, q: number, t: number) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     };
-    
+
     let r, g, b;
     if (s === 0) {
       r = g = b = l;
     } else {
       const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
+      r = hue2rgb(p, q, h + 1 / 3);
       g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
-    
+
     const toHex = (x: number) => {
       const hex = Math.round(x * 255).toString(16);
       return hex.length === 1 ? '0' + hex : hex;
     };
-    
+
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
   const handleApplyTheme = (preset: typeof COLOR_PRESETS[0]) => {
     setSelectedPreset(preset.name);
-    
+
     // Update custom color inputs with preset colors for preview
     setCustomPrimaryColor(hslToHex(preset.primary));
     setCustomSidebarColor(hslToHex(preset.sidebar));
     setCustomHoverColor(hslToHex(preset.hover));
-    
+
     updateCompanySettings({
       theme: {
         primaryColor: preset.primary,
@@ -291,11 +427,11 @@ export default function Configuracoes() {
         hoverColor: preset.hover,
       }
     });
-    
+
     document.documentElement.style.setProperty('--primary', preset.primary);
     document.documentElement.style.setProperty('--sidebar-background', preset.sidebar);
     document.documentElement.style.setProperty('--hover', preset.hover);
-    
+
     toast.success(`Tema "${preset.name}" aplicado!`);
   };
 
@@ -305,7 +441,7 @@ export default function Configuracoes() {
     const sidebarHsl = hexToHsl(customSidebarColor);
     const hoverHsl = hexToHsl(customHoverColor);
     const sidebarHeaderHsl = hexToHsl(customSidebarHeaderColor);
-    
+
     updateCompanySettings({
       theme: {
         primaryColor: primaryHsl,
@@ -314,12 +450,12 @@ export default function Configuracoes() {
         sidebarHeaderColor: sidebarHeaderHsl,
       }
     });
-    
+
     document.documentElement.style.setProperty('--primary', primaryHsl);
     document.documentElement.style.setProperty('--sidebar-background', sidebarHsl);
     document.documentElement.style.setProperty('--hover', hoverHsl);
     document.documentElement.style.setProperty('--sidebar-header-background', sidebarHeaderHsl);
-    
+
     toast.success("Cores personalizadas aplicadas!");
   };
 
@@ -339,7 +475,7 @@ export default function Configuracoes() {
     if (userData.name !== editingUser.name) {
       updateUserName({ userId: editingUser.id, name: userData.name });
     }
-    
+
     // Update role if changed
     if (userData.role !== editingUser.role) {
       updateUserRole({ userId: editingUser.id, role: userData.role });
@@ -377,9 +513,9 @@ export default function Configuracoes() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.data.session?.access_token}`,
           },
-          body: JSON.stringify({ 
-            userId: resetPasswordUser.id, 
-            newPassword 
+          body: JSON.stringify({
+            userId: resetPasswordUser.id,
+            newPassword
           }),
         }
       );
@@ -404,6 +540,7 @@ export default function Configuracoes() {
 
   const getRoleLabel = (role: string) => {
     switch (role) {
+      case 'superadmin': return 'Super Global';
       case 'admin': return 'Administrador';
       case 'manager': return 'Gerente';
       case 'seller': return 'Vendedor';
@@ -413,6 +550,7 @@ export default function Configuracoes() {
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
+      case 'superadmin': return 'bg-purple-500/10 text-purple-600 border border-purple-200';
       case 'admin': return 'bg-destructive/10 text-destructive';
       case 'manager': return 'bg-warning/10 text-warning';
       case 'seller': return 'bg-primary/10 text-primary';
@@ -470,6 +608,10 @@ export default function Configuracoes() {
             <Percent className="h-4 w-4" />
             Comissões
           </TabsTrigger>
+          <TabsTrigger value="assinatura" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Assinatura
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="empresa">
@@ -479,52 +621,52 @@ export default function Configuracoes() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Nome da Empresa</Label>
-                  <Input 
-                    placeholder="Gráfica Rápida XYZ" 
+                  <Input
+                    placeholder="Gráfica Rápida XYZ"
                     value={companyData.name}
                     onChange={(e) => setCompanyData({ ...companyData, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>CNPJ</Label>
-                  <MaskedInput 
+                  <MaskedInput
                     mask="cnpj"
-                    placeholder="00.000.000/0001-00" 
+                    placeholder="00.000.000/0001-00"
                     value={companyData.cnpj}
                     onChange={(value) => setCompanyData({ ...companyData, cnpj: value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Telefone</Label>
-                  <MaskedInput 
+                  <MaskedInput
                     mask="phone"
-                    placeholder="(00) 0000-0000" 
+                    placeholder="(00) 0000-0000"
                     value={companyData.phone}
                     onChange={(value) => setCompanyData({ ...companyData, phone: value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Telefone 2</Label>
-                  <MaskedInput 
+                  <MaskedInput
                     mask="phone"
-                    placeholder="(00) 0000-0000" 
+                    placeholder="(00) 0000-0000"
                     value={companyData.phone2}
                     onChange={(value) => setCompanyData({ ...companyData, phone2: value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input 
-                    type="email" 
-                    placeholder="contato@grafica.com" 
+                  <Input
+                    type="email"
+                    placeholder="contato@grafica.com"
                     value={companyData.email}
                     onChange={(e) => setCompanyData({ ...companyData, email: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label>Endereço</Label>
-                  <Input 
-                    placeholder="Rua, Número, Bairro - Cidade/UF" 
+                  <Input
+                    placeholder="Rua, Número, Bairro - Cidade/UF"
                     value={companyData.address}
                     onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
                   />
@@ -566,20 +708,20 @@ export default function Configuracoes() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <ChangePasswordDialog />
-                {authUser?.role === 'admin' && (
+                {(authUser?.role === 'admin' || authUser?.role === 'superadmin') && (
                   <Button onClick={() => {
                     // Pre-fill with admin's email for easier management
                     const adminEmail = authUser?.email || '';
                     // Generate a unique email suffix based on timestamp
                     const uniqueSuffix = Date.now().toString().slice(-6);
-                    const generatedEmail = adminEmail 
+                    const generatedEmail = adminEmail
                       ? adminEmail.replace('@', `+vendedor${uniqueSuffix}@`)
                       : `vendedor${uniqueSuffix}@empresa.local`;
-                    setNewUserData({ 
-                      email: generatedEmail, 
-                      password: "", 
-                      name: "", 
-                      role: "seller" 
+                    setNewUserData({
+                      email: generatedEmail,
+                      password: "",
+                      name: "",
+                      role: "seller"
                     });
                     setIsCreateUserDialogOpen(true);
                   }}>
@@ -589,7 +731,7 @@ export default function Configuracoes() {
                 )}
               </div>
             </div>
-            
+
             {isLoadingUsers ? (
               <UsersSkeleton />
             ) : supabaseUsers.length === 0 ? (
@@ -597,24 +739,41 @@ export default function Configuracoes() {
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                   <User className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="font-medium">Nenhum usuário cadastrado</p>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg font-medium">Nenhum usuário cadastrado</h3>
+                <p className="text-muted-foreground mb-6">
                   Clique em "Novo Usuário" para cadastrar o primeiro usuário.
                 </p>
+                {(authUser?.role === 'admin' || authUser?.role === 'superadmin') && (
+                  <Button onClick={() => {
+                    const adminEmail = authUser?.email || '';
+                    const uniqueSuffix = Date.now().toString().slice(-6);
+                    const generatedEmail = adminEmail
+                      ? adminEmail.replace('@', `+vendedor${uniqueSuffix}@`)
+                      : `vendedor${uniqueSuffix}@empresa.local`;
+                    setNewUserData({
+                      email: generatedEmail,
+                      password: "",
+                      name: "",
+                      role: "seller"
+                    });
+                    setIsCreateUserDialogOpen(true);
+                  }}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Novo Usuário
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
                 {supabaseUsers.map((user) => (
-                  <div 
-                    key={user.id} 
-                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                      user.active ? 'bg-muted/50' : 'bg-destructive/5 border border-destructive/20'
-                    }`}
+                  <div
+                    key={user.id}
+                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${user.active ? 'bg-muted/50' : 'bg-destructive/5 border border-destructive/20'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                        user.active ? 'bg-primary/10' : 'bg-muted'
-                      }`}>
+                      <div className={`h-10 w-10 rounded-full flex items-center justify-center ${user.active ? 'bg-primary/10' : 'bg-muted'
+                        }`}>
                         <User className={`h-5 w-5 ${user.active ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div>
@@ -635,11 +794,11 @@ export default function Configuracoes() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {authUser?.role === 'admin' && user.role !== 'admin' && (
+                      {(authUser?.role === 'admin' || authUser?.role === 'superadmin') && user.role !== 'admin' && user.role !== 'superadmin' && (
                         <>
-                          <Button 
+                          <Button
                             variant={user.active ? "outline" : "default"}
-                            size="sm" 
+                            size="sm"
                             onClick={() => toggleUserStatus({ userId: user.id, active: !user.active })}
                             title={user.active ? "Desativar Usuário" : "Ativar Usuário"}
                             disabled={isTogglingStatus}
@@ -650,9 +809,9 @@ export default function Configuracoes() {
                               <UserCheck className="h-4 w-4" />
                             )}
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleOpenResetPassword(user)}
                             title="Resetar Senha"
                           >
@@ -701,7 +860,7 @@ export default function Configuracoes() {
                   <Label htmlFor="new-user-role">Função</Label>
                   <Select
                     value={newUserData.role}
-                    onValueChange={(value: "manager" | "seller") => 
+                    onValueChange={(value: "manager" | "seller") =>
                       setNewUserData({ ...newUserData, role: value })
                     }
                   >
@@ -709,6 +868,8 @@ export default function Configuracoes() {
                       <SelectValue placeholder="Selecione a função" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="superadmin">Super Global</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
                       <SelectItem value="manager">Gerente</SelectItem>
                       <SelectItem value="seller">Vendedor</SelectItem>
                     </SelectContent>
@@ -719,7 +880,7 @@ export default function Configuracoes() {
                 <Button variant="outline" onClick={() => setIsCreateUserDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     if (!newUserData.name.trim()) {
                       toast.error("Nome é obrigatório");
@@ -786,7 +947,7 @@ export default function Configuracoes() {
                 <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button 
+                <Button
                   onClick={handleResetPassword}
                   disabled={isResettingPassword}
                 >
@@ -815,15 +976,15 @@ export default function Configuracoes() {
                     Ativar controle de estoque para produtos. Quando desativado, o estoque não será decrementado nas vendas.
                   </p>
                 </div>
-                <Switch 
-                  checked={usesStock} 
+                <Switch
+                  checked={usesStock}
                   onCheckedChange={(checked) => {
                     setUsesStock(checked);
                     updateCloudSettings({ usesStock: checked });
-                  }} 
+                  }}
                 />
               </div>
-              
+
               {usesStock && (
                 <>
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
@@ -834,14 +995,14 @@ export default function Configuracoes() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Input 
+                      <Input
                         type="number"
                         className="w-24 text-center"
                         value={lowStockThreshold}
                         onChange={(e) => setLowStockThreshold(parseInt(e.target.value) || 0)}
                       />
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => updateCloudSettings({ lowStockThreshold })}
                         disabled={isUpdatingSettings}
@@ -850,7 +1011,7 @@ export default function Configuracoes() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div>
                       <p className="font-medium">Alertas de Estoque Baixo</p>
@@ -858,7 +1019,7 @@ export default function Configuracoes() {
                         Exibir alertas quando produtos atingirem estoque mínimo
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={notifyLowStock}
                       onCheckedChange={(checked) => {
                         setNotifyLowStock(checked);
@@ -866,7 +1027,7 @@ export default function Configuracoes() {
                       }}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div>
                       <p className="font-medium">Histórico de Movimentações</p>
@@ -879,12 +1040,12 @@ export default function Configuracoes() {
                 </>
               )}
             </div>
-            
+
             {!usesStock && (
               <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
                 <p className="text-sm text-warning">
-                  ⚠️ Com o controle de estoque desativado, o sistema não decrementará automaticamente 
-                  a quantidade de produtos ao realizar vendas. Útil para empresas de serviços ou 
+                  ⚠️ Com o controle de estoque desativado, o sistema não decrementará automaticamente
+                  a quantidade de produtos ao realizar vendas. Útil para empresas de serviços ou
                   que não precisam de controle de inventário.
                 </p>
               </div>
@@ -901,7 +1062,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Imprimir Logo nos Recibos</p>
                   <p className="text-sm text-muted-foreground">Incluir logo da empresa nos documentos impressos</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={printLogoOnReceipts}
                   onCheckedChange={(checked) => {
                     setPrintLogoOnReceipts(checked);
@@ -914,7 +1075,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Impressão Automática</p>
                   <p className="text-sm text-muted-foreground">Imprimir automaticamente ao finalizar venda</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={autoPrintOnSale}
                   onCheckedChange={(checked) => {
                     setAutoPrintOnSale(checked);
@@ -935,7 +1096,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Estoque Baixo</p>
                   <p className="text-sm text-muted-foreground">Alertar quando produto atingir estoque mínimo</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={notifyLowStock}
                   onCheckedChange={(checked) => {
                     setNotifyLowStock(checked);
@@ -948,7 +1109,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Novas Vendas</p>
                   <p className="text-sm text-muted-foreground">Notificar sobre novas vendas realizadas</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={notifyNewSales}
                   onCheckedChange={(checked) => {
                     setNotifyNewSales(checked);
@@ -961,7 +1122,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Pagamentos Pendentes</p>
                   <p className="text-sm text-muted-foreground">Alertar sobre clientes com pagamentos em atraso</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={notifyPendingPayments}
                   onCheckedChange={(checked) => {
                     setNotifyPendingPayments(checked);
@@ -974,7 +1135,7 @@ export default function Configuracoes() {
                   <p className="font-medium">Status de Ordens</p>
                   <p className="text-sm text-muted-foreground">Notificar sobre mudanças no status das ordens</p>
                 </div>
-                <Switch 
+                <Switch
                   checked={notifyOrderStatus}
                   onCheckedChange={(checked) => {
                     setNotifyOrderStatus(checked);
@@ -1013,13 +1174,13 @@ export default function Configuracoes() {
                   <p className="text-xs text-muted-foreground">Identidade da empresa</p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col items-center gap-4">
                 <div className="w-full aspect-square max-w-[180px] border-2 border-dashed border-border rounded-xl flex items-center justify-center bg-gradient-to-br from-muted/30 to-muted/10 overflow-hidden group hover:border-primary/50 transition-all duration-300">
                   {logoPreview ? (
-                    <img 
-                      src={logoPreview} 
-                      alt="Logo" 
+                    <img
+                      src={logoPreview}
+                      alt="Logo"
                       className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
@@ -1029,7 +1190,7 @@ export default function Configuracoes() {
                     </div>
                   )}
                 </div>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -1037,10 +1198,10 @@ export default function Configuracoes() {
                   className="hidden"
                   onChange={handleLogoUpload}
                 />
-                
+
                 <div className="flex gap-2 w-full">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1 gap-2 hover:bg-hover/10 hover:border-hover/50"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -1048,8 +1209,8 @@ export default function Configuracoes() {
                     {logoPreview ? "Trocar" : "Enviar"}
                   </Button>
                   {logoPreview && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="icon"
                       className="text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive/50"
                       onClick={handleRemoveLogo}
@@ -1073,25 +1234,24 @@ export default function Configuracoes() {
                   <p className="text-xs text-muted-foreground">Escolha um tema rápido</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {COLOR_PRESETS.map((preset) => (
                   <button
                     key={preset.name}
                     onClick={() => handleApplyTheme(preset)}
-                    className={`group p-4 rounded-xl border-2 transition-all duration-300 text-left cursor-pointer hover:scale-[1.02] hover:shadow-lg ${
-                      selectedPreset === preset.name 
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20 shadow-lg shadow-primary/10' 
-                        : 'border-border hover:border-hover/50 hover:bg-hover/5 hover:shadow-hover/20'
-                    }`}
+                    className={`group p-4 rounded-xl border-2 transition-all duration-300 text-left cursor-pointer hover:scale-[1.02] hover:shadow-lg ${selectedPreset === preset.name
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary/20 shadow-lg shadow-primary/10'
+                      : 'border-border hover:border-hover/50 hover:bg-hover/5 hover:shadow-hover/20'
+                      }`}
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <div 
-                        className="w-8 h-8 rounded-full shadow-inner ring-2 ring-white/20 group-hover:scale-110 transition-transform duration-300" 
+                      <div
+                        className="w-8 h-8 rounded-full shadow-inner ring-2 ring-white/20 group-hover:scale-110 transition-transform duration-300"
                         style={{ background: `hsl(${preset.primary})` }}
                       />
-                      <div 
-                        className="w-8 h-8 rounded-full shadow-inner ring-2 ring-white/20 group-hover:scale-110 transition-transform duration-300" 
+                      <div
+                        className="w-8 h-8 rounded-full shadow-inner ring-2 ring-white/20 group-hover:scale-110 transition-transform duration-300"
                         style={{ background: `hsl(${preset.sidebar})` }}
                       />
                     </div>
@@ -1122,7 +1282,7 @@ export default function Configuracoes() {
                 Aplicar Cores
               </Button>
             </div>
-            
+
             <div className="grid gap-6 md:grid-cols-3">
               {/* Primary Color */}
               <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-hover/30 hover:bg-hover/5 transition-all duration-300">
@@ -1148,14 +1308,14 @@ export default function Configuracoes() {
                       className="font-mono text-sm"
                       maxLength={7}
                     />
-                    <div 
-                      className="h-8 rounded-lg shadow-inner" 
+                    <div
+                      className="h-8 rounded-lg shadow-inner"
                       style={{ backgroundColor: customPrimaryColor }}
                     />
                   </div>
                 </div>
               </div>
-              
+
               {/* Sidebar Color */}
               <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border/50 hover:border-hover/30 hover:bg-hover/5 transition-all duration-300">
                 <div className="flex items-center gap-2">
@@ -1180,8 +1340,8 @@ export default function Configuracoes() {
                       className="font-mono text-sm"
                       maxLength={7}
                     />
-                    <div 
-                      className="h-8 rounded-lg shadow-inner" 
+                    <div
+                      className="h-8 rounded-lg shadow-inner"
                       style={{ backgroundColor: customSidebarColor }}
                     />
                   </div>
@@ -1212,8 +1372,8 @@ export default function Configuracoes() {
                       className="font-mono text-sm"
                       maxLength={7}
                     />
-                    <div 
-                      className="h-8 rounded-lg shadow-inner transition-all duration-300" 
+                    <div
+                      className="h-8 rounded-lg shadow-inner transition-all duration-300"
                       style={{ backgroundColor: customHoverColor }}
                     />
                   </div>
@@ -1244,8 +1404,8 @@ export default function Configuracoes() {
                       className="font-mono text-sm"
                       maxLength={7}
                     />
-                    <div 
-                      className="h-8 rounded-lg shadow-inner transition-all duration-300" 
+                    <div
+                      className="h-8 rounded-lg shadow-inner transition-all duration-300"
                       style={{ backgroundColor: customSidebarHeaderColor }}
                     />
                   </div>
@@ -1267,7 +1427,7 @@ export default function Configuracoes() {
                     Ativar cálculo de comissão sobre vendas realizadas pelos vendedores
                   </p>
                 </div>
-                <Switch 
+                <Switch
                   checked={usesCommission}
                   onCheckedChange={(checked) => {
                     setUsesCommission(checked);
@@ -1275,7 +1435,7 @@ export default function Configuracoes() {
                   }}
                 />
               </div>
-              
+
               {usesCommission && (
                 <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                   <div>
@@ -1286,7 +1446,7 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <Input 
+                      <Input
                         type="number"
                         min="0"
                         max="100"
@@ -1297,8 +1457,8 @@ export default function Configuracoes() {
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => updateCloudSettings({ commissionPercentage })}
                       disabled={isUpdatingSettings}
@@ -1308,11 +1468,11 @@ export default function Configuracoes() {
                   </div>
                 </div>
               )}
-              
+
               {usesCommission && (
                 <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
                   <p className="text-sm text-primary">
-                    💡 Com a comissão ativada, os vendedores poderão visualizar o valor a receber 
+                    💡 Com a comissão ativada, os vendedores poderão visualizar o valor a receber
                     na tela de "Minhas Comissões" no menu lateral.
                   </p>
                 </div>
@@ -1320,7 +1480,127 @@ export default function Configuracoes() {
             </div>
           </Card>
         </TabsContent>
+
+        <TabsContent value="assinatura">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="p-6 md:col-span-2 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    Status da Assinatura
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Gerencie o plano e faturamento da sua empresa.</p>
+                </div>
+                {tenantInfo?.subscription_status === 'active' ? (
+                  <Badge className="bg-green-500">Ativo</Badge>
+                ) : (
+                  <Badge variant="destructive">Inativo / Expirado</Badge>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
+                  <p className="text-xs text-muted-foreground uppercase font-semibold">Expira em</p>
+                  <p className="text-xl font-bold">
+                    {tenantInfo?.subscription_expires_at
+                      ? new Date(tenantInfo.subscription_expires_at).toLocaleDateString()
+                      : "Vitalício"}
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
+                  <p className="text-xs text-muted-foreground uppercase font-semibold">Plano Atual</p>
+                  <p className="text-xl font-bold capitalize">{tenantInfo?.plan || "Profissional"}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium underline decoration-primary/30">Renovar Assinatura</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Card className="p-4 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group" onClick={() => handleCreateBilling(5000)}>
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant="outline" className="bg-background">Mensal</Badge>
+                      <CreditCard className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold">R$ 50,00</p>
+                      <p className="text-xs text-muted-foreground">Acesso total por 30 dias</p>
+                    </div>
+                    <Button
+                      onClick={startBillingProcess}
+                      className="w-full mt-4 gap-2"
+                      disabled={billingLoading}
+                    >
+                      {billingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                      Renovar via PIX
+                    </Button>
+                  </Card>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 space-y-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Histórico
+              </h3>
+              <div className="space-y-4">
+                {payments.length === 0 ? (
+                  <p className="text-sm text-center text-muted-foreground py-8">Nenhum pagamento registrado.</p>
+                ) : (
+                  payments.map((pay: any) => (
+                    <div key={pay.id} className="flex flex-col p-3 rounded-lg border bg-muted/30 gap-1 text-sm">
+                      <div className="flex justify-between font-medium">
+                        <span>PIX - R$ {(pay.amount / 100).toFixed(2)}</span>
+                        <Badge variant={pay.status === 'PAID' ? 'default' : 'outline'} className={pay.status === 'PAID' ? 'bg-green-500' : ''}>
+                          {pay.status === 'PAID' ? 'Pago' : pay.status}
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(pay.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      {/* PIX Payment Dialog */}
+      <Dialog open={showPixDialog} onOpenChange={setShowPixDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pagamento via PIX</DialogTitle>
+            <DialogDescription>
+              Escaneie o QR Code ou copie o código para pagar
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center space-y-6 py-4">
+            <div className="bg-white p-4 rounded-xl border-2 border-primary/10">
+              <img src={pixData?.qrCode} alt="QR Code PIX" className="w-64 h-64" />
+            </div>
+
+            <div className="w-full space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase text-center">Código Copia e Cola</p>
+              <div className="flex gap-2">
+                <div className="flex-1 bg-muted p-2 rounded-lg text-[10px] break-all font-mono border select-all h-20 overflow-y-auto">
+                  {pixData?.copyPaste}
+                </div>
+                <Button size="icon" onClick={copyToClipboard} className="shrink-0 self-center">
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Aguardando confirmação do pagamento...
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* User Dialog */}
       <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
@@ -1331,8 +1611,8 @@ export default function Configuracoes() {
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSaveUser(); }}>
             <div className="space-y-2">
               <Label>Nome *</Label>
-              <Input 
-                placeholder="Nome do usuário" 
+              <Input
+                placeholder="Nome do usuário"
                 value={userData.name}
                 onChange={(e) => setUserData({ ...userData, name: e.target.value })}
               />
@@ -1344,6 +1624,7 @@ export default function Configuracoes() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover">
+                  <SelectItem value="superadmin">Super Global</SelectItem>
                   <SelectItem value="seller">Vendedor</SelectItem>
                   <SelectItem value="manager">Gerente</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>
@@ -1357,8 +1638,8 @@ export default function Configuracoes() {
               <Button type="button" variant="outline" onClick={() => setIsUserDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="gradient-primary text-primary-foreground"
                 disabled={isUpdatingRole || isUpdatingName}
               >
@@ -1370,15 +1651,87 @@ export default function Configuracoes() {
         </DialogContent>
       </Dialog>
 
+      {/* Billing Info Form Dialog */}
+      <Dialog open={showBillingForm} onOpenChange={setShowBillingForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Informações de Faturamento</DialogTitle>
+            <DialogDescription>
+              Confirme seus dados para gerar o PIX com segurança no Abacate Pay.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nome Completo / Razão Social</Label>
+              <Input
+                value={billingForm.name}
+                onChange={(e) => setBillingForm({ ...billingForm, name: e.target.value })}
+                placeholder="Ex: João Silva ou Empresa Ltda"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>E-mail</Label>
+              <Input
+                type="email"
+                value={billingForm.email}
+                onChange={(e) => setBillingForm({ ...billingForm, email: e.target.value })}
+                placeholder="seu@email.com"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>CPF ou CNPJ</Label>
+                <MaskedInput
+                  mask={billingForm.taxId.length > 11 ? "cnpj" : "cpf"}
+                  value={billingForm.taxId}
+                  onChange={(value) => setBillingForm({ ...billingForm, taxId: value })}
+                  placeholder="000.000.000-00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>WhatsApp / Telefone</Label>
+                <MaskedInput
+                  mask="phone"
+                  value={billingForm.cellphone}
+                  onChange={(value) => setBillingForm({ ...billingForm, cellphone: value })}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowBillingForm(false)}>
+              Cancelar
+            </Button>
+            <Button
+              className="gradient-primary"
+              disabled={
+                billingLoading ||
+                !billingForm.name ||
+                !billingForm.email ||
+                billingForm.taxId.replace(/\D/g, '').length < 11 ||
+                billingForm.cellphone.replace(/\D/g, '').length < 10
+              }
+              onClick={() => {
+                setShowBillingForm(false);
+                handleCreateBilling(5000); // R$ 50,00
+              }}
+            >
+              Gerar PIX
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Backup Dialog */}
       <BackupDialog open={backupDialogOpen} onOpenChange={setBackupDialogOpen} />
 
       {/* Onboarding Dialog */}
-      <OnboardingDialog 
-        open={showOnboarding} 
+      <OnboardingDialog
+        open={showOnboarding}
         onOpenChange={setShowOnboarding}
         onComplete={() => setShowOnboarding(false)}
       />
-    </MainLayout>
+    </MainLayout >
   );
 }

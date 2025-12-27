@@ -38,17 +38,17 @@ import { toast } from "sonner";
 import { exportCustomersToExcel, generateCustomerTemplate, parseCustomersExcel } from "@/lib/excelUtils";
 
 export default function Clientes() {
-  const { 
-    customers, 
-    isLoading, 
-    addCustomer, 
-    updateCustomer, 
+  const {
+    customers,
+    isLoading,
+    addCustomer,
+    updateCustomer,
     deleteCustomer,
     isAdding,
     isUpdating,
-    isDeleting 
+    isDeleting
   } = useSupabaseCustomers();
-  
+
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -140,7 +140,7 @@ export default function Clientes() {
     setIsImporting(true);
     try {
       const importedCustomers = await parseCustomersExcel(file);
-      
+
       if (importedCustomers.length === 0) {
         toast.error("Nenhum cliente encontrado no arquivo");
         return;
@@ -157,7 +157,7 @@ export default function Clientes() {
         });
         imported++;
       }
-      
+
       toast.success(`${imported} cliente(s) importado(s) com sucesso`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao importar arquivo");
@@ -200,19 +200,31 @@ export default function Clientes() {
   return (
     <MainLayout title="Clientes">
       <div className="space-y-4 lg:space-y-6">
+        {/* Top Banner/Alert from screenshot */}
+        <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/30 rounded-xl p-3.5 text-sm text-amber-800 dark:text-amber-400 shadow-sm backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-100 dark:bg-amber-800/40 p-1.5 rounded-lg">
+              <Search className="h-4 w-4" />
+            </div>
+            <p className="font-medium">
+              Seu período de teste está ativo. Aproveite todos os recursos usando o sistema.
+            </p>
+          </div>
+        </div>
+
         {/* Header Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-between items-start sm:items-center">
+          <div className="relative flex-1 max-w-md w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar cliente..."
+              placeholder="Pesquisar por nome, CPF ou contato..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-10 text-sm"
+              className="pl-9 h-11 text-sm bg-card/50 border-border/50 rounded-xl focus-visible:ring-primary/20 transition-all font-medium"
             />
           </div>
-          
-          <div className="grid grid-cols-2 sm:flex gap-2 flex-wrap">
+
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {/* Hidden file input */}
             <input
               type="file"
@@ -221,108 +233,117 @@ export default function Clientes() {
               accept=".xlsx,.xls"
               className="hidden"
             />
-            
-            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" onClick={handleExport}>
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Exportar</span>
-              <span className="sm:hidden">Export</span>
-            </Button>
-            
-            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm" onClick={handleDownloadTemplate}>
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Template</span>
-              <span className="sm:hidden">Templ.</span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="gap-1 text-xs sm:text-sm" 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isImporting}
-            >
-              {isImporting ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" /> : <Upload className="h-3 w-3 sm:h-4 sm:w-4" />}
-              <span className="hidden sm:inline">{isImporting ? "Importando..." : "Importar"}</span>
-              <span className="sm:hidden">{isImporting ? "..." : "Import"}</span>
-            </Button>
-            
+
+            <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-xl border border-border/50 shadow-inner">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-8 text-[11px] font-semibold bg-background hover:bg-muted border-border/40 shadow-sm rounded-lg"
+                onClick={handleExport}
+              >
+                <Download className="h-3.5 w-3.5 text-primary/70" />
+                Exportar
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-8 text-[11px] font-semibold bg-background hover:bg-muted border-border/40 shadow-sm rounded-lg"
+                onClick={handleDownloadTemplate}
+              >
+                <Download className="h-3.5 w-3.5 text-primary/70" />
+                Template
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-8 text-[11px] font-semibold bg-background hover:bg-muted border-border/40 shadow-sm rounded-lg"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImporting}
+              >
+                {isImporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5 text-primary/70" />}
+                {isImporting ? "Importando..." : "Importar"}
+              </Button>
+            </div>
+
             <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
               <DialogTrigger asChild>
-                <Button size="sm" className="gradient-primary text-primary-foreground gap-1 text-xs sm:text-sm col-span-2 sm:col-span-1" onClick={() => handleOpenDialog()}>
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-11 px-6 font-bold shadow-lg shadow-primary/20 rounded-xl ml-auto sm:ml-0 transition-all active:scale-95" onClick={() => handleOpenDialog()}>
+                  <Plus className="h-5 w-5" />
                   Novo Cliente
                 </Button>
               </DialogTrigger>
-            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
-              <DialogHeader>
-                <DialogTitle className="text-base lg:text-lg">{editingCustomer ? "Editar Cliente" : "Cadastrar Cliente"}</DialogTitle>
-              </DialogHeader>
-              <form className="space-y-3 lg:space-y-4" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                <div className="space-y-2">
-                  <Label className="text-sm">Nome Completo *</Label>
-                  <Input 
-                    placeholder="Ex: Maria da Silva" 
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="h-10"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3 lg:gap-4">
+              <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
+                <DialogHeader>
+                  <DialogTitle className="text-base lg:text-lg">{editingCustomer ? "Editar Cliente" : "Cadastrar Cliente"}</DialogTitle>
+                </DialogHeader>
+                <form className="space-y-3 lg:space-y-4" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                   <div className="space-y-2">
-                    <Label className="text-sm">CPF/CNPJ</Label>
-                    <MaskedInput 
-                      mask="document"
-                      placeholder="000.000.000-00" 
-                      value={formData.doc}
-                      onChange={(value) => setFormData({ ...formData, doc: value })}
+                    <Label className="text-sm">Nome Completo *</Label>
+                    <Input
+                      placeholder="Ex: Maria da Silva"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm">CPF/CNPJ</Label>
+                      <MaskedInput
+                        mask="document"
+                        placeholder="000.000.000-00"
+                        value={formData.doc}
+                        onChange={(value) => setFormData({ ...formData, doc: value })}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Telefone *</Label>
+                      <MaskedInput
+                        mask="phone"
+                        placeholder="(00) 00000-0000"
+                        value={formData.phone}
+                        onChange={(value) => setFormData({ ...formData, phone: value })}
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">E-mail</Label>
+                    <Input
+                      type="email"
+                      placeholder="cliente@email.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm">Telefone *</Label>
-                    <MaskedInput 
-                      mask="phone"
-                      placeholder="(00) 00000-0000" 
-                      value={formData.phone}
-                      onChange={(value) => setFormData({ ...formData, phone: value })}
+                    <Label className="text-sm">Observações</Label>
+                    <Input
+                      placeholder="Observações sobre o cliente"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       className="h-10"
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm">E-mail</Label>
-                  <Input 
-                    type="email" 
-                    placeholder="cliente@email.com" 
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="h-10"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm">Observações</Label>
-                  <Input 
-                    placeholder="Observações sobre o cliente" 
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="h-10"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-3 lg:pt-4">
-                  <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }} className="h-10 text-sm">
-                    Cancelar
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="gradient-primary text-primary-foreground h-10 text-sm"
-                    disabled={isAdding || isUpdating}
-                  >
-                    {(isAdding || isUpdating) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {editingCustomer ? "Salvar" : "Salvar"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
+                  <div className="flex justify-end gap-2 pt-3 lg:pt-4">
+                    <Button type="button" variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }} className="h-10 text-sm">
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="gradient-primary text-primary-foreground h-10 text-sm"
+                      disabled={isAdding || isUpdating}
+                    >
+                      {(isAdding || isUpdating) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {editingCustomer ? "Salvar" : "Salvar"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
             </Dialog>
           </div>
         </div>
@@ -353,8 +374,8 @@ export default function Clientes() {
             </div>
           ) : (
             filteredClients.map((client) => (
-              <div 
-                key={client.id} 
+              <div
+                key={client.id}
                 className="bg-card rounded-xl border border-border p-3 hover:border-primary/30 transition-all"
               >
                 <div className="flex items-center gap-3">
@@ -369,17 +390,17 @@ export default function Clientes() {
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-8 w-8"
                       onClick={() => handleOpenDialog(client)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-8 w-8 text-destructive"
                       onClick={() => setCustomerToDelete(client)}
                     >
@@ -399,15 +420,15 @@ export default function Clientes() {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-card rounded-xl border border-border shadow-soft overflow-hidden">
+        <div className="hidden lg:block bg-card/30 rounded-xl border border-border/50 shadow-soft overflow-hidden backdrop-blur-sm">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold">Cliente</TableHead>
-                <TableHead className="font-semibold">CPF/CNPJ</TableHead>
-                <TableHead className="font-semibold">Contato</TableHead>
-                <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="font-semibold text-right">Ações</TableHead>
+              <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border/50">
+                <TableHead className="font-bold text-foreground/90">Cliente</TableHead>
+                <TableHead className="font-bold text-foreground/90">CPF/CNPJ</TableHead>
+                <TableHead className="font-bold text-foreground/90">Contato</TableHead>
+                <TableHead className="font-bold text-foreground/90">Status</TableHead>
+                <TableHead className="font-bold text-foreground/90 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -431,44 +452,44 @@ export default function Clientes() {
                 </TableRow>
               ) : (
                 filteredClients.map((client) => (
-                  <TableRow key={client.id} className="hover:bg-hover/10 border-b-2 border-transparent hover:border-hover/30 transition-all duration-200 cursor-pointer">
-                    <TableCell>
+                  <TableRow key={client.id} className="hover:bg-muted/40 border-b border-border/30 transition-all duration-200 group">
+                    <TableCell className="py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center group-hover:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors">
                           <User className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium">{client.name}</p>
+                          <p className="font-semibold text-foreground">{client.name}</p>
                           <p className="text-xs text-muted-foreground">{client.email || "-"}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{client.doc || "-"}</TableCell>
+                    <TableCell className="font-mono text-sm text-muted-foreground">{client.doc || "-"}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Phone className="h-3.5 w-3.5" />
                         {client.phone || "-"}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className="bg-success/10 text-success border-success/20">
+                      <Badge className="bg-success/10 text-success border-success/20 font-medium">
                         Ativo
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                           onClick={() => handleOpenDialog(client)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-destructive hover:text-destructive"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => setCustomerToDelete(client)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -494,8 +515,8 @@ export default function Clientes() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
+            <AlertDialogAction
+              onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
