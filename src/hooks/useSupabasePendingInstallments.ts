@@ -196,7 +196,7 @@ export function useSupabasePendingInstallments() {
       notes?: string;
       totalAmount?: number;
       newInstallmentsCount?: number;
-      firstDueDate?: string;
+      installmentDates?: string[];
       installmentUpdates?: Array<{
         id: string;
         amount?: number;
@@ -223,11 +223,6 @@ export function useSupabasePendingInstallments() {
         const newTotalAmount = data.totalAmount ?? original.total_amount;
         const newInstallmentsCount = data.newInstallmentsCount ?? original.total_installments;
         const amountPerInstallment = Number((newTotalAmount / newInstallmentsCount).toFixed(2));
-        
-        // Parse the first due date
-        const firstDueDate = data.firstDueDate 
-          ? new Date(data.firstDueDate + 'T12:00:00') 
-          : new Date(original.due_date + 'T12:00:00');
 
         // Delete old installments
         const { error: deleteError } = await supabase
@@ -237,22 +232,32 @@ export function useSupabasePendingInstallments() {
 
         if (deleteError) throw deleteError;
 
-        // Create new installments
+        // Create new installments with custom dates if provided
         const newInstallments = [];
         for (let i = 0; i < newInstallmentsCount; i++) {
-          const dueDate = new Date(firstDueDate);
-          dueDate.setMonth(dueDate.getMonth() + i);
+          // Use provided date or calculate based on first date
+          let dueDateStr: string;
+          if (data.installmentDates && data.installmentDates[i]) {
+            dueDateStr = data.installmentDates[i];
+          } else {
+            const firstDate = data.installmentDates?.[0] 
+              ? new Date(data.installmentDates[0] + 'T12:00:00')
+              : new Date(original.due_date + 'T12:00:00');
+            const dueDate = new Date(firstDate);
+            dueDate.setMonth(dueDate.getMonth() + i);
+            dueDateStr = dueDate.toISOString().split('T')[0];
+          }
 
           newInstallments.push({
             expense_id: original.expense_id,
-            supplier_id: data.supplierName !== undefined ? original.supplier_id : original.supplier_id,
+            supplier_id: original.supplier_id,
             supplier_name: data.supplierName ?? original.supplier_name,
             description: data.description ?? original.description,
             total_amount: newTotalAmount,
             installment_number: i + 1,
             total_installments: newInstallmentsCount,
             amount: amountPerInstallment,
-            due_date: dueDate.toISOString().split('T')[0],
+            due_date: dueDateStr,
             category: data.category ?? original.category,
             notes: data.notes ?? original.notes,
             tenant_id: tenantId,

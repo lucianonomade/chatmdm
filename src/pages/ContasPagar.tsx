@@ -120,7 +120,7 @@ export default function ContasPagar() {
   const [editPurchaseNotes, setEditPurchaseNotes] = useState("");
   const [editPurchaseTotalAmount, setEditPurchaseTotalAmount] = useState("");
   const [editPurchaseInstallmentsCount, setEditPurchaseInstallmentsCount] = useState("");
-  const [editPurchaseFirstDueDate, setEditPurchaseFirstDueDate] = useState("");
+  const [editInstallmentDates, setEditInstallmentDates] = useState<string[]>([]);
   const [deletePurchaseConfirmOpen, setDeletePurchaseConfirmOpen] = useState(false);
 
   // Payment dialog state (for partial payments)
@@ -284,8 +284,39 @@ export default function ContasPagar() {
     setEditPurchaseNotes(sortedInstallments[0].notes || "");
     setEditPurchaseTotalAmount(sortedInstallments[0].totalAmount.toFixed(2));
     setEditPurchaseInstallmentsCount(sortedInstallments.length.toString());
-    setEditPurchaseFirstDueDate(sortedInstallments[0].dueDate);
+    // Initialize dates from existing installments
+    setEditInstallmentDates(sortedInstallments.map(i => i.dueDate));
     setEditPurchaseOpen(true);
+  };
+
+  // Handle installments count change - regenerate dates array
+  const handleInstallmentsCountChange = (newCount: string) => {
+    setEditPurchaseInstallmentsCount(newCount);
+    const count = parseInt(newCount);
+    if (isNaN(count) || count < 1) return;
+    
+    // Get first date from current dates or use today
+    const firstDate = editInstallmentDates[0] 
+      ? new Date(editInstallmentDates[0] + 'T12:00:00') 
+      : new Date();
+    
+    // Generate new dates array
+    const newDates: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const date = new Date(firstDate);
+      date.setMonth(date.getMonth() + i);
+      newDates.push(date.toISOString().split('T')[0]);
+    }
+    setEditInstallmentDates(newDates);
+  };
+
+  // Update a specific installment date
+  const handleInstallmentDateChange = (index: number, newDate: string) => {
+    setEditInstallmentDates(prev => {
+      const updated = [...prev];
+      updated[index] = newDate;
+      return updated;
+    });
   };
 
   // Save edited purchase
@@ -301,7 +332,7 @@ export default function ContasPagar() {
     const countChanged = !isNaN(newInstallmentsCount) && newInstallmentsCount !== editPurchaseInstallments.length;
     
     if (amountChanged || countChanged) {
-      // Recreate installments
+      // Recreate installments with custom dates
       updatePurchase({
         installmentIds: editPurchaseInstallments.map(i => i.id),
         description: editPurchaseDescription.trim(),
@@ -310,7 +341,7 @@ export default function ContasPagar() {
         notes: editPurchaseNotes.trim() || undefined,
         totalAmount: amountChanged ? newTotalAmount : undefined,
         newInstallmentsCount: countChanged ? newInstallmentsCount : undefined,
-        firstDueDate: editPurchaseFirstDueDate || undefined,
+        installmentDates: editInstallmentDates,
       });
     } else {
       // Just update common fields
@@ -1946,20 +1977,30 @@ export default function ContasPagar() {
                       min="1"
                       max="48"
                       value={editPurchaseInstallmentsCount}
-                      onChange={(e) => setEditPurchaseInstallmentsCount(e.target.value)}
+                      onChange={(e) => handleInstallmentsCountChange(e.target.value)}
                       placeholder="1"
                     />
                   </div>
                 </div>
 
+                {/* Installment dates */}
                 <div className="space-y-2">
-                  <Label htmlFor="edit-first-due-date">Data 1ª Parcela</Label>
-                  <Input
-                    id="edit-first-due-date"
-                    type="date"
-                    value={editPurchaseFirstDueDate}
-                    onChange={(e) => setEditPurchaseFirstDueDate(e.target.value)}
-                  />
+                  <Label className="text-sm font-semibold">Datas das Parcelas</Label>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {Array.from({ length: parseInt(editPurchaseInstallmentsCount) || 0 }, (_, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                        <Badge variant="outline" className="shrink-0 min-w-[60px] justify-center">
+                          {index + 1}/{editPurchaseInstallmentsCount}
+                        </Badge>
+                        <Input
+                          type="date"
+                          value={editInstallmentDates[index] || ""}
+                          onChange={(e) => handleInstallmentDateChange(index, e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Preview of calculated installment value */}
