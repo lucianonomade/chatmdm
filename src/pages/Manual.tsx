@@ -235,17 +235,19 @@ export default function Manual() {
             <li>4. <a href="#clientes">Clientes</a></li>
             <li>5. <a href="#ordens">Ordens de Serviço</a></li>
             <li>6. <a href="#financeiro">Financeiro</a></li>
-            <li>7. <a href="#caixa">Controle de Caixa</a></li>
-            <li>8. <a href="#comissoes">Comissões</a></li>
-            <li>9. <a href="#relatorios">Relatórios</a></li>
-            <li>10. <a href="#fornecedores">Fornecedores</a></li>
-            <li>11. <a href="#configuracoes">Configurações</a></li>
-            <li>12. <a href="#perfis">Perfis de Usuário</a></li>
-            <li>13. <a href="#seguranca">Segurança e Multi-tenant</a></li>
-            <li>14. <a href="#backup">Backup e Recuperação</a></li>
-            <li>15. <a href="#testes">Qualidade e Testes</a></li>
-            <li>16. <a href="#integracao">Integrações</a></li>
-            <li>17. <a href="#dicas">Dicas e Atalhos</a></li>
+            <li>7. <a href="#contas-pagar">Contas a Pagar</a></li>
+            <li>8. <a href="#contas-receber">Contas a Receber</a></li>
+            <li>9. <a href="#caixa">Controle de Caixa</a></li>
+            <li>10. <a href="#comissoes">Comissões</a></li>
+            <li>11. <a href="#relatorios">Relatórios</a></li>
+            <li>12. <a href="#fornecedores">Fornecedores</a></li>
+            <li>13. <a href="#configuracoes">Configurações</a></li>
+            <li>14. <a href="#perfis">Perfis de Usuário</a></li>
+            <li>15. <a href="#seguranca">Segurança e Multi-tenant</a></li>
+            <li>16. <a href="#backup">Backup e Recuperação</a></li>
+            <li>17. <a href="#testes">Qualidade e Testes</a></li>
+            <li>18. <a href="#integracao">Integrações</a></li>
+            <li>19. <a href="#dicas">Dicas e Atalhos</a></li>
           </ul>
         </div>
 
@@ -646,13 +648,185 @@ export default function Manual() {
           </div>
 
           <div class="warning">
-            <strong>⚠️ Apenas Administradores e Gerentes</strong> têm acesso ao botão "Zerar", que limpa todos os dados locais.
+            <strong>⚠️ Apenas Administradores e Gerentes</strong> têm acesso ao módulo financeiro completo.
           </div>
         </div>
 
-        <!-- 7. CAIXA -->
+        <!-- 7. CONTAS A PAGAR -->
+        <div class="page-break" id="contas-pagar">
+          <h1>7. 💳 Contas a Pagar</h1>
+          <p>Gerencie todas as obrigações financeiras da sua empresa em um só lugar.</p>
+          
+          <div class="section">
+            <h3>📊 Cards de Resumo</h3>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <div>
+                  <strong>Total a Pagar</strong><br/>
+                  Soma de todas as parcelas pendentes. Clique para ver detalhes.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🚚</div>
+                <div>
+                  <strong>Fornecedores</strong><br/>
+                  Total devido a fornecedores. Clique para ver lista detalhada.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">💵</div>
+                <div>
+                  <strong>Comissões</strong><br/>
+                  Comissões pendentes de vendedores (se habilitado).
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🛒</div>
+                <div>
+                  <strong>Compras</strong><br/>
+                  Total de compras e despesas parceladas.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>➕ Nova Despesa Parcelada</h3>
+            <p>Clique em <strong>"Nova Despesa Parcelada"</strong> para cadastrar:</p>
+            <table>
+              <tr><th>Campo</th><th>Descrição</th></tr>
+              <tr><td>Fornecedor</td><td>Selecione ou cadastre um fornecedor</td></tr>
+              <tr><td>Descrição</td><td>Descreva a despesa (obrigatório)</td></tr>
+              <tr><td>Categoria</td><td>Compras, Serviços, Manutenção ou Outros</td></tr>
+              <tr><td>Valor Total</td><td>Valor total da despesa</td></tr>
+              <tr><td>Parcelas</td><td>Número de parcelas (1-48)</td></tr>
+              <tr><td>1ª Parcela</td><td>Data do primeiro vencimento</td></tr>
+              <tr><td>Observações</td><td>Detalhes adicionais</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h3>📅 Lista de Parcelas</h3>
+            <p>A tabela mostra todas as parcelas com:</p>
+            <ul>
+              <li><strong>Vencimento:</strong> Data com indicador de status (vencida, vence hoje, próxima)</li>
+              <li><strong>Descrição:</strong> Nome da despesa e número da parcela</li>
+              <li><strong>Fornecedor:</strong> Nome do fornecedor</li>
+              <li><strong>Categoria:</strong> Tipo da despesa</li>
+              <li><strong>Valor:</strong> Valor da parcela</li>
+              <li><strong>Status:</strong> Pendente ou Pago</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>✅ Dar Baixa em Parcelas</h3>
+            <p>Para marcar uma parcela como paga:</p>
+            <ol>
+              <li>Localize a parcela na lista</li>
+              <li>Clique no botão <strong>"Pagar"</strong></li>
+              <li>O sistema registra a data do pagamento automaticamente</li>
+            </ol>
+          </div>
+
+          <div class="section">
+            <h3>🔍 Filtros</h3>
+            <ul>
+              <li><strong>Status:</strong> Todos, Pendentes ou Pagas</li>
+              <li><strong>Mês/Ano:</strong> Filtre por período</li>
+              <li><strong>Busca:</strong> Encontre por descrição, fornecedor ou categoria</li>
+            </ul>
+          </div>
+
+          <div class="tip">
+            <strong>💡 Dica:</strong> As parcelas vencidas aparecem destacadas em vermelho para facilitar a identificação.
+          </div>
+        </div>
+
+        <!-- 8. CONTAS A RECEBER -->
+        <div class="page-break" id="contas-receber">
+          <h1>8. 📥 Contas a Receber</h1>
+          <p>Controle os valores pendentes de recebimento dos clientes.</p>
+          
+          <div class="section">
+            <h3>📊 Cards de Resumo</h3>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <div>
+                  <strong>Total a Receber</strong><br/>
+                  Soma de todas as parcelas pendentes de clientes.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">⏰</div>
+                <div>
+                  <strong>Vencidas</strong><br/>
+                  Parcelas com vencimento ultrapassado.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📅</div>
+                <div>
+                  <strong>A Vencer</strong><br/>
+                  Parcelas com vencimento futuro.
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">✅</div>
+                <div>
+                  <strong>Recebido no Mês</strong><br/>
+                  Total já recebido no mês atual.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>📋 Lista de Parcelas</h3>
+            <p>A tabela mostra todas as parcelas a receber:</p>
+            <ul>
+              <li><strong>Vencimento:</strong> Data com indicador visual de status</li>
+              <li><strong>Cliente:</strong> Nome do cliente</li>
+              <li><strong>Pedido:</strong> Número do pedido original</li>
+              <li><strong>Descrição:</strong> Detalhes da parcela</li>
+              <li><strong>Valor:</strong> Valor a receber</li>
+              <li><strong>Status:</strong> Pendente ou Recebido</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>✅ Dar Baixa em Recebíveis</h3>
+            <p>Quando o cliente pagar:</p>
+            <ol>
+              <li>Localize a parcela na lista</li>
+              <li>Clique no botão <strong>"Receber"</strong></li>
+              <li>O sistema atualiza o status do pagamento do pedido</li>
+            </ol>
+          </div>
+
+          <div class="section">
+            <h3>🔍 Filtros</h3>
+            <ul>
+              <li><strong>Status:</strong> Todos, Pendentes ou Recebidos</li>
+              <li><strong>Período:</strong> Filtre por mês/ano</li>
+              <li><strong>Cliente:</strong> Busque por nome do cliente</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <h3>📲 Contato com Cliente</h3>
+            <p>Use o botão do <strong>WhatsApp</strong> para enviar lembrete de pagamento diretamente para o cliente.</p>
+          </div>
+
+          <div class="tip">
+            <strong>💡 Dica:</strong> Os recebíveis são criados automaticamente quando uma venda é parcelada ou com pagamento pendente.
+          </div>
+        </div>
+
+        <!-- 9. CAIXA -->
         <div class="page-break" id="caixa">
-          <h1>7. 🏦 Controle de Caixa</h1>
+          <h1>9. 🏦 Controle de Caixa</h1>
           <p>Gerencie o fluxo de caixa diário da sua empresa.</p>
           
           <div class="section">
@@ -758,9 +932,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 8. COMISSÕES -->
+        <!-- 10. COMISSÕES -->
         <div class="page-break" id="comissoes">
-          <h1>8. 💵 Comissões</h1>
+          <h1>10. 💵 Comissões</h1>
           <p>Gerencie as comissões de vendedores sobre as vendas realizadas.</p>
           
           <div class="section">
@@ -828,9 +1002,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 9. RELATÓRIOS -->
+        <!-- 11. RELATÓRIOS -->
         <div class="page-break" id="relatorios">
-          <h1>9. 📊 Relatórios</h1>
+          <h1>11. 📊 Relatórios</h1>
           <p>Gere relatórios detalhados para análise do seu negócio.</p>
           
           <div class="section">
@@ -871,9 +1045,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 10. FORNECEDORES -->
+        <!-- 12. FORNECEDORES -->
         <div class="page-break" id="fornecedores">
-          <h1>10. 🚚 Fornecedores</h1>
+          <h1>12. 🚚 Fornecedores</h1>
           <p>Cadastre e gerencie seus fornecedores.</p>
           
           <div class="section">
@@ -893,9 +1067,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 11. CONFIGURAÇÕES -->
+        <!-- 13. CONFIGURAÇÕES -->
         <div class="page-break" id="configuracoes">
-          <h1>11. ⚙️ Configurações</h1>
+          <h1>13. ⚙️ Configurações</h1>
           <p>Personalize o sistema de acordo com suas necessidades.</p>
           
           <div class="section">
@@ -978,9 +1152,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 12. PERFIS -->
+        <!-- 14. PERFIS -->
         <div class="page-break" id="perfis">
-          <h1>12. 👤 Perfis de Usuário</h1>
+          <h1>14. 👤 Perfis de Usuário</h1>
           <p>O sistema possui três níveis de acesso:</p>
           
           <div class="section">
@@ -1016,9 +1190,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 13. SEGURANÇA -->
+        <!-- 15. SEGURANÇA -->
         <div class="page-break" id="seguranca">
-          <h1>13. 🔒 Segurança e Multi-tenant</h1>
+          <h1>15. 🔒 Segurança e Multi-tenant</h1>
           <p>O sistema foi desenvolvido com segurança em primeiro lugar, utilizando as melhores práticas do mercado.</p>
           
           <div class="section">
@@ -1080,9 +1254,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 14. BACKUP -->
+        <!-- 16. BACKUP -->
         <div class="page-break" id="backup">
-          <h1>14. 💾 Backup e Recuperação</h1>
+          <h1>16. 💾 Backup e Recuperação</h1>
           <p>O sistema oferece funcionalidades de backup para proteção dos seus dados.</p>
           
           <div class="section">
@@ -1124,9 +1298,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 15. TESTES -->
+        <!-- 17. TESTES -->
         <div class="page-break" id="testes">
-          <h1>15. ✅ Qualidade e Testes</h1>
+          <h1>17. ✅ Qualidade e Testes</h1>
           <p>O sistema passa por rigorosos testes de qualidade para garantir seu funcionamento correto.</p>
           
           <div class="section">
@@ -1215,9 +1389,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 16. INTEGRAÇÕES -->
+        <!-- 18. INTEGRAÇÕES -->
         <div class="page-break" id="integracao">
-          <h1>16. 🔗 Integrações</h1>
+          <h1>18. 🔗 Integrações</h1>
           <p>O sistema se integra com diversas ferramentas para ampliar suas funcionalidades.</p>
           
           <div class="section">
@@ -1264,9 +1438,9 @@ export default function Manual() {
           </div>
         </div>
 
-        <!-- 17. DICAS -->
+        <!-- 19. DICAS -->
         <div class="page-break" id="dicas">
-          <h1>17. 💡 Dicas e Atalhos</h1>
+          <h1>19. 💡 Dicas e Atalhos</h1>
           
           <div class="section">
             <h3>⌨️ Atalhos de Teclado</h3>
@@ -1382,7 +1556,7 @@ export default function Manual() {
         </Card>
 
         {/* Quick Links */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-10 gap-3">
           {[
             { icon: Home, title: "Dashboard", color: "text-blue-500", pdfSection: "dashboard" },
             { icon: ShoppingCart, title: "Vendas", color: "text-green-500", pdfSection: "vendas" },
@@ -1390,6 +1564,8 @@ export default function Manual() {
             { icon: Users, title: "Clientes", color: "text-orange-500", pdfSection: "clientes" },
             { icon: ClipboardList, title: "Ordens", color: "text-cyan-500", pdfSection: "ordens" },
             { icon: DollarSign, title: "Financeiro", color: "text-emerald-500", pdfSection: "financeiro" },
+            { icon: ArrowDownCircle, title: "Contas a Pagar", color: "text-red-500", pdfSection: "contas-pagar" },
+            { icon: ArrowUpCircle, title: "Contas a Receber", color: "text-green-500", pdfSection: "contas-receber" },
             { icon: Wallet, title: "Caixa", color: "text-yellow-500", pdfSection: "caixa" },
             { icon: FileText, title: "Relatórios", color: "text-pink-500", pdfSection: "relatorios" },
             { icon: Truck, title: "Fornecedores", color: "text-indigo-500", pdfSection: "fornecedores" },
@@ -1439,55 +1615,67 @@ export default function Manual() {
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
                 <h3 className="font-medium">6. Financeiro</h3>
-                <p className="text-sm text-muted-foreground">Controle de entradas, saídas e contas a receber</p>
+                <p className="text-sm text-muted-foreground">Controle de entradas, saídas e resumo financeiro</p>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <h3 className="font-medium text-primary">7. Contas a Pagar</h3>
+                <p className="text-sm text-muted-foreground">Despesas parceladas, fornecedores e comissões</p>
               </div>
             </div>
             <div className="space-y-3">
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <h3 className="font-medium text-primary">8. Contas a Receber</h3>
+                <p className="text-sm text-muted-foreground">Parcelas de clientes e recebíveis pendentes</p>
+              </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">7. Controle de Caixa</h3>
+                <h3 className="font-medium">9. Controle de Caixa</h3>
                 <p className="text-sm text-muted-foreground">Fluxo de caixa, suprimentos, sangrias e gastos fixos</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">8. Relatórios</h3>
+                <h3 className="font-medium">10. Comissões</h3>
+                <p className="text-sm text-muted-foreground">Gerenciamento de comissões por vendedor</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">11. Relatórios</h3>
                 <p className="text-sm text-muted-foreground">Relatórios de vendas, estoque e inadimplência</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">9. Fornecedores</h3>
+                <h3 className="font-medium">12. Fornecedores</h3>
                 <p className="text-sm text-muted-foreground">Cadastro de fornecedores</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">10. Configurações</h3>
+                <h3 className="font-medium">13. Configurações</h3>
                 <p className="text-sm text-muted-foreground">Dados da empresa, usuários, temas e notificações</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">11. Perfis de Usuário</h3>
+                <h3 className="font-medium">14. Perfis de Usuário</h3>
                 <p className="text-sm text-muted-foreground">Permissões de Admin, Gerente e Vendedor</p>
-              </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">12. Segurança</h3>
-                <p className="text-sm text-muted-foreground">Multi-tenant, RLS e controle de acesso</p>
               </div>
             </div>
             <div className="space-y-3">
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">13. Backup</h3>
+                <h3 className="font-medium">15. Segurança</h3>
+                <p className="text-sm text-muted-foreground">Multi-tenant, RLS e controle de acesso</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <h3 className="font-medium">16. Backup</h3>
                 <p className="text-sm text-muted-foreground">Backup automático e exportação de dados</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">14. Qualidade e Testes</h3>
+                <h3 className="font-medium">17. Qualidade e Testes</h3>
                 <p className="text-sm text-muted-foreground">Testes automatizados, E2E e acessibilidade</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">15. Integrações</h3>
+                <h3 className="font-medium">18. Integrações</h3>
                 <p className="text-sm text-muted-foreground">WhatsApp, impressão, Excel e PWA</p>
               </div>
               <div className="p-3 bg-muted/50 rounded-lg">
-                <h3 className="font-medium">16. Dicas e Atalhos</h3>
+                <h3 className="font-medium">19. Dicas e Atalhos</h3>
                 <p className="text-sm text-muted-foreground">Atalhos de teclado, busca global e personalização</p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
                 <h3 className="font-medium text-primary">🆕 Novidades</h3>
-                <p className="text-sm text-muted-foreground">Recuperação de senha automática via email, login por nome, segurança aprimorada</p>
+                <p className="text-sm text-muted-foreground">Contas a Pagar, Contas a Receber, recuperação de senha</p>
               </div>
             </div>
           </div>
