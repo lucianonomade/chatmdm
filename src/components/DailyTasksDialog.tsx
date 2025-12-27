@@ -42,10 +42,12 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   const currentDay = today.getDate();
-  const pendingFixedExpenses = fixedExpenses.filter(fe => fe.active && fe.dueDay >= currentDay);
-  const totalFixedExpenses = pendingFixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  
+  // Fixed expenses: only show overdue (dueDay < currentDay) or due today (dueDay === currentDay)
+  const dueOrOverdueFixedExpenses = fixedExpenses.filter(fe => fe.active && fe.dueDay <= currentDay);
+  const totalFixedExpenses = dueOrOverdueFixedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
 
-  // Get overdue and due today installments
+  // Installments: overdue or due today
   const overdueInstallments = pendingInstallments.filter(i => i.dueDate <= todayStr);
   const totalInstallments = overdueInstallments.reduce((acc, curr) => acc + curr.amount, 0);
   
@@ -140,9 +142,18 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
     if (type === 'all' || type === 'payables') {
       printWindow.document.write(`
         <div class="section">
-          <div class="section-title">CONTAS A PAGAR (MÊS)</div>
-          ${pendingFixedExpenses.length === 0 ? '<div>Todas as contas pagas</div>' : ''}
-          ${pendingFixedExpenses.map(expense => `
+          <div class="section-title">CONTAS A PAGAR (VENCIDAS/HOJE)</div>
+          ${dueOrOverdueFixedExpenses.length === 0 && overdueInstallments.length === 0 ? '<div>Todas as contas pagas</div>' : ''}
+          ${overdueInstallments.map(installment => `
+            <div class="item">
+              <div>
+                <div class="item-name">${escapeHtml(installment.description)} (${installment.installmentNumber}/${installment.totalInstallments})</div>
+                <div class="item-details">Venc. ${new Date(installment.dueDate + 'T12:00:00').toLocaleDateString()}</div>
+              </div>
+              <div>R$ ${installment.amount.toFixed(2)}</div>
+            </div>
+          `).join('')}
+          ${dueOrOverdueFixedExpenses.map(expense => `
             <div class="item">
               <div>
                 <div class="item-name">${escapeHtml(expense.name)}</div>
@@ -372,7 +383,7 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-2 pb-2">
-                  {pendingFixedExpenses.length === 0 && overdueInstallments.length === 0 ? (
+                  {dueOrOverdueFixedExpenses.length === 0 && overdueInstallments.length === 0 ? (
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5 py-1">
                       <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Todas as contas pagas
                     </p>
@@ -400,8 +411,8 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                         </div>
                       ))}
                       
-                      {/* Fixed Expenses */}
-                      {pendingFixedExpenses.slice(0, overdueInstallments.length >= 2 ? 1 : 3 - overdueInstallments.length).map(expense => (
+                      {/* Fixed Expenses due or overdue */}
+                      {dueOrOverdueFixedExpenses.slice(0, overdueInstallments.length >= 2 ? 1 : 3 - overdueInstallments.length).map(expense => (
                         <div 
                           key={expense.id} 
                           className="flex items-center justify-between p-1.5 rounded bg-background/60 hover:bg-background"
@@ -416,9 +427,9 @@ export function DailyTasksDialog({ open, onOpenChange }: DailyTasksDialogProps) 
                         </div>
                       ))}
                       
-                      {(pendingFixedExpenses.length + overdueInstallments.length) > 3 && (
+                      {(dueOrOverdueFixedExpenses.length + overdueInstallments.length) > 3 && (
                         <p className="text-[10px] text-muted-foreground text-center py-0.5">
-                          +{(pendingFixedExpenses.length + overdueInstallments.length) - 3} mais
+                          +{(dueOrOverdueFixedExpenses.length + overdueInstallments.length) - 3} mais
                         </p>
                       )}
                     </div>
