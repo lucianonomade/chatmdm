@@ -78,7 +78,7 @@ export default function ContasPagar() {
   const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense } = useSupabaseExpenses();
   const { orders, isLoading: ordersLoading } = useSupabaseOrders();
   const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense, isLoading: fixedLoading } = useSupabaseFixedExpenses();
-  const { pendingInstallments, totalPendingAmount, payInstallment, isLoading: installmentsLoading, isPaying: isPayingInstallment } = useSupabasePendingInstallments();
+  const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase } = useSupabasePendingInstallments();
   const { authUser } = useAuth();
   const { settings: companySettings } = useSyncedCompanySettings();
   
@@ -110,6 +110,14 @@ export default function ContasPagar() {
   // Grouped installments dialog state
   const [selectedGroupedInstallments, setSelectedGroupedInstallments] = useState<PendingInstallment[]>([]);
   const [groupedInstallmentsOpen, setGroupedInstallmentsOpen] = useState(false);
+
+  // Edit purchase dialog state
+  const [editPurchaseOpen, setEditPurchaseOpen] = useState(false);
+  const [editPurchaseInstallments, setEditPurchaseInstallments] = useState<PendingInstallment[]>([]);
+  const [editPurchaseDescription, setEditPurchaseDescription] = useState("");
+  const [editPurchaseSupplier, setEditPurchaseSupplier] = useState("");
+  const [editPurchaseCategory, setEditPurchaseCategory] = useState("");
+  const [editPurchaseNotes, setEditPurchaseNotes] = useState("");
 
   // Payment dialog state (for partial payments)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
@@ -259,6 +267,32 @@ export default function ContasPagar() {
   // Quick pay for installment (full amount)
   const handlePayInstallment = (installment: PendingInstallment) => {
     openPaymentDialog('installment', installment, installment.amount);
+  };
+
+  // Open edit purchase dialog
+  const handleEditPurchase = (installments: PendingInstallment[]) => {
+    if (installments.length === 0) return;
+    setEditPurchaseInstallments(installments);
+    setEditPurchaseDescription(installments[0].description);
+    setEditPurchaseSupplier(installments[0].supplierName || "");
+    setEditPurchaseCategory(installments[0].category || "");
+    setEditPurchaseNotes(installments[0].notes || "");
+    setEditPurchaseOpen(true);
+  };
+
+  // Save edited purchase
+  const handleSaveEditPurchase = () => {
+    if (!editPurchaseDescription.trim()) return;
+    
+    updatePurchase({
+      installmentIds: editPurchaseInstallments.map(i => i.id),
+      description: editPurchaseDescription.trim(),
+      supplierName: editPurchaseSupplier.trim() || undefined,
+      category: editPurchaseCategory.trim() || undefined,
+      notes: editPurchaseNotes.trim() || undefined,
+    });
+    
+    setEditPurchaseOpen(false);
   };
 
   const usesCommission = companySettings?.usesCommission || false;
@@ -721,6 +755,17 @@ export default function ContasPagar() {
                                   Total: R$ {group.totalAmount.toFixed(2)}
                                 </p>
                               </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditPurchase(group.installments);
+                                }}
+                                title="Editar compra"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -1702,16 +1747,29 @@ export default function ContasPagar() {
             
             {selectedGroupedInstallments.length > 0 && (
               <div className="space-y-4 flex-1 overflow-y-auto">
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <p className="font-semibold">{selectedGroupedInstallments[0].description}</p>
-                  {selectedGroupedInstallments[0].supplierName && (
-                    <p className="text-sm text-muted-foreground">
-                      Fornecedor: {selectedGroupedInstallments[0].supplierName}
+                <div className="bg-muted/50 rounded-lg p-3 flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="font-semibold">{selectedGroupedInstallments[0].description}</p>
+                    {selectedGroupedInstallments[0].supplierName && (
+                      <p className="text-sm text-muted-foreground">
+                        Fornecedor: {selectedGroupedInstallments[0].supplierName}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Valor total da compra: <span className="font-semibold">R$ {selectedGroupedInstallments[0].totalAmount.toFixed(2)}</span>
                     </p>
-                  )}
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Valor total da compra: <span className="font-semibold">R$ {selectedGroupedInstallments[0].totalAmount.toFixed(2)}</span>
-                  </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setGroupedInstallmentsOpen(false);
+                      handleEditPurchase(selectedGroupedInstallments);
+                    }}
+                    title="Editar compra"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
@@ -1770,6 +1828,76 @@ export default function ContasPagar() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Purchase Dialog */}
+        <Dialog open={editPurchaseOpen} onOpenChange={setEditPurchaseOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit2 className="h-5 w-5 text-primary" />
+                Editar Compra
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Descrição *</Label>
+                <Input
+                  id="edit-description"
+                  value={editPurchaseDescription}
+                  onChange={(e) => setEditPurchaseDescription(e.target.value)}
+                  placeholder="Descrição da compra"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-supplier">Fornecedor</Label>
+                <Input
+                  id="edit-supplier"
+                  value={editPurchaseSupplier}
+                  onChange={(e) => setEditPurchaseSupplier(e.target.value)}
+                  placeholder="Nome do fornecedor"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Categoria</Label>
+                <Input
+                  id="edit-category"
+                  value={editPurchaseCategory}
+                  onChange={(e) => setEditPurchaseCategory(e.target.value)}
+                  placeholder="Categoria"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-notes">Observações</Label>
+                <Input
+                  id="edit-notes"
+                  value={editPurchaseNotes}
+                  onChange={(e) => setEditPurchaseNotes(e.target.value)}
+                  placeholder="Observações"
+                />
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                * As alterações serão aplicadas em {editPurchaseInstallments.length} parcela{editPurchaseInstallments.length > 1 ? 's' : ''}
+              </p>
+
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setEditPurchaseOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSaveEditPurchase}
+                  disabled={!editPurchaseDescription.trim() || isUpdatingPurchase}
+                >
+                  {isUpdatingPurchase ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

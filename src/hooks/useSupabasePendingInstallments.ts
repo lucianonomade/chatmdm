@@ -152,6 +152,72 @@ export function useSupabasePendingInstallments() {
     },
   });
 
+  const updateInstallment = useMutation({
+    mutationFn: async (data: {
+      id: string;
+      description?: string;
+      supplierName?: string;
+      amount?: number;
+      dueDate?: string;
+      category?: string;
+      notes?: string;
+    }) => {
+      const updateData: Record<string, unknown> = {};
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.supplierName !== undefined) updateData.supplier_name = data.supplierName;
+      if (data.amount !== undefined) updateData.amount = data.amount;
+      if (data.dueDate !== undefined) updateData.due_date = data.dueDate;
+      if (data.category !== undefined) updateData.category = data.category;
+      if (data.notes !== undefined) updateData.notes = data.notes;
+
+      const { error } = await supabase
+        .from('pending_installments')
+        .update(updateData)
+        .eq('id', data.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending_installments'] });
+      toast.success("Parcela atualizada!");
+    },
+    onError: (error) => {
+      console.error('Error updating installment:', error);
+      toast.error("Erro ao atualizar parcela");
+    },
+  });
+
+  const updatePurchase = useMutation({
+    mutationFn: async (data: {
+      installmentIds: string[];
+      description?: string;
+      supplierName?: string;
+      category?: string;
+      notes?: string;
+    }) => {
+      const updateData: Record<string, unknown> = {};
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.supplierName !== undefined) updateData.supplier_name = data.supplierName;
+      if (data.category !== undefined) updateData.category = data.category;
+      if (data.notes !== undefined) updateData.notes = data.notes;
+
+      const { error } = await supabase
+        .from('pending_installments')
+        .update(updateData)
+        .in('id', data.installmentIds);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending_installments'] });
+      toast.success("Compra atualizada!");
+    },
+    onError: (error) => {
+      console.error('Error updating purchase:', error);
+      toast.error("Erro ao atualizar compra");
+    },
+  });
+
   return {
     installments,
     pendingInstallments,
@@ -161,8 +227,11 @@ export function useSupabasePendingInstallments() {
     addInstallments: addInstallments.mutate,
     payInstallment: payInstallment.mutate,
     deleteInstallment: deleteInstallment.mutate,
+    updateInstallment: updateInstallment.mutate,
+    updatePurchase: updatePurchase.mutate,
     isAdding: addInstallments.isPending,
     isPaying: payInstallment.isPending,
     isDeleting: deleteInstallment.isPending,
+    isUpdating: updateInstallment.isPending || updatePurchase.isPending,
   };
 }
