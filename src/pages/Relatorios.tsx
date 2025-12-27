@@ -41,6 +41,8 @@ import {
   Clock,
   Eye,
   User,
+  Truck,
+  Star,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,6 +51,7 @@ import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
 import { useSyncedCompanySettings } from "@/hooks/useSyncedCompanySettings";
 import { useSupabaseUsers } from "@/hooks/useSupabaseUsers";
 import { useSupabaseCustomers } from "@/hooks/useSupabaseCustomers";
+import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { format } from "date-fns";
 import { OrderDetailsDialog } from "@/components/ordens/OrderDetailsDialog";
 import { ServiceOrder } from "@/lib/types";
@@ -60,11 +63,13 @@ export default function Relatorios() {
   const { settings: companySettings } = useSyncedCompanySettings();
   const { users } = useSupabaseUsers();
   const { customers } = useSupabaseCustomers();
+  const { suppliers } = useSupabaseSuppliers();
   const { authUser } = useAuth();
   const [activeTab, setActiveTab] = useState("vendas");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [vendedor, setVendedor] = useState("todos");
+  const [fornecedor, setFornecedor] = useState("todos");
   const [searchTerm, setSearchTerm] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null);
@@ -233,6 +238,70 @@ export default function Relatorios() {
 
     return { pendingOrders, totalPending, byCustomer };
   }, [filteredOrders, customers, searchTerm]);
+
+  // Purchases by supplier report data
+  const supplierPurchasesData = useMemo(() => {
+    // Filter expenses by supplier if selected
+    let expensesToAnalyze = filteredExpenses.filter(e => e.supplierId || e.supplierName);
+    
+    if (fornecedor !== "todos") {
+      expensesToAnalyze = expensesToAnalyze.filter(e => e.supplierId === fornecedor || e.supplierName === fornecedor);
+    }
+
+    const bySupplier = suppliers.map(supplier => {
+      const supplierExpenses = filteredExpenses.filter(e => e.supplierId === supplier.id);
+      const total = supplierExpenses.reduce((acc, e) => acc + e.amount, 0);
+      return {
+        id: supplier.id,
+        name: supplier.name,
+        total,
+        count: supplierExpenses.length,
+      };
+    }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+
+    const totalPurchased = expensesToAnalyze.reduce((acc, e) => acc + e.amount, 0);
+
+    return { bySupplier, totalPurchased, expensesToAnalyze };
+  }, [filteredExpenses, suppliers, fornecedor]);
+
+  // Top selling products report
+  const topProductsData = useMemo(() => {
+    const productSales = new Map<string, { name: string; quantity: number; revenue: number }>();
+
+    filteredOrders.forEach(order => {
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach((item: any) => {
+          const key = item.name || item.productName || 'Produto';
+          const existing = productSales.get(key) || { name: key, quantity: 0, revenue: 0 };
+          existing.quantity += item.quantity || 1;
+          existing.revenue += (item.price || 0) * (item.quantity || 1);
+          productSales.set(key, existing);
+        });
+      }
+    });
+
+    return Array.from(productSales.values())
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+  }, [filteredOrders]);
+
+  // Top customers report
+  const topCustomersData = useMemo(() => {
+    const customerPurchases = new Map<string, { name: string; orders: number; total: number; paid: number }>();
+
+    filteredOrders.forEach(order => {
+      const key = order.customerName || 'Cliente não identificado';
+      const existing = customerPurchases.get(key) || { name: key, orders: 0, total: 0, paid: 0 };
+      existing.orders += 1;
+      existing.total += order.total;
+      existing.paid += order.amountPaid || 0;
+      customerPurchases.set(key, existing);
+    });
+
+    return Array.from(customerPurchases.values())
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }, [filteredOrders]);
 
   // Customer orders for the customer search feature
   const customerOrders = useMemo(() => {
@@ -562,78 +631,103 @@ export default function Relatorios() {
 
         {/* Filters Card */}
         <Card className="p-3 sm:p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 items-end">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Data Inicial</Label>
-              <div className="relative">
-                <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Data Final</Label>
-              <div className="relative">
-                <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
-                />
-              </div>
-            </div>
-            {/* Only show seller filter for admin/manager */}
-            {!isSeller && (
+          <div className="flex flex-col gap-3">
+            {/* Row 1: Dates and Seller */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Vendedor</Label>
-                <Select value={vendedor} onValueChange={setVendedor}>
-                  <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="todos">Todos</SelectItem>
-                    {sellers.map((s) => (
-                      <SelectItem key={s.id} value={s.name}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-xs">Data Inicial</Label>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
+                  />
+                </div>
               </div>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Buscar Cliente</Label>
-              <div className="relative">
-                <User className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Nome do cliente..."
-                  value={customerSearch}
-                  onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs">Data Final</Label>
+                <div className="relative">
+                  <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
+                  />
+                </div>
               </div>
+              {/* Only show seller filter for admin/manager */}
+              {!isSeller && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Vendedor</Label>
+                  <Select value={vendedor} onValueChange={setVendedor}>
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectItem value="todos">Todos</SelectItem>
+                      {sellers.map((s) => (
+                        <SelectItem key={s.id} value={s.name}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {!isSeller && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Fornecedor</Label>
+                  <Select value={fornecedor} onValueChange={setFornecedor}>
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectItem value="todos">Todos</SelectItem>
+                      {suppliers.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
-            <div className="flex gap-1 sm:gap-2 col-span-2 md:col-span-1">
-              <Button
-                onClick={() => handlePrint(activeTab)}
-                variant="outline"
-                className="h-8 sm:h-9 flex-1 text-xs sm:text-sm px-2"
-              >
-                <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Imprimir</span>
-              </Button>
-              <Button
-                onClick={() => handlePrint(activeTab)}
-                className="h-8 sm:h-9 flex-1 gradient-primary text-primary-foreground text-xs sm:text-sm px-2"
-              >
-                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">PDF</span>
-              </Button>
+            
+            {/* Row 2: Search and Actions */}
+            <div className="flex flex-wrap gap-2 items-end">
+              <div className="flex-1 min-w-[150px] max-w-[250px] space-y-1.5">
+                <Label className="text-xs">Buscar Cliente</Label>
+                <div className="relative">
+                  <User className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Nome do cliente..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="pl-7 sm:pl-8 h-8 sm:h-9 text-xs sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => handlePrint(activeTab)}
+                  variant="outline"
+                  className="h-8 sm:h-9 text-xs sm:text-sm px-3"
+                >
+                  <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  Imprimir
+                </Button>
+                <Button
+                  onClick={() => handlePrint(activeTab)}
+                  className="h-8 sm:h-9 gradient-primary text-primary-foreground text-xs sm:text-sm px-3"
+                >
+                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  PDF
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -872,6 +966,100 @@ export default function Relatorios() {
                 </div>
               </Card>
             </div>
+
+            {/* Top Products and Top Customers Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  Produtos Mais Vendidos
+                </h3>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {topProductsData.length > 0 ? topProductsData.map((product, index) => (
+                    <div key={product.name} className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center text-xs">
+                          {index + 1}
+                        </Badge>
+                        <span className="truncate max-w-[150px]">{product.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-medium">R$ {product.revenue.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground ml-2">({product.quantity}x)</span>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhum produto vendido no período</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-blue-500" />
+                  Clientes que Mais Compram
+                </h3>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {topCustomersData.length > 0 ? topCustomersData.map((customer, index) => (
+                    <div 
+                      key={customer.name} 
+                      className="flex justify-between items-center p-2 bg-muted/50 rounded cursor-pointer hover:bg-muted"
+                      onClick={() => handleCustomerClick(customer.name)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center text-xs">
+                          {index + 1}
+                        </Badge>
+                        <span className="truncate max-w-[150px]">{customer.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-medium">R$ {customer.total.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground ml-2">({customer.orders} pedidos)</span>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhuma venda no período</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Purchases by Supplier */}
+            {!isSeller && supplierPurchasesData.bySupplier.length > 0 && (
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-purple-500" />
+                  Compras por Fornecedor
+                  <Badge variant="secondary" className="ml-auto">
+                    Total: R$ {supplierPurchasesData.totalPurchased.toFixed(2)}
+                  </Badge>
+                </h3>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fornecedor</TableHead>
+                        <TableHead className="text-center">Compras</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {supplierPurchasesData.bySupplier.map((supplier) => (
+                        <TableRow key={supplier.id}>
+                          <TableCell className="font-medium">{supplier.name}</TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline">{supplier.count}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold text-destructive">
+                            R$ {supplier.total.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </Card>
+            )}
 
             {/* Seller Sales Table - Shows when a seller is selected */}
             {vendedor !== "todos" && (
