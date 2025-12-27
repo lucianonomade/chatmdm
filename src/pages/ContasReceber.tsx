@@ -78,14 +78,19 @@ export default function ContasReceber() {
     // Date filter
     if (dateFrom || dateTo) {
       const orderDate = new Date(o.createdAt);
+      // Normalize dates to compare only date parts
+      const orderDateOnly = startOfDay(orderDate);
+      
       if (dateFrom && dateTo) {
-        if (!isWithinInterval(orderDate, { start: startOfDay(dateFrom), end: endOfDay(dateTo) })) {
+        const fromDate = startOfDay(dateFrom);
+        const toDate = endOfDay(dateTo);
+        if (orderDateOnly < fromDate || orderDateOnly > toDate) {
           return false;
         }
       } else if (dateFrom) {
-        if (orderDate < startOfDay(dateFrom)) return false;
+        if (orderDateOnly < startOfDay(dateFrom)) return false;
       } else if (dateTo) {
-        if (orderDate > endOfDay(dateTo)) return false;
+        if (orderDateOnly > endOfDay(dateTo)) return false;
       }
     }
     
@@ -550,19 +555,20 @@ export default function ContasReceber() {
         {/* Table */}
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <Table className="table-fixed w-full" containerClassName="overflow-x-hidden">
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold px-3 w-[110px]">Pedido</TableHead>
-                  <TableHead className="font-semibold px-3 hidden sm:table-cell">Cliente</TableHead>
-                  <TableHead className="font-semibold px-3 hidden md:table-cell w-[120px]">Data</TableHead>
-                  <TableHead className="font-semibold px-3 text-right hidden lg:table-cell w-[120px]">Total</TableHead>
-                  <TableHead className="font-semibold px-3 text-right hidden lg:table-cell w-[120px]">Pago</TableHead>
-                  <TableHead className="font-semibold px-3 text-right w-[130px]">Pendente</TableHead>
-                  <TableHead className="font-semibold px-3 hidden sm:table-cell w-[110px]">Status</TableHead>
-                  <TableHead className="font-semibold px-3 text-right w-[92px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
+            <div className="overflow-x-auto">
+              <Table className="w-full min-w-[600px]">
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold px-3 whitespace-nowrap">Pedido</TableHead>
+                    <TableHead className="font-semibold px-3 whitespace-nowrap">Cliente</TableHead>
+                    <TableHead className="font-semibold px-3 whitespace-nowrap">Data</TableHead>
+                    <TableHead className="font-semibold px-3 text-right whitespace-nowrap">Total</TableHead>
+                    <TableHead className="font-semibold px-3 text-right whitespace-nowrap">Pago</TableHead>
+                    <TableHead className="font-semibold px-3 text-right whitespace-nowrap">Pendente</TableHead>
+                    <TableHead className="font-semibold px-3 whitespace-nowrap">Status</TableHead>
+                    <TableHead className="font-semibold px-3 text-right whitespace-nowrap">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {filteredOrders.length === 0 ? (
                   <TableRow>
@@ -584,23 +590,22 @@ export default function ContasReceber() {
                         onClick={() => handleViewOrder(order)}
                       >
                         <TableCell className="px-3 py-3">
-                          <div className="font-mono text-sm font-medium truncate">#{order.id}</div>
-                          <div className="text-xs text-muted-foreground sm:hidden truncate">{order.customerName}</div>
+                          <div className="font-mono text-sm font-medium">#{order.id}</div>
                         </TableCell>
-                        <TableCell className="font-medium hidden sm:table-cell px-3 py-3 truncate">{order.customerName}</TableCell>
-                        <TableCell className="text-muted-foreground hidden md:table-cell px-3 py-3 whitespace-nowrap">
+                        <TableCell className="font-medium px-3 py-3 max-w-[200px] truncate">{order.customerName}</TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 whitespace-nowrap">
                           {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                         </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell px-3 py-3 whitespace-nowrap">
+                        <TableCell className="text-right px-3 py-3 whitespace-nowrap">
                           R$ {order.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-right text-success hidden lg:table-cell px-3 py-3 whitespace-nowrap">
+                        <TableCell className="text-right text-success px-3 py-3 whitespace-nowrap">
                           R$ {paid.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="text-right font-bold text-warning px-3 py-3 whitespace-nowrap">
                           R$ {remaining.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell px-3 py-3">
+                        <TableCell className="px-3 py-3">
                           <Badge className={
                             order.paymentStatus === 'partial'
                               ? "bg-warning/10 text-warning border-warning/20"
@@ -625,7 +630,8 @@ export default function ContasReceber() {
                   })
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
