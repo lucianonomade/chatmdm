@@ -76,7 +76,7 @@ interface SellerCommission {
 
 export default function ContasPagar() {
   const { suppliers, isLoading: suppliersLoading } = useSupabaseSuppliers();
-  const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense } = useSupabaseExpenses();
+  const { expenses, supplierBalances, getSupplierBalance, isLoading: expensesLoading, addExpense, deleteExpense, isDeleting: isDeletingExpense } = useSupabaseExpenses();
   const { orders, isLoading: ordersLoading } = useSupabaseOrders();
   const { fixedExpenses, totalFixedExpenses, addFixedExpense, updateFixedExpense, deleteFixedExpense, isLoading: fixedLoading } = useSupabaseFixedExpenses();
   const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, deletePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase, isDeleting: isDeletingPurchase } = useSupabasePendingInstallments();
@@ -144,6 +144,10 @@ export default function ContasPagar() {
 
   // Stats Cards Dialog state
   const [statsDialogOpen, setStatsDialogOpen] = useState<'total' | 'fornecedores' | 'comissoes' | 'compras' | null>(null);
+
+  // Expense delete confirmation state
+  const [expenseToDeleteId, setExpenseToDeleteId] = useState<string | null>(null);
+  const [deleteExpenseConfirmOpen, setDeleteExpenseConfirmOpen] = useState(false);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
 
@@ -1035,6 +1039,7 @@ export default function ContasPagar() {
                     <TableHead className="font-semibold">Fornecedor</TableHead>
                     <TableHead className="font-semibold">Categoria</TableHead>
                     <TableHead className="font-semibold text-right">Valor</TableHead>
+                    <TableHead className="font-semibold text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1042,7 +1047,7 @@ export default function ContasPagar() {
                     <TableSkeleton />
                   ) : expenses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12">
+                      <TableCell colSpan={6} className="text-center py-12">
                         <div className="flex flex-col items-center gap-3">
                           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
                             <ShoppingCart className="h-8 w-8 text-muted-foreground" />
@@ -1094,6 +1099,20 @@ export default function ContasPagar() {
                           </TableCell>
                           <TableCell className="text-right font-bold text-warning">
                             R$ {expense.amount.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                setExpenseToDeleteId(expense.id);
+                                setDeleteExpenseConfirmOpen(true);
+                              }}
+                              title="Excluir despesa"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -2665,6 +2684,33 @@ export default function ContasPagar() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Delete Expense Confirmation Dialog */}
+        <AlertDialog open={deleteExpenseConfirmOpen} onOpenChange={setDeleteExpenseConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir despesa?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setExpenseToDeleteId(null)}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (expenseToDeleteId) {
+                    deleteExpense(expenseToDeleteId);
+                    setExpenseToDeleteId(null);
+                    setDeleteExpenseConfirmOpen(false);
+                  }
+                }}
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </MainLayout>
   );
