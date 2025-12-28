@@ -1517,13 +1517,13 @@ export default function Configuracoes() {
               <div className="space-y-4">
                 <h4 className="font-medium underline decoration-primary/30">Renovar Assinatura</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Card className="p-4 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group" onClick={() => handleCreateBilling(5000)}>
+                  <Card className="p-4 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group" onClick={() => handleCreateBilling(3500)}>
                     <div className="flex justify-between items-start mb-2">
                       <Badge variant="outline" className="bg-background">Mensal</Badge>
                       <CreditCard className="h-5 w-5 text-primary" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-2xl font-bold">R$ 50,00</p>
+                      <p className="text-2xl font-bold">R$ 35,00</p>
                       <p className="text-xs text-muted-foreground">Acesso total por 30 dias</p>
                     </div>
                     <Button
@@ -1714,7 +1714,7 @@ export default function Configuracoes() {
               }
               onClick={() => {
                 setShowBillingForm(false);
-                handleCreateBilling(5000); // R$ 50,00
+                handleCreateBilling(3500); // R$ 35,00
               }}
             >
               Gerar PIX

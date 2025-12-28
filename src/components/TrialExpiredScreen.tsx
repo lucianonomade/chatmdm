@@ -36,7 +36,7 @@ export function TrialExpiredScreen() {
     try {
       const { data, error } = await supabase.functions.invoke('create-abacate-billing', {
         body: {
-          amount: 5000,
+          amount: 3500,
           description: 'Ativação do Sistema - Licença 30 dias',
           customer: {
             name: billingForm.name,
@@ -125,7 +125,7 @@ export function TrialExpiredScreen() {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <p className="text-sm font-medium text-primary">Plano Profissional</p>
-                <p className="text-2xl font-bold">R$ 50,00</p>
+                <p className="text-2xl font-bold">R$ 35,00</p>
               </div>
               <div className="p-2 bg-background rounded-lg border">
                 <CheckCircle2 className="h-6 w-6 text-green-500" />
