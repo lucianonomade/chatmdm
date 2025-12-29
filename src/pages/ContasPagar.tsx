@@ -82,7 +82,7 @@ export default function ContasPagar() {
   const { pendingInstallments, totalPendingAmount, payInstallment, updatePurchase, deletePurchase, isLoading: installmentsLoading, isPaying: isPayingInstallment, isUpdating: isUpdatingPurchase, isDeleting: isDeletingPurchase } = useSupabasePendingInstallments();
   const { authUser } = useAuth();
   const { settings: companySettings } = useSyncedCompanySettings();
-  
+
   const [search, setSearch] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -91,7 +91,7 @@ export default function ContasPagar() {
   const [sellerDetailsOpen, setSellerDetailsOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<ServiceOrder | null>(null);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
-  
+
   // Fixed expense form state
   const [fixedExpenseOpen, setFixedExpenseOpen] = useState(false);
   const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
@@ -102,7 +102,7 @@ export default function ContasPagar() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
   const [payingExpenseId, setPayingExpenseId] = useState<string | null>(null);
-  
+
   // Installment details dialog state
   const [selectedInstallment, setSelectedInstallment] = useState<PendingInstallment | null>(null);
   const [installmentDetailsOpen, setInstallmentDetailsOpen] = useState(false);
@@ -135,7 +135,7 @@ export default function ContasPagar() {
   const [commissionPaymentOpen, setCommissionPaymentOpen] = useState(false);
   const [sellerToPayCommission, setSellerToPayCommission] = useState<SellerCommission | null>(null);
   const [isPayingCommission, setIsPayingCommission] = useState(false);
-  
+
   // Per-order commission payment state
   const [selectedOrdersForCommission, setSelectedOrdersForCommission] = useState<Set<string>>(new Set());
   const [orderCommissionDialogOpen, setOrderCommissionDialogOpen] = useState(false);
@@ -151,14 +151,14 @@ export default function ContasPagar() {
 
   // Expense edit state
   const [editExpenseOpen, setEditExpenseOpen] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<{id: string; description: string; amount: string; category: string; supplierName: string} | null>(null);
+  const [editingExpense, setEditingExpense] = useState<{ id: string; description: string; amount: string; category: string; supplierName: string } | null>(null);
 
   const isLoading = suppliersLoading || expensesLoading || ordersLoading || fixedLoading || installmentsLoading;
 
   // Group pending installments by description (same purchase)
   const groupedPendingInstallments = useMemo(() => {
     const groups = new Map<string, PendingInstallment[]>();
-    
+
     pendingInstallments.forEach(installment => {
       const key = `${installment.description}-${installment.supplierId || 'none'}`;
       if (!groups.has(key)) {
@@ -176,17 +176,27 @@ export default function ContasPagar() {
       installments: installments.sort((a, b) => a.installmentNumber - b.installmentNumber),
       pendingCount: installments.length,
       totalPending: installments.reduce((sum, i) => sum + i.amount, 0),
-      nextDueDate: installments.reduce((earliest, i) => 
-        new Date(i.dueDate) < new Date(earliest) ? i.dueDate : earliest, 
+      nextDueDate: installments.reduce((earliest, i) =>
+        new Date(i.dueDate + 'T12:00:00') < new Date(earliest + 'T12:00:00') ? i.dueDate : earliest,
         installments[0].dueDate
       ),
     }));
   }, [pendingInstallments]);
 
+  const formatDateSafely = (dateStr: string) => {
+    try {
+      if (!dateStr) return "-";
+      return format(parseISO(dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00'), "dd/MM/yyyy", { locale: ptBR });
+    } catch (e) {
+      console.error("Erro ao formatar data:", dateStr, e);
+      return dateStr;
+    }
+  };
+
   // Check if a fixed expense was already paid for a specific month
   const isFixedExpensePaidForMonth = (fixedExpenseId: string, month: number, year: number): boolean => {
-    return expenses.some(e => 
-      e.category === 'Gasto Fixo' && 
+    return expenses.some(e =>
+      e.category === 'Gasto Fixo' &&
       e.description.includes(`[${fixedExpenseId}]`) &&
       new Date(e.date).getMonth() === month &&
       new Date(e.date).getFullYear() === year
@@ -214,7 +224,7 @@ export default function ContasPagar() {
           monthLabel: format(dueDate, "dd/MM", { locale: ptBR })
         });
       }
-      
+
       // Check next month
       if (!isFixedExpensePaidForMonth(expense.id, nextMonth, nextYear)) {
         const dueDate = new Date(nextYear, nextMonth, expense.dueDay);
@@ -229,7 +239,7 @@ export default function ContasPagar() {
     // Sort by due date
     return pending.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }, [fixedExpenses, expenses]);
-  
+
   const totalPendingFixedExpenses = pendingFixedExpenses.reduce((sum, p) => sum + p.expense.amount, 0);
 
   // Open payment dialog
@@ -249,7 +259,7 @@ export default function ContasPagar() {
     if (paymentType === 'fixed' && paymentItem) {
       const expense = paymentItem as FixedExpense;
       setPayingExpenseId(expense.id);
-      
+
       addExpense({
         supplierId: '',
         supplierName: 'Gasto Fixo',
@@ -258,12 +268,12 @@ export default function ContasPagar() {
         date: new Date().toISOString(),
         category: 'Gasto Fixo'
       });
-      
+
       setTimeout(() => setPayingExpenseId(null), 500);
     } else if (paymentType === 'installment' && paymentItem) {
       const installment = paymentItem as PendingInstallment;
       setPayingInstallmentId(installment.id);
-      
+
       addExpense({
         supplierId: installment.supplierId || '',
         supplierName: installment.supplierName || 'Compra Parcelada',
@@ -272,12 +282,12 @@ export default function ContasPagar() {
         date: new Date().toISOString(),
         category: installment.category || 'Compras'
       });
-      
+
       // Only mark as paid if paying full amount
       if (!isPartialPayment || amount >= installment.amount) {
         payInstallment(installment.id);
       }
-      
+
       setTimeout(() => setPayingInstallmentId(null), 500);
     }
 
@@ -317,12 +327,12 @@ export default function ContasPagar() {
     setEditPurchaseInstallmentsCount(newCount);
     const count = parseInt(newCount);
     if (isNaN(count) || count < 1) return;
-    
+
     // Get first date from current dates or use today
-    const firstDate = editInstallmentDates[0] 
-      ? new Date(editInstallmentDates[0] + 'T12:00:00') 
+    const firstDate = editInstallmentDates[0]
+      ? new Date(editInstallmentDates[0] + 'T12:00:00')
       : new Date();
-    
+
     // Generate new dates array
     const newDates: string[] = [];
     for (let i = 0; i < count; i++) {
@@ -345,15 +355,15 @@ export default function ContasPagar() {
   // Save edited purchase
   const handleSaveEditPurchase = () => {
     if (!editPurchaseDescription.trim()) return;
-    
+
     const originalInstallment = editPurchaseInstallments[0];
     const newTotalAmount = parseFloat(editPurchaseTotalAmount);
     const newInstallmentsCount = parseInt(editPurchaseInstallmentsCount);
-    
+
     // Check if total amount or installments count changed
     const amountChanged = !isNaN(newTotalAmount) && newTotalAmount !== originalInstallment.totalAmount;
     const countChanged = !isNaN(newInstallmentsCount) && newInstallmentsCount !== editPurchaseInstallments.length;
-    
+
     if (amountChanged || countChanged) {
       // Recreate installments with custom dates
       updatePurchase({
@@ -376,7 +386,7 @@ export default function ContasPagar() {
         notes: editPurchaseNotes.trim() || undefined,
       });
     }
-    
+
     setEditPurchaseOpen(false);
   };
 
@@ -414,19 +424,19 @@ export default function ContasPagar() {
   // Calculate seller commissions for selected month
   const sellerCommissions = useMemo((): SellerCommission[] => {
     if (!usesCommission || !orders) return [];
-    
+
     const [year, month] = selectedMonth.split('-').map(Number);
     const monthStart = startOfMonth(new Date(year, month - 1));
     const monthEnd = endOfMonth(new Date(year, month - 1));
     const commissionRate = commissionPercentage / 100;
-    
+
     const commissionMap = new Map<string, SellerCommission>();
-    
+
     orders.forEach(order => {
       const orderDate = parseISO(order.createdAt);
       const isInMonth = isWithinInterval(orderDate, { start: monthStart, end: monthEnd });
       const hasPaidAmount = (order.amountPaid || 0) > 0;
-      
+
       if (isInMonth && hasPaidAmount && order.sellerId) {
         const existing = commissionMap.get(order.sellerId) || {
           sellerId: order.sellerId,
@@ -436,17 +446,17 @@ export default function ContasPagar() {
           ordersCount: 0,
           orders: [],
         };
-        
+
         const amountPaid = order.amountPaid || 0;
         existing.totalSales += amountPaid;
         existing.commissionAmount += amountPaid * commissionRate;
         existing.ordersCount += 1;
         existing.orders.push(order);
-        
+
         commissionMap.set(order.sellerId, existing);
       }
     });
-    
+
     return Array.from(commissionMap.values()).sort((a, b) => b.commissionAmount - a.commissionAmount);
   }, [orders, selectedMonth, commissionPercentage, usesCommission]);
 
@@ -466,10 +476,10 @@ export default function ContasPagar() {
 
   const totalPayable = suppliersWithBalance.reduce((sum, s) => sum + s.balance, 0);
 
-  const selectedSupplierData = selectedSupplier 
-    ? suppliers.find(s => s.id === selectedSupplier) 
+  const selectedSupplierData = selectedSupplier
+    ? suppliers.find(s => s.id === selectedSupplier)
     : null;
-  
+
   const selectedSupplierExpenses = selectedSupplier
     ? expenses.filter(e => e.supplierId === selectedSupplier)
     : [];
@@ -492,12 +502,12 @@ export default function ContasPagar() {
   // Pay commission handler
   const handlePayCommission = async () => {
     if (!sellerToPayCommission) return;
-    
+
     setIsPayingCommission(true);
     try {
       const [year, month] = selectedMonth.split('-').map(Number);
       const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
-      
+
       addExpense({
         supplierId: '',
         supplierName: sellerToPayCommission.sellerName,
@@ -506,7 +516,7 @@ export default function ContasPagar() {
         date: new Date().toISOString(),
         category: 'Comissão',
       });
-      
+
       setCommissionPaymentOpen(false);
       setSellerToPayCommission(null);
     } finally {
@@ -551,16 +561,16 @@ export default function ContasPagar() {
   // Pay commission for selected orders
   const handlePaySelectedOrdersCommission = async () => {
     if (!selectedSeller || selectedOrdersForCommission.size === 0) return;
-    
+
     setIsPayingOrderCommission(true);
     try {
       const [year, month] = selectedMonth.split('-').map(Number);
       const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
       const commissionRate = commissionPercentage / 100;
-      
+
       const selectedOrders = selectedSeller.orders.filter(o => selectedOrdersForCommission.has(o.id));
       const totalCommission = selectedOrders.reduce((sum, o) => sum + (o.amountPaid || 0) * commissionRate, 0);
-      
+
       addExpense({
         supplierId: '',
         supplierName: selectedSeller.sellerName,
@@ -569,7 +579,7 @@ export default function ContasPagar() {
         date: new Date().toISOString(),
         category: 'Comissão',
       });
-      
+
       setSelectedOrdersForCommission(new Set());
     } finally {
       setIsPayingOrderCommission(false);
@@ -579,14 +589,14 @@ export default function ContasPagar() {
   // Pay commission for a single order
   const handlePaySingleOrderCommission = async () => {
     if (!orderToPayCommission) return;
-    
+
     setIsPayingOrderCommission(true);
     try {
       const [year, month] = selectedMonth.split('-').map(Number);
       const monthName = format(new Date(year, month - 1), 'MMMM/yyyy', { locale: ptBR });
       const commissionRate = commissionPercentage / 100;
       const commissionAmount = (orderToPayCommission.amountPaid || 0) * commissionRate;
-      
+
       addExpense({
         supplierId: '',
         supplierName: orderToPayCommission.sellerName || 'Vendedor',
@@ -595,7 +605,7 @@ export default function ContasPagar() {
         date: new Date().toISOString(),
         category: 'Comissão',
       });
-      
+
       setOrderCommissionDialogOpen(false);
       setOrderToPayCommission(null);
     } finally {
@@ -766,7 +776,7 @@ export default function ContasPagar() {
         </body>
       </html>
     `;
-    
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(printContent);
@@ -801,7 +811,7 @@ export default function ContasPagar() {
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card 
+          <Card
             className="border-l-4 border-l-warning cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => setStatsDialogOpen('total')}
           >
@@ -820,7 +830,7 @@ export default function ContasPagar() {
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             className="cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => setStatsDialogOpen('fornecedores')}
           >
@@ -840,7 +850,7 @@ export default function ContasPagar() {
           </Card>
 
           {usesCommission && (
-            <Card 
+            <Card
               className="cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => setStatsDialogOpen('comissoes')}
             >
@@ -860,7 +870,7 @@ export default function ContasPagar() {
             </Card>
           )}
 
-          <Card 
+          <Card
             className="cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => setStatsDialogOpen('compras')}
           >
@@ -956,7 +966,7 @@ export default function ContasPagar() {
                       {groupedPendingInstallments.map((group) => {
                         const isOverdue = new Date(group.nextDueDate) < new Date();
                         return (
-                          <div 
+                          <div
                             key={group.key}
                             className={`flex items-center justify-between p-3 rounded-lg bg-background border hover:shadow-md transition-all cursor-pointer ${isOverdue ? 'border-destructive/50' : ''}`}
                             onClick={() => {
@@ -975,7 +985,7 @@ export default function ContasPagar() {
                                     {group.pendingCount} parcela{group.pendingCount > 1 ? 's' : ''} pendente{group.pendingCount > 1 ? 's' : ''}
                                   </Badge>
                                   <span className={`${isOverdue ? 'text-destructive font-semibold' : ''}`}>
-                                    Próx. venc: {format(new Date(group.nextDueDate), "dd/MM/yyyy", { locale: ptBR })}
+                                    Próx. venc: {formatDateSafely(group.nextDueDate)}
                                   </span>
                                   {group.supplierName && ` • ${group.supplierName}`}
                                 </p>
@@ -1067,18 +1077,18 @@ export default function ContasPagar() {
                     </TableRow>
                   ) : (
                     expenses
-                      .filter(e => 
+                      .filter(e =>
                         e.description.toLowerCase().includes(search.toLowerCase()) ||
                         e.supplierName?.toLowerCase().includes(search.toLowerCase()) ||
                         e.category?.toLowerCase().includes(search.toLowerCase())
                       )
                       .map((expense) => (
-                        <TableRow 
+                        <TableRow
                           key={expense.id}
                           className="hover:bg-hover/10 transition-all"
                         >
                           <TableCell className="text-muted-foreground">
-                            {expense.date ? format(parseISO(expense.date), "dd/MM/yyyy", { locale: ptBR }) : "-"}
+                            {formatDateSafely(expense.date)}
                           </TableCell>
                           <TableCell className="font-medium">{expense.description.replace(/\s*\[.*\]$/, '')}</TableCell>
                           <TableCell>
@@ -1180,7 +1190,7 @@ export default function ContasPagar() {
                   ) : (
                     <div className="space-y-2">
                       {pendingFixedExpenses.map((item, index) => (
-                        <div 
+                        <div
                           key={`${item.expense.id}-${item.dueDate.getTime()}`}
                           className="flex items-center justify-between p-3 rounded-lg bg-background border hover:shadow-md transition-all"
                         >
@@ -1199,7 +1209,7 @@ export default function ContasPagar() {
                             <span className="font-bold text-destructive text-lg">
                               R$ {item.expense.amount.toFixed(2)}
                             </span>
-                            <Button 
+                            <Button
                               size="sm"
                               className="bg-success hover:bg-success/90 text-success-foreground gap-1"
                               onClick={() => handlePayFixedExpense(item.expense)}
@@ -1229,7 +1239,7 @@ export default function ContasPagar() {
                   Novo Gasto Fixo
                 </Button>
               </div>
-              
+
               <div className="bg-card rounded-xl border border-border shadow-soft overflow-hidden">
                 <Table>
                   <TableHeader>
@@ -1266,7 +1276,7 @@ export default function ContasPagar() {
                         const today = new Date();
                         const isPaidThisMonth = isFixedExpensePaidForMonth(expense.id, today.getMonth(), today.getFullYear());
                         return (
-                          <TableRow 
+                          <TableRow
                             key={expense.id}
                             className={`hover:bg-hover/10 transition-all ${!expense.active ? 'opacity-50' : ''}`}
                           >
@@ -1299,7 +1309,7 @@ export default function ContasPagar() {
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 {expense.active && !isPaidThisMonth && (
-                                  <Button 
+                                  <Button
                                     size="sm"
                                     className="bg-success hover:bg-success/90 text-success-foreground"
                                     onClick={() => handlePayFixedExpense(expense)}
@@ -1308,15 +1318,15 @@ export default function ContasPagar() {
                                     <DollarSign className="h-4 w-4" />
                                   </Button>
                                 )}
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={() => handleOpenFixedExpenseForm(expense)}
                                 >
                                   <Edit2 className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="destructive" 
+                                <Button
+                                  variant="destructive"
                                   size="sm"
                                   onClick={() => {
                                     setExpenseToDelete(expense.id);
@@ -1382,8 +1392,8 @@ export default function ContasPagar() {
                     </TableRow>
                   ) : (
                     filteredSuppliers.map((fornecedor) => (
-                      <TableRow 
-                        key={fornecedor.id} 
+                      <TableRow
+                        key={fornecedor.id}
                         className="hover:bg-hover/10 transition-all cursor-pointer"
                         onClick={() => handleViewDetails(fornecedor.id)}
                       >
@@ -1407,8 +1417,8 @@ export default function ContasPagar() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1477,8 +1487,8 @@ export default function ContasPagar() {
                         </TableRow>
                       ) : (
                         sellerCommissions.map((seller) => (
-                          <TableRow 
-                            key={seller.sellerId} 
+                          <TableRow
+                            key={seller.sellerId}
                             className="hover:bg-hover/10 transition-all cursor-pointer"
                             onClick={() => handleViewSellerDetails(seller)}
                           >
@@ -1503,8 +1513,8 @@ export default function ContasPagar() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1514,8 +1524,8 @@ export default function ContasPagar() {
                                   <Eye className="h-4 w-4 mr-1" />
                                   Ver Vendas
                                 </Button>
-                                <Button 
-                                  variant="default" 
+                                <Button
+                                  variant="default"
                                   size="sm"
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={(e) => openCommissionPaymentDialog(seller, e)}
@@ -1579,8 +1589,8 @@ export default function ContasPagar() {
                     </p>
                   ) : (
                     selectedSupplierExpenses.map((expense) => (
-                      <div 
-                        key={expense.id} 
+                      <div
+                        key={expense.id}
                         className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50"
                       >
                         <div>
@@ -1645,7 +1655,7 @@ export default function ContasPagar() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2">
-                  <Button 
+                  <Button
                     className="bg-green-600 hover:bg-green-700 gap-2"
                     onClick={(e) => openCommissionPaymentDialog(selectedSeller, e)}
                   >
@@ -1653,15 +1663,15 @@ export default function ContasPagar() {
                     Pagar Todas Comissões
                   </Button>
                   {selectedOrdersForCommission.size > 0 && (
-                    <Button 
+                    <Button
                       variant="outline"
                       className="gap-2 border-green-500 text-green-600 hover:bg-green-50"
                       onClick={handlePaySelectedOrdersCommission}
                       disabled={isPayingOrderCommission}
                     >
                       <DollarSign className="h-4 w-4" />
-                      {isPayingOrderCommission 
-                        ? 'Pagando...' 
+                      {isPayingOrderCommission
+                        ? 'Pagando...'
                         : `Pagar Selecionados (${selectedOrdersForCommission.size}) - R$ ${selectedOrdersCommissionTotal.toFixed(2)}`
                       }
                     </Button>
@@ -1677,12 +1687,12 @@ export default function ContasPagar() {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleAllOrdersForSeller(
-                          selectedSeller.orders, 
+                          selectedSeller.orders,
                           selectedOrdersForCommission.size === selectedSeller.orders.length
                         )}
                       >
-                        {selectedOrdersForCommission.size === selectedSeller.orders.length 
-                          ? 'Desmarcar Todos' 
+                        {selectedOrdersForCommission.size === selectedSeller.orders.length
+                          ? 'Desmarcar Todos'
                           : 'Selecionar Todos'
                         }
                       </Button>
@@ -1693,11 +1703,10 @@ export default function ContasPagar() {
                       const commission = (order.amountPaid || 0) * (commissionPercentage / 100);
                       const isSelected = selectedOrdersForCommission.has(order.id);
                       return (
-                        <div 
-                          key={order.id} 
-                          className={`flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 transition-colors ${
-                            isSelected ? 'border-green-500 bg-green-50/50' : ''
-                          }`}
+                        <div
+                          key={order.id}
+                          className={`flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 transition-colors ${isSelected ? 'border-green-500 bg-green-50/50' : ''
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             <input
@@ -1707,7 +1716,7 @@ export default function ContasPagar() {
                               className="h-4 w-4 rounded border-border text-green-600 focus:ring-green-500"
                               onClick={(e) => e.stopPropagation()}
                             />
-                            <div 
+                            <div
                               className="flex items-center gap-3 cursor-pointer"
                               onClick={() => handleViewOrderDetails(order)}
                             >
@@ -1791,8 +1800,8 @@ export default function ContasPagar() {
                   <div>
                     <Label className="text-muted-foreground text-xs">Status</Label>
                     <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
-                      {selectedOrder.paymentStatus === 'paid' ? 'Pago' : 
-                       selectedOrder.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
+                      {selectedOrder.paymentStatus === 'paid' ? 'Pago' :
+                        selectedOrder.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
                     </Badge>
                   </div>
                 </div>
@@ -1937,7 +1946,7 @@ export default function ContasPagar() {
                 Detalhes da Parcela
               </DialogTitle>
             </DialogHeader>
-            
+
             {selectedInstallment && (
               <div className="space-y-4">
                 <div className="bg-muted/50 rounded-lg p-4 space-y-3">
@@ -1945,7 +1954,7 @@ export default function ContasPagar() {
                     <p className="text-sm text-muted-foreground">Descrição</p>
                     <p className="font-semibold">{selectedInstallment.description}</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Parcela</p>
@@ -1996,7 +2005,7 @@ export default function ContasPagar() {
                   <Button variant="outline" onClick={() => setInstallmentDetailsOpen(false)}>
                     Fechar
                   </Button>
-                  <Button 
+                  <Button
                     className="bg-success hover:bg-success/90 text-success-foreground gap-2"
                     onClick={() => {
                       handlePayInstallment(selectedInstallment);
@@ -2022,13 +2031,13 @@ export default function ContasPagar() {
                 Efetuar Pagamento
               </DialogTitle>
             </DialogHeader>
-            
+
             {paymentItem && (
               <div className="space-y-4">
                 <div className="bg-muted/50 rounded-lg p-3">
                   <p className="font-medium">
-                    {paymentType === 'fixed' 
-                      ? (paymentItem as FixedExpense).name 
+                    {paymentType === 'fixed'
+                      ? (paymentItem as FixedExpense).name
                       : (paymentItem as PendingInstallment).description}
                   </p>
                   {paymentType === 'installment' && (
@@ -2038,7 +2047,7 @@ export default function ContasPagar() {
                   )}
                   <p className="text-sm text-muted-foreground mt-1">
                     Valor total: <span className="font-semibold text-foreground">
-                      R$ {paymentType === 'fixed' 
+                      R$ {paymentType === 'fixed'
                         ? (paymentItem as FixedExpense).amount.toFixed(2)
                         : (paymentItem as PendingInstallment).amount.toFixed(2)}
                     </span>
@@ -2053,8 +2062,8 @@ export default function ContasPagar() {
                     onCheckedChange={(checked) => {
                       setIsPartialPayment(checked);
                       if (!checked) {
-                        const fullAmount = paymentType === 'fixed' 
-                          ? (paymentItem as FixedExpense).amount 
+                        const fullAmount = paymentType === 'fixed'
+                          ? (paymentItem as FixedExpense).amount
                           : (paymentItem as PendingInstallment).amount;
                         setPaymentAmount(fullAmount.toFixed(2));
                       }
@@ -2087,7 +2096,7 @@ export default function ContasPagar() {
                   <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button 
+                  <Button
                     className="bg-success hover:bg-success/90 text-success-foreground gap-2"
                     onClick={handleConfirmPayment}
                     disabled={parseFloat(paymentAmount) <= 0}
@@ -2110,7 +2119,7 @@ export default function ContasPagar() {
                 Parcelas do Pedido
               </DialogTitle>
             </DialogHeader>
-            
+
             {selectedGroupedInstallments.length > 0 && (
               <div className="space-y-4 flex-1 overflow-y-auto">
                 <div className="bg-muted/50 rounded-lg p-3 flex items-start justify-between">
@@ -2145,7 +2154,7 @@ export default function ContasPagar() {
                   {selectedGroupedInstallments.map((installment) => {
                     const isOverdue = new Date(installment.dueDate) < new Date();
                     return (
-                      <div 
+                      <div
                         key={installment.id}
                         className={`flex items-center justify-between p-3 rounded-lg border ${isOverdue ? 'border-destructive/50 bg-destructive/5' : 'bg-background'}`}
                       >
@@ -2166,7 +2175,7 @@ export default function ContasPagar() {
                           <span className="font-bold text-destructive">
                             R$ {installment.amount.toFixed(2)}
                           </span>
-                          <Button 
+                          <Button
                             size="sm"
                             className="bg-success hover:bg-success/90 text-success-foreground gap-1"
                             onClick={() => handlePayInstallment(installment)}
@@ -2206,7 +2215,7 @@ export default function ContasPagar() {
                 Editar Compra
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4 flex-1 overflow-y-auto pr-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2 col-span-2">
@@ -2315,8 +2324,8 @@ export default function ContasPagar() {
             </div>
 
             <div className="border-t pt-3 space-y-3">
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 className="w-full gap-2"
                 onClick={() => setDeletePurchaseConfirmOpen(true)}
                 disabled={isDeletingPurchase}
@@ -2324,12 +2333,12 @@ export default function ContasPagar() {
                 <Trash2 className="h-4 w-4" />
                 Excluir Compra
               </Button>
-              
+
               <DialogFooter className="gap-2 sm:gap-2">
                 <Button variant="outline" onClick={() => setEditPurchaseOpen(false)}>
                   Cancelar
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSaveEditPurchase}
                   disabled={!editPurchaseDescription.trim() || isUpdatingPurchase}
                 >
@@ -2351,8 +2360,8 @@ export default function ContasPagar() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={handleDeletePurchase} 
+              <AlertDialogAction
+                onClick={handleDeletePurchase}
                 className="bg-destructive hover:bg-destructive/90"
                 disabled={isDeletingPurchase}
               >
@@ -2399,7 +2408,7 @@ export default function ContasPagar() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={handlePayCommission}
                 className="bg-green-600 hover:bg-green-700"
                 disabled={isPayingCommission}
@@ -2455,7 +2464,7 @@ export default function ContasPagar() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={handlePaySingleOrderCommission}
                 className="bg-green-600 hover:bg-green-700"
                 disabled={isPayingOrderCommission}
@@ -2505,7 +2514,7 @@ export default function ContasPagar() {
                   <p className="text-sm text-muted-foreground">Total Geral</p>
                   <p className="text-3xl font-bold text-warning">R$ {(totalPayable + totalCommissionPayable).toFixed(2)}</p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-lg border bg-card">
                     <div className="flex items-center gap-2 mb-1">
@@ -2515,7 +2524,7 @@ export default function ContasPagar() {
                     <p className="text-xl font-bold text-foreground">R$ {totalPayable.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">{suppliersWithBalance.length} fornecedor(es)</p>
                   </div>
-                  
+
                   {usesCommission && (
                     <div className="p-4 rounded-lg border bg-card">
                       <div className="flex items-center gap-2 mb-1">
@@ -2532,8 +2541,8 @@ export default function ContasPagar() {
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">Detalhamento Fornecedores:</p>
                     {suppliersWithBalance.map(s => (
-                      <div 
-                        key={s.id} 
+                      <div
+                        key={s.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => { setStatsDialogOpen(null); handleViewDetails(s.id); }}
                       >
@@ -2553,8 +2562,8 @@ export default function ContasPagar() {
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">Detalhamento Comissões:</p>
                     {sellerCommissions.map(s => (
-                      <div 
-                        key={s.sellerId} 
+                      <div
+                        key={s.sellerId}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => { setStatsDialogOpen(null); handleViewSellerDetails(s); }}
                       >
@@ -2582,7 +2591,7 @@ export default function ContasPagar() {
                   <p className="text-sm text-muted-foreground">Total Fornecedores</p>
                   <p className="text-3xl font-bold text-foreground">R$ {totalPayable.toFixed(2)}</p>
                 </div>
-                
+
                 {suppliersWithBalance.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Truck className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -2591,8 +2600,8 @@ export default function ContasPagar() {
                 ) : (
                   <div className="space-y-2">
                     {suppliersWithBalance.map(s => (
-                      <div 
-                        key={s.id} 
+                      <div
+                        key={s.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => { setStatsDialogOpen(null); handleViewDetails(s.id); }}
                       >
@@ -2623,7 +2632,7 @@ export default function ContasPagar() {
                   <p className="text-sm text-muted-foreground">Total Comissões - {format(new Date(selectedMonth + '-01'), 'MMMM yyyy', { locale: ptBR })}</p>
                   <p className="text-3xl font-bold text-green-500">R$ {totalCommissionPayable.toFixed(2)}</p>
                 </div>
-                
+
                 {sellerCommissions.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Percent className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -2632,8 +2641,8 @@ export default function ContasPagar() {
                 ) : (
                   <div className="space-y-2">
                     {sellerCommissions.map(s => (
-                      <div 
-                        key={s.sellerId} 
+                      <div
+                        key={s.sellerId}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => { setStatsDialogOpen(null); handleViewSellerDetails(s); }}
                       >
@@ -2664,7 +2673,7 @@ export default function ContasPagar() {
                   <p className="text-sm text-muted-foreground">Total de Compras</p>
                   <p className="text-3xl font-bold text-foreground">{expenses.filter(e => e.supplierId).length}</p>
                 </div>
-                
+
                 {expenses.filter(e => e.supplierId).length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -2673,11 +2682,11 @@ export default function ContasPagar() {
                 ) : (
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {expenses.filter(e => e.supplierId).slice(0, 20).map(exp => (
-                      <div 
-                        key={exp.id} 
+                      <div
+                        key={exp.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
-                        onClick={() => { 
-                          setStatsDialogOpen(null); 
+                        onClick={() => {
+                          setStatsDialogOpen(null);
                           const supplier = suppliers.find(s => s.id === exp.supplierId);
                           if (supplier) handleViewDetails(supplier.id);
                         }}

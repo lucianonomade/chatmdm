@@ -66,7 +66,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
   const { suppliers, addSupplier, isAdding: isAddingSupplier } = useSupabaseSuppliers();
   const { addExpense, isAdding: isAddingExpense } = useSupabaseExpenses();
   const { addInstallments, isAdding: isAddingInstallments } = useSupabasePendingInstallments();
-  
+
   // Purchase form state
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [description, setDescription] = useState("");
@@ -74,12 +74,13 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // Payment/Installment state
   const [enableInstallments, setEnableInstallments] = useState(false);
   const [paidAmount, setPaidAmount] = useState("");
   const [installmentsCount, setInstallmentsCount] = useState("2");
   const [entryDate, setEntryDate] = useState<Date>(new Date());
+  const [suggestedDueDay, setSuggestedDueDay] = useState<string>("");
   const [installmentDates, setInstallmentDates] = useState<Date[]>(() => {
     const dates: Date[] = [];
     for (let i = 0; i < 12; i++) {
@@ -89,7 +90,29 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
     }
     return dates;
   });
-  
+
+  const handleDueDayChange = (day: string) => {
+    setSuggestedDueDay(day);
+    if (!day) return;
+
+    const dayNum = parseInt(day);
+    const newDates = [...installmentDates];
+
+    // Update all future installments based on the suggested day
+    const baseDate = new Date();
+    for (let i = 0; i < 12; i++) {
+      const nextDate = new Date(baseDate);
+      nextDate.setMonth(baseDate.getMonth() + i + 1);
+
+      // Handle months with fewer days than the chosen day (e.g. 31st in February)
+      const lastDayOfMonth = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
+      nextDate.setDate(Math.min(dayNum, lastDayOfMonth));
+
+      newDates[i] = nextDate;
+    }
+    setInstallmentDates(newDates);
+  };
+
   // New supplier form state
   const [newSupplierName, setNewSupplierName] = useState("");
   const [newSupplierPhone, setNewSupplierPhone] = useState("");
@@ -114,6 +137,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
       dates.push(date);
     }
     setInstallmentDates(dates);
+    setSuggestedDueDay("");
     setNewSupplierName("");
     setNewSupplierPhone("");
     setNewSupplierEmail("");
@@ -172,16 +196,16 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
     // If paying something now, register that as expense
     if (!enableInstallments || parsedPaidAmount > 0) {
       const expenseAmount = enableInstallments ? parsedPaidAmount : parsedAmount;
-      
+
       if (expenseAmount > 0) {
         addExpense({
           supplierId: selectedSupplier || "",
           supplierName: supplierName,
-          description: enableInstallments 
-            ? `${description.trim()} (Entrada)` 
+          description: enableInstallments
+            ? `${description.trim()} (Entrada)`
             : description.trim(),
           amount: expenseAmount,
-          date: entryDate.toISOString(),
+          date: new Date(entryDate.getTime() - (entryDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0] + 'T12:00:00',
           category: category || "Compras",
         });
       }
@@ -242,13 +266,13 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
               <Building2 className="h-4 w-4" />
               Fornecedor
             </Label>
-            
+
             <Tabs defaultValue="list" className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-9">
                 <TabsTrigger value="list" className="text-xs">Buscar</TabsTrigger>
                 <TabsTrigger value="new" className="text-xs">Novo Fornecedor</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="list" className="space-y-2 mt-2">
                 <Input
                   placeholder="Buscar fornecedor..."
@@ -259,11 +283,10 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                 <div className="max-h-[150px] overflow-y-auto space-y-1 border rounded-lg p-2">
                   {/* Option for no supplier */}
                   <div
-                    className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
-                      selectedSupplier === "" 
-                        ? "bg-primary/10 border-primary" 
+                    className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${selectedSupplier === ""
+                        ? "bg-primary/10 border-primary"
                         : "hover:bg-muted"
-                    }`}
+                      }`}
                     onClick={() => handleSelectSupplier("")}
                   >
                     <div>
@@ -274,40 +297,39 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                       <Check className="w-4 h-4 text-primary" />
                     )}
                   </div>
-                  
+
                   {filteredSuppliers.length === 0 && searchTerm && (
                     <p className="text-center text-muted-foreground py-2 text-sm">
                       Nenhum fornecedor encontrado
                     </p>
                   )}
-                  
+
                   {filteredSuppliers.map(supplier => (
-                      <div
-                        key={supplier.id}
-                        className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${
-                          selectedSupplier === supplier.id 
-                            ? "bg-primary/10 border-primary" 
-                            : "hover:bg-muted"
+                    <div
+                      key={supplier.id}
+                      className={`p-2 rounded-lg cursor-pointer flex justify-between items-center border transition-colors ${selectedSupplier === supplier.id
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-muted"
                         }`}
-                        onClick={() => handleSelectSupplier(supplier.id)}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{supplier.name}</p>
-                          {supplier.phone && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Phone className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{supplier.phone}</span>
-                            </p>
-                          )}
-                        </div>
-                        {selectedSupplier === supplier.id && (
-                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      onClick={() => handleSelectSupplier(supplier.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{supplier.name}</p>
+                        {supplier.phone && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Phone className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">{supplier.phone}</span>
+                          </p>
                         )}
                       </div>
-                    ))}
+                      {selectedSupplier === supplier.id && (
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </div>
+                  ))}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="new" className="space-y-3 mt-2">
                 <div className="space-y-1">
                   <Label className="text-xs">Nome do Fornecedor *</Label>
@@ -367,7 +389,7 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
               <Package className="h-4 w-4" />
               Detalhes da Compra
             </Label>
-            
+
             <div className="space-y-1">
               <Label className="text-xs">Descrição *</Label>
               <Input
@@ -448,6 +470,19 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Dia Venc. Sugerido</Label>
+                      <Select value={suggestedDueDay} onValueChange={handleDueDayChange}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Dia" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover">
+                          {Array.from({ length: 31 }, (_, i) => (
+                            <SelectItem key={i + 1} value={(i + 1).toString()}>Dia {i + 1}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   {/* Date pickers */}
@@ -492,8 +527,8 @@ export function PurchaseDialog({ open, onOpenChange }: PurchaseDialogProps) {
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {installmentDates[index] 
-                                ? format(installmentDates[index], "dd/MM/yyyy", { locale: ptBR }) 
+                              {installmentDates[index]
+                                ? format(installmentDates[index], "dd/MM/yyyy", { locale: ptBR })
                                 : "Selecionar"}
                             </Button>
                           </PopoverTrigger>

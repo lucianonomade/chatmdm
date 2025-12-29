@@ -31,6 +31,7 @@ export function useSupabasePendingInstallments() {
       const { data, error } = await supabase
         .from('pending_installments')
         .select('*')
+        .eq('tenant_id', tenantId)
         .order('due_date', { ascending: true });
 
       if (error) throw error;
@@ -75,10 +76,10 @@ export function useSupabasePendingInstallments() {
       if (!tenantId) throw new Error("Tenant não encontrado");
 
       const installmentsToInsert = [];
-      
+
       for (let i = 0; i < data.installments; i++) {
         const dueDate = data.installmentDates[i] || new Date();
-        
+
         installmentsToInsert.push({
           expense_id: data.expenseId || null,
           supplier_id: data.supplierId || null,
@@ -98,7 +99,7 @@ export function useSupabasePendingInstallments() {
       const { error } = await supabase
         .from('pending_installments')
         .insert(installmentsToInsert);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -114,12 +115,12 @@ export function useSupabasePendingInstallments() {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('pending_installments')
-        .update({ 
-          paid: true, 
-          paid_at: new Date().toISOString() 
+        .update({
+          paid: true,
+          paid_at: new Date().toISOString()
         })
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -139,7 +140,7 @@ export function useSupabasePendingInstallments() {
         .from('pending_installments')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -174,7 +175,7 @@ export function useSupabasePendingInstallments() {
         .from('pending_installments')
         .update(updateData)
         .eq('id', data.id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -240,7 +241,7 @@ export function useSupabasePendingInstallments() {
           if (data.installmentDates && data.installmentDates[i]) {
             dueDateStr = data.installmentDates[i];
           } else {
-            const firstDate = data.installmentDates?.[0] 
+            const firstDate = data.installmentDates?.[0]
               ? new Date(data.installmentDates[0] + 'T12:00:00')
               : new Date(original.due_date + 'T12:00:00');
             const dueDate = new Date(firstDate);
@@ -284,7 +285,7 @@ export function useSupabasePendingInstallments() {
           .from('pending_installments')
           .update(updateData)
           .in('id', data.installmentIds);
-        
+
         if (error) throw error;
       }
 
@@ -300,7 +301,7 @@ export function useSupabasePendingInstallments() {
               .from('pending_installments')
               .update(individualUpdate)
               .eq('id', update.id);
-            
+
             if (error) throw error;
           }
         }
@@ -322,7 +323,7 @@ export function useSupabasePendingInstallments() {
         .from('pending_installments')
         .delete()
         .in('id', installmentIds);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {

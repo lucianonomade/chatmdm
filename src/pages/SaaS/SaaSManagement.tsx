@@ -35,7 +35,9 @@ import {
     RefreshCw,
     ShieldCheck,
     User as UserIcon,
-    AlertCircle
+    AlertCircle,
+    Mail,
+    Building
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -50,6 +52,14 @@ interface Tenant {
     plan: string;
     subscription_status: string;
     subscription_expires_at: string | null;
+    owner?: {
+        name: string;
+        email: string;
+    };
+    company_settings?: {
+        name: string;
+        email: string;
+    }[];
 }
 
 export default function SaaSManagement() {
@@ -62,20 +72,83 @@ export default function SaaSManagement() {
 
     const fetchTenants = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        // @ts-ignore
+        const { data, error } = await supabase.rpc('get_saas_dashboard_data');
+        if (error) {
+            console.error("RPC Error, falling back:", error);
+            toast({
+                title: "Atualização de Banco de Dados Necessária",
+                description: "Execute o SQL de migração no Supabase para visualizar todos os tenants.",
+                variant: "destructive",
+            });
+            await fetchTenantsFallback();
+        } else {
+            setTenants((data as any) || []);
+            setLoading(false);
+        }
+    };
+
+    const fetchTenantsFallback = async () => {
+        setLoading(true);
+        // 1. Fetch Tenants
+        const { data: tenantsData, error: tenantsError } = await supabase
             .from('tenants')
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) {
+        if (tenantsError) {
+            console.error(tenantsError);
             toast({
                 title: "Erro ao buscar instâncias",
-                description: error.message,
+                description: tenantsError.message,
                 variant: "destructive",
             });
-        } else {
-            setTenants(data || []);
+            setLoading(false);
+            return;
         }
+
+        if (!tenantsData || tenantsData.length === 0) {
+            setTenants([]);
+            setLoading(false);
+            return;
+        }
+
+        const ownerIds = Array.from(new Set((tenantsData as any[]).map(t => t.owner_id).filter(Boolean)));
+        const tenantIds = tenantsData.map(t => t.id);
+
+        // 2. Fetch Profiles (Owners) manually to avoid FK issues
+        const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, name, email')
+            .in('id', ownerIds);
+
+        if (profilesError) {
+            console.error("Error fetching profiles:", profilesError);
+        }
+
+        // 3. Fetch Company Settings manually
+        const { data: companiesData, error: companiesError } = await supabase
+            .from('company_settings')
+            .select('tenant_id, name, email')
+            .in('tenant_id', tenantIds);
+
+        if (companiesError) {
+            console.error("Error fetching companies:", companiesError);
+        }
+
+        // 4. Merge Data
+        const mergedTenants = (tenantsData as any[]).map(tenant => {
+            const owner = profilesData?.find(p => p.id === tenant.owner_id);
+            const company = companiesData?.find(c => c.tenant_id === tenant.id);
+
+            return {
+                ...tenant,
+                owner: owner ? { name: owner.name, email: owner.email } : undefined,
+                company_settings: company ? [{ name: company.name, email: company.email }] : []
+            };
+        });
+
+        setTenants(mergedTenants as unknown as Tenant[]);
         setLoading(false);
     };
 
@@ -88,6 +161,7 @@ export default function SaaSManagement() {
 
         const { error } = await supabase
             .from('tenants')
+            // @ts-ignore
             .update({
                 subscription_expires_at: new Date(newExpirationDate).toISOString(),
                 subscription_status: 'active'
@@ -105,7 +179,7 @@ export default function SaaSManagement() {
                 title: "Assinatura atualizada!",
                 description: `A instância ${selectedTenant.name} foi renovada.`,
             });
-            fetchTenants();
+            fetchTenants(); // Refresh data to get updates
             setIsDetailOpen(false);
         }
     };
@@ -127,7 +201,7 @@ export default function SaaSManagement() {
                 title: tenant.active ? "Instância desativada" : "Instância ativada",
                 description: `A instância ${tenant.name} foi alterada com sucesso.`,
             });
-            fetchTenants();
+            fetchTenants(); // Refresh data
         }
     };
 
@@ -153,10 +227,12 @@ export default function SaaSManagement() {
                     </h1>
                     <p className="text-muted-foreground mt-1">Controle global de instâncias e faturamento.</p>
                 </div>
-                <Button onClick={fetchTenants} disabled={loading} variant="outline" size="sm">
-                    <RefreshCw className={loading ? "animate-spin mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
-                    Atualizar
-                </Button>
+                <div className="flex gap-2">
+                    <Button onClick={fetchTenants} disabled={loading} variant="outline" size="sm">
+                        <RefreshCw className={loading ? "animate-spin mr-2 h-4 w-4" : "mr-2 h-4 w-4"} />
+                        Atualizar
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -210,6 +286,7 @@ export default function SaaSManagement() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Empresa</TableHead>
+                                    <TableHead>Responsável</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Plano</TableHead>
                                     <TableHead>Expiração</TableHead>
@@ -221,15 +298,35 @@ export default function SaaSManagement() {
                                     <TableRow key={tenant.id} className="hover:bg-muted/50">
                                         <TableCell>
                                             <div className="flex flex-col">
-                                                <span className="font-medium">{tenant.name}</span>
+                                                <div className="flex items-center gap-2 font-medium">
+                                                    <Building className="h-3 w-3 text-muted-foreground" />
+                                                    {tenant.company_settings?.[0]?.name || tenant.name}
+                                                </div>
                                                 <span className="text-xs text-muted-foreground">{tenant.slug}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col text-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <UserIcon className="h-3 w-3 text-muted-foreground" />
+                                                    <span>{tenant.owner?.name || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                                    <Mail className="h-3 w-3" />
+                                                    <span>{tenant.owner?.email || 'N/A'}</span>
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(tenant.subscription_status, tenant.subscription_expires_at)}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="outline" className="capitalize">{tenant.plan || 'Free'}</Badge>
+                                            <div className="flex flex-col">
+                                                <Badge variant="outline" className="capitalize w-fit">{tenant.plan || 'Gratuito'}</Badge>
+                                                <span className="text-[10px] text-muted-foreground mt-1">
+                                                    {tenant.subscription_status === 'active' ? 'Pago' : 'Não Pago'}
+                                                </span>
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             {tenant.subscription_expires_at ? (
@@ -268,7 +365,7 @@ export default function SaaSManagement() {
                     <DialogHeader>
                         <DialogTitle>Gerenciar Instância</DialogTitle>
                         <DialogDescription>
-                            Ajuste as configurações globais para {selectedTenant?.name}.
+                            Ajuste as configurações globais para {selectedTenant?.company_settings?.[0]?.name || selectedTenant?.name}.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -299,12 +396,29 @@ export default function SaaSManagement() {
                             </div>
                         </div>
 
-                        <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                        <div className="p-3 rounded-lg border bg-muted/30 space-y-3">
                             <Label className="text-sm font-medium flex items-center gap-2">
                                 <UserIcon className="h-4 w-4" />
-                                Informações do Proprietário
+                                Informações Detalhadas
                             </Label>
-                            <p className="text-xs text-muted-foreground truncate">ID: {selectedTenant?.owner_id}</p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground">Proprietário</p>
+                                    <p className="font-medium truncate">{selectedTenant?.owner?.name || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground">Email</p>
+                                    <p className="font-medium truncate">{selectedTenant?.owner?.email || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1 col-span-2">
+                                    <p className="text-muted-foreground">ID do Proprietário</p>
+                                    <p className="font-mono text-[10px] text-muted-foreground truncate">{selectedTenant?.owner_id}</p>
+                                </div>
+                                <div className="space-y-1 col-span-2">
+                                    <p className="text-muted-foreground">Empresa (Config)</p>
+                                    <p className="font-medium">{selectedTenant?.company_settings?.[0]?.name || 'Não configurada'}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </DialogContent>
@@ -312,3 +426,6 @@ export default function SaaSManagement() {
         </div>
     );
 }
+
+// ... unchanged styles
+
