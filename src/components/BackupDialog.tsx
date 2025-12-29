@@ -167,49 +167,106 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
 
         // Import Customers
         if (pendingBackupData.customers?.length > 0) {
+          let addedCount = 0;
           for (const customer of pendingBackupData.customers) {
-            const { id, ...rest } = customer;
-            await addCustomer(rest);
+            // Check if customer already exists (by Document or Name)
+            const exists = customers.some(c =>
+              (c.doc && customer.doc && c.doc === customer.doc) ||
+              (!c.doc && c.name === customer.name)
+            );
+
+            if (!exists) {
+              const { id, ...rest } = customer;
+              await addCustomer(rest);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} clientes importados!`);
         }
 
         // Import Suppliers
         if (pendingBackupData.suppliers?.length > 0) {
+          let addedCount = 0;
           for (const supplier of pendingBackupData.suppliers) {
-            const { id, ...rest } = supplier;
-            await addSupplier(rest);
+            // Check if supplier already exists by Name
+            const exists = suppliers.some(s => s.name === supplier.name);
+
+            if (!exists) {
+              const { id, ...rest } = supplier;
+              await addSupplier(rest);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} fornecedores importados!`);
         }
 
         // Import Products
         if (pendingBackupData.products?.length > 0) {
+          let addedCount = 0;
           for (const product of pendingBackupData.products) {
-            const { id, ...rest } = product;
-            await addProduct(rest);
+            // Check if product already exists by Name
+            const exists = products.some(p => p.name === product.name);
+
+            if (!exists) {
+              const { id, ...rest } = product;
+              await addProduct(rest);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} produtos importados!`);
         }
 
         // Import Orders
         if (pendingBackupData.orders?.length > 0) {
+          let addedCount = 0;
           for (const order of pendingBackupData.orders) {
-            await addOrder(order);
+            // Check if order likely exists (by Date and Total and Customer Name)
+            const exists = orders.some(o =>
+              new Date(o.createdAt).getTime() === new Date(order.createdAt).getTime() &&
+              o.total === order.total &&
+              o.customerName === order.customerName
+            );
+
+            if (!exists) {
+              await addOrder(order);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} pedidos importados!`);
         }
 
         // Import Expenses
         if (pendingBackupData.expenses?.length > 0) {
+          let addedCount = 0;
           for (const expense of pendingBackupData.expenses) {
-            const { id, ...rest } = expense;
-            await addExpense(rest);
+            const exists = expenses.some(e =>
+              e.description === expense.description &&
+              e.amount === expense.amount &&
+              e.date === expense.date
+            );
+
+            if (!exists) {
+              const { id, ...rest } = expense;
+              await addExpense(rest);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} despesas importadas!`);
         }
 
         // Import Fixed Expenses
         if (pendingBackupData.fixedExpenses?.length > 0) {
+          let addedCount = 0;
           for (const fixed of pendingBackupData.fixedExpenses) {
-            const { id, ...rest } = fixed;
-            await addFixedExpense(rest);
+            const exists = fixedExpenses.some(f => f.name === fixed.name);
+
+            if (!exists) {
+              const { id, ...rest } = fixed;
+              await addFixedExpense(rest);
+              addedCount++;
+            }
           }
+          if (addedCount > 0) toast.success(`${addedCount} gastos fixos importados!`);
         }
       }
 
