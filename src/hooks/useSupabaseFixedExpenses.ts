@@ -23,6 +23,7 @@ export function useSupabaseFixedExpenses() {
       const { data, error } = await supabase
         .from('fixed_expenses')
         .select('*')
+        .eq('tenant_id', tenantId)
         .order('due_day', { ascending: true });
 
       if (error) throw error;
@@ -43,7 +44,7 @@ export function useSupabaseFixedExpenses() {
   const addFixedExpense = useMutation({
     mutationFn: async (expense: Omit<FixedExpense, 'id' | 'createdAt'>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const { error } = await supabase
         .from('fixed_expenses')
         .insert({
@@ -54,7 +55,7 @@ export function useSupabaseFixedExpenses() {
           active: expense.active,
           tenant_id: tenantId,
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +81,7 @@ export function useSupabaseFixedExpenses() {
         .from('fixed_expenses')
         .update(updateData)
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -99,7 +100,7 @@ export function useSupabaseFixedExpenses() {
         .from('fixed_expenses')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -121,7 +122,7 @@ export function useSupabaseFixedExpenses() {
     isLoading,
     error,
     totalFixedExpenses,
-    addFixedExpense: addFixedExpense.mutate,
+    addFixedExpense: addFixedExpense.mutateAsync,
     updateFixedExpense: updateFixedExpense.mutate,
     deleteFixedExpense: deleteFixedExpense.mutate,
     isAdding: addFixedExpense.isPending,

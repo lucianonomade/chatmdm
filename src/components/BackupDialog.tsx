@@ -10,11 +10,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, FileSpreadsheet, FileJson, Loader2, Clock, Settings2, Upload, AlertTriangle } from "lucide-react";
+import { Download, FileSpreadsheet, FileJson, Loader2, Clock, Settings2, Upload, AlertTriangle, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useSupabaseCustomers } from "@/hooks/useSupabaseCustomers";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
+import { useSupabaseOrders } from "@/hooks/useSupabaseOrders";
+import { useSupabaseExpenses } from "@/hooks/useSupabaseExpenses";
+import { useSupabaseFixedExpenses } from "@/hooks/useSupabaseFixedExpenses";
 import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { exportToExcel, exportToJSON, parseJSONBackup, getBackupStats } from "@/lib/backupUtils";
 import { toast } from "sonner";
@@ -41,14 +44,19 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
   const [restoring, setRestoring] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
-  const [pendingBackupData, setPendingBackupData] = useState<ReturnType<typeof parseJSONBackup>>(null);
+  const [pendingBackupData, setPendingBackupData] = useState<any>(null);
+  const [localBackups, setLocalBackupsList] = useState<any[]>([]);
+  const [importToCloud, setImportToCloud] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const { orders, expenses, fixedExpenses, companySettings, restoreBackup } = useStore();
-  const { customers } = useSupabaseCustomers();
-  const { products } = useSupabaseProducts();
-  const { suppliers } = useSupabaseSuppliers();
-  
+
+  const { companySettings, restoreBackup } = useStore();
+  const { customers, addCustomer } = useSupabaseCustomers();
+  const { products, addProduct } = useSupabaseProducts();
+  const { suppliers, addSupplier } = useSupabaseSuppliers();
+  const { orders, addOrder } = useSupabaseOrders();
+  const { expenses, addExpense } = useSupabaseExpenses();
+  const { fixedExpenses, addFixedExpense } = useSupabaseFixedExpenses();
+
   const {
     performBackup,
     getAutoBackupEnabled,
@@ -72,12 +80,16 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
       setBackupOnCloseState(getBackupOnClose());
       setIntervalState(String(getBackupInterval()));
       setLastBackup(getLastBackupTime());
+
+      import('@/lib/backupUtils').then(({ getLocalBackups }) => {
+        setLocalBackupsList(getLocalBackups());
+      });
     }
   }, [open]);
 
   const handleExport = async (format: 'excel' | 'json') => {
     setExporting(true);
-    
+
     try {
       const data = {
         customers,
@@ -121,7 +133,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       const parsed = parseJSONBackup(content);
-      
+
       if (!parsed) {
         toast.error('Arquivo de backup inválido ou corrompido');
         return;
@@ -146,11 +158,65 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
 
     setRestoring(true);
     try {
+      // 1. Local restoration
       restoreBackup(pendingBackupData);
+
+      // 2. Cloud restoration (if selected)
+      if (importToCloud) {
+        toast.info("Importando para a nuvem... isso pode levar um tempo.");
+
+        // Import Customers
+        if (pendingBackupData.customers?.length > 0) {
+          for (const customer of pendingBackupData.customers) {
+            const { id, ...rest } = customer;
+            await addCustomer(rest);
+          }
+        }
+
+        // Import Suppliers
+        if (pendingBackupData.suppliers?.length > 0) {
+          for (const supplier of pendingBackupData.suppliers) {
+            const { id, ...rest } = supplier;
+            await addSupplier(rest);
+          }
+        }
+
+        // Import Products
+        if (pendingBackupData.products?.length > 0) {
+          for (const product of pendingBackupData.products) {
+            const { id, ...rest } = product;
+            await addProduct(rest);
+          }
+        }
+
+        // Import Orders
+        if (pendingBackupData.orders?.length > 0) {
+          for (const order of pendingBackupData.orders) {
+            await addOrder(order);
+          }
+        }
+
+        // Import Expenses
+        if (pendingBackupData.expenses?.length > 0) {
+          for (const expense of pendingBackupData.expenses) {
+            const { id, ...rest } = expense;
+            await addExpense(rest);
+          }
+        }
+
+        // Import Fixed Expenses
+        if (pendingBackupData.fixedExpenses?.length > 0) {
+          for (const fixed of pendingBackupData.fixedExpenses) {
+            const { id, ...rest } = fixed;
+            await addFixedExpense(rest);
+          }
+        }
+      }
+
       toast.success('Backup restaurado com sucesso! Recarregando...');
       setShowRestoreConfirm(false);
       onOpenChange(false);
-      
+
       // Reload page to apply changes
       setTimeout(() => {
         window.location.reload();
@@ -199,9 +265,9 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
   const formatLastBackup = () => {
     if (!lastBackup) return "Nunca";
     try {
-      return formatDistanceToNow(new Date(lastBackup), { 
-        addSuffix: true, 
-        locale: ptBR 
+      return formatDistanceToNow(new Date(lastBackup), {
+        addSuffix: true,
+        locale: ptBR
       });
     } catch {
       return "Desconhecido";
@@ -222,20 +288,34 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         </DialogHeader>
 
         {/* Last backup info */}
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">Último backup:</span>
+        <div className="flex items-center justify-between px-2 py-1 mb-2">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm font-medium">Último backup:</span>
           </div>
-          <span className="text-sm font-medium">{formatLastBackup()}</span>
+          <span className={`text-sm font-bold ${lastBackup ? 'text-primary' : 'text-muted-foreground'}`}>
+            {formatLastBackup()}
+          </span>
         </div>
 
         {/* Stats summary */}
-        <div className="grid grid-cols-3 gap-2">
-          {stats.map(stat => (
-            <div key={stat.label} className="text-center p-2 bg-muted rounded-lg">
-              <div className="text-lg font-bold">{stat.count}</div>
-              <div className="text-xs text-muted-foreground">{stat.label}</div>
+        {/* Stats summary */}
+        <div className="grid grid-cols-5 gap-3 py-4">
+          {[
+            { label: 'Clientes', count: customers.length },
+            { label: 'Produtos', count: products.length },
+            { label: 'Fornecedores', count: suppliers.length },
+            { label: 'Pedidos', count: orders.length },
+            { label: 'Despesas', count: expenses.length },
+            { label: 'Gastos Fixos', count: fixedExpenses.length },
+            { label: 'Categorias', count: new Set(products.map(p => p.category).filter(Boolean)).size },
+            { label: 'Subcategorias', count: new Set(products.map(p => p.subcategory).filter(Boolean)).size },
+            { label: 'Recebíveis', count: orders.filter(o => o.paymentStatus !== 'paid').length },
+            { label: 'Parcelas', count: orders.reduce((acc, o) => acc + (o.payments?.length || 0), 0) },
+          ].map((stat, i) => (
+            <div key={i} className="flex flex-col items-center justify-center p-3 bg-muted/40 rounded-xl border border-border/50">
+              <span className="text-xl font-bold text-foreground">{stat.count}</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium text-center">{stat.label}</span>
             </div>
           ))}
         </div>
@@ -250,79 +330,145 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         />
 
         {/* Export options */}
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           <Button
             variant="outline"
-            className="justify-start h-auto py-3 px-4"
+            className="w-full justify-start h-auto py-4 px-4 bg-emerald-50/50 hover:bg-emerald-50 border-emerald-200/60 text-emerald-900 hover:text-emerald-950 group transition-all"
             onClick={() => handleExport('excel')}
             disabled={exporting}
           >
-            {exporting ? (
-              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-            ) : (
-              <FileSpreadsheet className="h-5 w-5 mr-3 text-success" />
-            )}
-            <div className="text-left">
-              <div className="font-medium">Exportar Excel (.xlsx)</div>
-              <div className="text-xs text-muted-foreground">
-                Planilha compatível com Excel e Google Sheets
+            <div className="p-2 rounded-full bg-emerald-100 text-emerald-600 mr-4 group-hover:scale-110 transition-transform">
+              {exporting ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="h-5 w-5" />
+              )}
+            </div>
+            <div className="text-left flex-1">
+              <div className="font-semibold text-base mb-0.5">Exportar Excel (.xlsx)</div>
+              <div className="text-xs text-emerald-700/80 font-medium">
+                Para visualização - compatível com Excel/Sheets
               </div>
             </div>
           </Button>
-          
+
           <Button
             variant="outline"
-            className="justify-start h-auto py-3 px-4"
+            className="w-full justify-start h-auto py-4 px-4 bg-blue-50/50 hover:bg-blue-50 border-blue-200/60 text-blue-900 hover:text-blue-950 group transition-all"
             onClick={() => handleExport('json')}
             disabled={exporting}
           >
-            {exporting ? (
-              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-            ) : (
-              <FileJson className="h-5 w-5 mr-3 text-info" />
-            )}
-            <div className="text-left">
-              <div className="font-medium">Exportar JSON</div>
-              <div className="text-xs text-muted-foreground">
-                Formato técnico para importação futura
+            <div className="p-2 rounded-full bg-blue-100 text-blue-600 mr-4 group-hover:scale-110 transition-transform">
+              {exporting ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <FileJson className="h-5 w-5" />
+              )}
+            </div>
+            <div className="text-left flex-1">
+              <div className="font-semibold text-base mb-0.5">Exportar JSON (Recomendado)</div>
+              <div className="text-xs text-blue-700/80 font-medium">
+                Backup completo para restauração
               </div>
             </div>
           </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-dashed border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground font-medium">
+                Zona de Perigo
+              </span>
+            </div>
+          </div>
 
           <Button
             variant="outline"
-            className="justify-start h-auto py-3 px-4 border-dashed"
+            className="w-full justify-start h-auto py-4 px-4 border-dashed border-orange-300 hover:bg-orange-50 hover:border-orange-400 text-orange-900 group transition-all"
             onClick={() => fileInputRef.current?.click()}
             disabled={restoring}
           >
-            {restoring ? (
-              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-            ) : (
-              <Upload className="h-5 w-5 mr-3 text-warning" />
-            )}
-            <div className="text-left">
-              <div className="font-medium">Restaurar Backup JSON</div>
-              <div className="text-xs text-muted-foreground">
-                Importar dados de um arquivo de backup
+            <div className="p-2 rounded-full bg-orange-100 text-orange-600 mr-4 group-hover:scale-110 transition-transform">
+              {restoring ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Upload className="h-5 w-5" />
+              )}
+            </div>
+            <div className="text-left flex-1">
+              <div className="font-semibold text-base mb-0.5">Restaurar Backup JSON</div>
+              <div className="text-xs text-muted-foreground font-medium">
+                Importar todos os dados de um backup anterior
               </div>
             </div>
           </Button>
+
+          {localBackups.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Backups Automáticos Recentes (Local)
+              </h4>
+              <div className="max-h-[150px] overflow-y-auto space-y-2 pr-1">
+                {localBackups.map((backup) => (
+                  <div key={backup.id} className="flex items-center justify-between p-2 bg-muted/30 rounded border text-sm">
+                    <div className="flex flex-col">
+                      <span className="font-medium">
+                        {new Date(backup.date).toLocaleDateString('pt-BR')} {new Date(backup.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {backup.data.customers?.length || 0} clie, {backup.data.orders?.length || 0} ped
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setPendingBackupData(backup.data);
+                          setShowRestoreConfirm(true);
+                        }}
+                      >
+                        <Upload className="h-4 w-4 text-warning" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={async () => {
+                          const { deleteLocalBackup } = await import('@/lib/backupUtils');
+                          deleteLocalBackup(backup.id);
+                          setLocalBackupsList(prev => prev.filter(b => b.id !== backup.id));
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Settings toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center gap-2"
-          onClick={() => setShowSettings(!showSettings)}
-        >
-          <Settings2 className="h-4 w-4" />
-          {showSettings ? "Ocultar configurações" : "Configurações de backup automático"}
-        </Button>
+        <div className="mt-2 pt-2 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-center gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowSettings(!showSettings)}
+          >
+            <Settings2 className="h-4 w-4" />
+            {showSettings ? "Ocultar configurações" : "Configurações de backup automático"}
+          </Button>
+        </div>
 
         {/* Auto backup settings */}
         {showSettings && (
-          <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/30 mt-2 animate-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="auto-backup">Backup Automático</Label>
@@ -386,17 +532,31 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
                 Esta ação irá <strong>substituir todos os dados atuais</strong> pelos dados do backup.
                 Isso não pode ser desfeito.
               </p>
-              
+
               {pendingBackupData && (
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  {getBackupStats(pendingBackupData).map(stat => (
-                    <div key={stat.label} className="text-center p-2 bg-muted rounded-lg">
-                      <div className="text-lg font-bold">{stat.count}</div>
-                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                <div className="grid grid-cols-5 gap-2 mt-4">
+                  {getBackupStats(pendingBackupData).map((stat, i) => (
+                    <div key={i} className="flex flex-col items-center justify-center p-2 bg-muted/40 rounded-lg border border-border/50">
+                      <div className="text-lg font-bold text-foreground">{stat.count}</div>
+                      <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium text-center">{stat.label}</div>
                     </div>
                   ))}
                 </div>
               )}
+
+              <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20 mt-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="cloud-import" className="text-sm font-semibold">Sincronizar com Nuvem</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Salvar dados também no banco de dados Supabase
+                  </p>
+                </div>
+                <Switch
+                  id="cloud-import"
+                  checked={importToCloud}
+                  onCheckedChange={setImportToCloud}
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -68,14 +68,14 @@ export function useSupabaseUsers() {
           .from('user_roles')
           .update({ role })
           .eq('user_id', userId);
-        
+
         if (error) throw error;
       } else {
         // Insert new role
         const { error } = await supabase
           .from('user_roles')
           .insert({ user_id: userId, role });
-        
+
         if (error) throw error;
       }
     },
@@ -95,7 +95,7 @@ export function useSupabaseUsers() {
         .from('profiles')
         .update({ name })
         .eq('id', userId);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -172,6 +172,38 @@ export function useSupabaseUsers() {
     },
   });
 
+  const deleteUser = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao excluir usuário');
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supabase-users'] });
+      toast.success("Usuário excluído com sucesso!");
+    },
+    onError: (error: Error) => {
+      console.error('Error deleting user:', error);
+      toast.error(error.message);
+    },
+  });
+
   return {
     users,
     isLoading,
@@ -180,9 +212,11 @@ export function useSupabaseUsers() {
     updateUserName: updateUserName.mutate,
     createUser: createUser.mutate,
     toggleUserStatus: toggleUserStatus.mutate,
+    deleteUser: deleteUser.mutate,
     isUpdatingRole: updateUserRole.isPending,
     isUpdatingName: updateUserName.isPending,
     isCreatingUser: createUser.isPending,
     isTogglingStatus: toggleUserStatus.isPending,
+    isDeletingUser: deleteUser.isPending,
   };
 }

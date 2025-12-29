@@ -13,7 +13,7 @@ export function useSupabaseCustomers() {
     queryFn: async () => {
       // Check if user can view PII (Personal Identifiable Information)
       const { data: canViewPii } = await supabase.rpc('can_view_customer_pii');
-      
+
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -37,9 +37,9 @@ export function useSupabaseCustomers() {
   const addCustomer = useMutation({
     mutationFn: async (customer: Omit<Customer, 'id'>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       const { error } = await supabase
         .from('customers')
         .insert({
@@ -51,7 +51,7 @@ export function useSupabaseCustomers() {
           created_by: user?.id,
           tenant_id: tenantId,
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -70,7 +70,7 @@ export function useSupabaseCustomers() {
         .from('customers')
         .update(data)
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -89,7 +89,7 @@ export function useSupabaseCustomers() {
         .from('customers')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -106,7 +106,7 @@ export function useSupabaseCustomers() {
     customers,
     isLoading,
     error,
-    addCustomer: addCustomer.mutate,
+    addCustomer: addCustomer.mutateAsync,
     updateCustomer: updateCustomer.mutate,
     deleteCustomer: deleteCustomer.mutate,
     isAdding: addCustomer.isPending,

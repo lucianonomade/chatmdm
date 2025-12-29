@@ -14,6 +14,7 @@ export function useSupabaseOrders() {
       const { data, error } = await supabase
         .from('service_orders')
         .select('*')
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -45,7 +46,7 @@ export function useSupabaseOrders() {
   const addOrder = useMutation({
     mutationFn: async (order: ServiceOrder) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const insertData = {
         id: order.id,
         customer_id: order.customerId === 'guest' ? null : (order.customerId || null),
@@ -65,11 +66,11 @@ export function useSupabaseOrders() {
         seller_name: order.sellerName || null,
         tenant_id: tenantId,
       };
-      
+
       const { error } = await supabase
         .from('service_orders')
         .insert(insertData);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -84,7 +85,7 @@ export function useSupabaseOrders() {
   const updateOrder = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ServiceOrder> }) => {
       const updateData: Record<string, unknown> = {};
-      
+
       if (data.customerName !== undefined) updateData.customer_name = data.customerName;
       if (data.customerId !== undefined) updateData.customer_id = data.customerId === 'guest' ? null : (data.customerId || null);
       if (data.items !== undefined) updateData.items = data.items as unknown as Record<string, unknown>[];
@@ -100,14 +101,14 @@ export function useSupabaseOrders() {
       if (data.measurements !== undefined) updateData.measurements = data.measurements;
       if (data.sellerId !== undefined) updateData.seller_id = data.sellerId;
       if (data.sellerName !== undefined) updateData.seller_name = data.sellerName;
-      
+
       updateData.updated_at = new Date().toISOString();
 
       const { error } = await supabase
         .from('service_orders')
         .update(updateData)
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -125,7 +126,7 @@ export function useSupabaseOrders() {
         .from('service_orders')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -143,7 +144,7 @@ export function useSupabaseOrders() {
         .from('service_orders')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {

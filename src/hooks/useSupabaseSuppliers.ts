@@ -32,7 +32,7 @@ export function useSupabaseSuppliers() {
   const addSupplier = useMutation({
     mutationFn: async (supplier: Omit<Supplier, 'id'>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const { error } = await supabase
         .from('suppliers')
         .insert({
@@ -42,7 +42,7 @@ export function useSupabaseSuppliers() {
           email: supplier.email,
           tenant_id: tenantId,
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -61,7 +61,7 @@ export function useSupabaseSuppliers() {
         .from('suppliers')
         .update(data)
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export function useSupabaseSuppliers() {
         .from('suppliers')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -97,7 +97,7 @@ export function useSupabaseSuppliers() {
     suppliers,
     isLoading,
     error,
-    addSupplier: addSupplier.mutate,
+    addSupplier: addSupplier.mutateAsync,
     updateSupplier: updateSupplier.mutate,
     deleteSupplier: deleteSupplier.mutate,
     isAdding: addSupplier.isPending,

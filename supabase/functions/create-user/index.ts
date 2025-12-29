@@ -15,7 +15,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
+
     // Create admin client with service role key
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
@@ -55,7 +55,7 @@ serve(async (req) => {
       );
     }
 
-    if (roleData.role !== 'admin') {
+    if (roleData.role !== 'admin' && roleData.role !== 'superadmin') {
       return new Response(
         JSON.stringify({ error: 'Apenas administradores podem cadastrar usuários' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -111,7 +111,7 @@ serve(async (req) => {
       email,
       password,
       email_confirm: true, // Auto-confirm email
-      user_metadata: { 
+      user_metadata: {
         name,
         tenant_id: adminTenantId // Pass tenant_id to be used by trigger
       }
@@ -119,7 +119,7 @@ serve(async (req) => {
 
     if (createError) {
       console.error('Create user error:', createError);
-      
+
       // Handle specific errors
       if (createError.message.includes('already been registered')) {
         return new Response(
@@ -127,7 +127,7 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
+
       return new Response(
         JSON.stringify({ error: createError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -168,7 +168,7 @@ serve(async (req) => {
         role: userRole,
         tenant_id: adminTenantId
       }, { onConflict: 'user_id' });
-    
+
     if (createRoleError) {
       console.error('Create role error:', createRoleError);
     }
@@ -176,13 +176,13 @@ serve(async (req) => {
     console.log(`User created successfully: ${newUser.user.id} with profile and role`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        user: { 
-          id: newUser.user.id, 
+      JSON.stringify({
+        success: true,
+        user: {
+          id: newUser.user.id,
           email: newUser.user.email,
-          name 
-        } 
+          name
+        }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

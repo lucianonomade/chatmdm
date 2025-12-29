@@ -62,10 +62,12 @@ export default function Configuracoes() {
     updateUserName,
     createUser,
     toggleUserStatus,
+    deleteUser,
     isUpdatingRole,
     isUpdatingName,
     isCreatingUser,
-    isTogglingStatus
+    isTogglingStatus,
+    isDeletingUser
   } = useSupabaseUsers();
   const { authUser } = useAuth();
 
@@ -322,6 +324,7 @@ export default function Configuracoes() {
   const handleSaveCompany = () => {
     updateCompanySettings(companyData);
     updateCloudSettings(companyData);
+    toast.success("Configurações da empresa enviadas!");
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -819,6 +822,20 @@ export default function Configuracoes() {
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => handleOpenUserDialog(user)}>
                             <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                              if (window.confirm(`Tem certeza que deseja excluir o usuário ${user.name}?`)) {
+                                deleteUser(user.id);
+                              }
+                            }}
+                            disabled={isDeletingUser}
+                            title="Excluir Usuário"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </>
                       )}

@@ -20,6 +20,7 @@ export function useSupabaseExpenses() {
       const { data, error } = await supabase
         .from('expenses')
         .select('*')
+        .eq('tenant_id', tenantId)
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -40,7 +41,7 @@ export function useSupabaseExpenses() {
   // Calculate balance per supplier (total owed to each supplier)
   const supplierBalances: SupplierBalance[] = expenses.reduce((acc, expense) => {
     if (!expense.supplierId) return acc;
-    
+
     const existing = acc.find(b => b.supplierId === expense.supplierId);
     if (existing) {
       existing.totalExpenses += expense.amount;
@@ -62,7 +63,7 @@ export function useSupabaseExpenses() {
   const addExpense = useMutation({
     mutationFn: async (expense: Omit<Expense, 'id'>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const { error } = await supabase
         .from('expenses')
         .insert({
@@ -74,7 +75,7 @@ export function useSupabaseExpenses() {
           category: expense.category,
           tenant_id: tenantId,
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -100,7 +101,7 @@ export function useSupabaseExpenses() {
           category: expense.category,
         })
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -119,7 +120,7 @@ export function useSupabaseExpenses() {
         .from('expenses')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -141,7 +142,7 @@ export function useSupabaseExpenses() {
     supplierBalances,
     getSupplierBalance,
     totalExpenses,
-    addExpense: addExpense.mutate,
+    addExpense: addExpense.mutateAsync,
     updateExpense: updateExpense.mutate,
     deleteExpense: deleteExpense.mutate,
     isAdding: addExpense.isPending,

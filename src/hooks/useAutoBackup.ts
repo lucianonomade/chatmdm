@@ -28,11 +28,11 @@ export function useAutoBackup() {
   const setAutoBackupEnabled = (enabled: boolean) => {
     localStorage.setItem(AUTO_BACKUP_ENABLED_KEY, String(enabled));
   };
-  
+
   const setBackupOnClose = (enabled: boolean) => {
     localStorage.setItem(BACKUP_ON_CLOSE_KEY, String(enabled));
   };
-  
+
   const setBackupInterval = (hours: number) => {
     localStorage.setItem(BACKUP_INTERVAL_KEY, String(hours));
   };
@@ -61,14 +61,22 @@ export function useAutoBackup() {
         return false;
       }
 
-      exportToJSON(data, companySettings.name || 'empresa');
+      if (silent) {
+        // Save to localStorage instead of downloading
+        import('@/lib/backupUtils').then(({ saveToLocalStorage }) => {
+          saveToLocalStorage(data);
+        });
+      } else {
+        exportToJSON(data, companySettings.name || 'empresa');
+      }
+
       const now = new Date().toISOString();
       setLastBackupTime(now);
-      
+
       if (!silent) {
         toast.success("Backup realizado com sucesso!");
       }
-      
+
       return true;
     } catch (error) {
       console.error('Backup error:', error);
@@ -83,12 +91,12 @@ export function useAutoBackup() {
   const isBackupDue = useCallback(() => {
     const lastBackup = getLastBackupTime();
     if (!lastBackup) return true;
-    
+
     const lastBackupDate = new Date(lastBackup);
     const now = new Date();
     const hoursSinceBackup = (now.getTime() - lastBackupDate.getTime()) / (1000 * 60 * 60);
     const interval = getBackupInterval();
-    
+
     return hoursSinceBackup >= interval;
   }, []);
 
@@ -138,7 +146,7 @@ export function useAutoBackup() {
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -153,7 +161,7 @@ export function useAutoBackup() {
         const backupTime = new Date(data.timestamp);
         const now = new Date();
         const hoursSince = (now.getTime() - backupTime.getTime()) / (1000 * 60 * 60);
-        
+
         // If pending backup is less than 24 hours old, offer to download it
         if (hoursSince < 24) {
           setTimeout(() => {
@@ -174,7 +182,7 @@ export function useAutoBackup() {
   // Start scheduled backup on mount
   useEffect(() => {
     startScheduledBackup();
-    
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

@@ -15,7 +15,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
+
     // Create admin client with service role key
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
@@ -55,7 +55,7 @@ serve(async (req) => {
       );
     }
 
-    if (roleData.role !== 'admin') {
+    if (roleData.role !== 'admin' && roleData.role !== 'superadmin') {
       return new Response(
         JSON.stringify({ error: 'Apenas administradores podem ativar/desativar usuários' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
