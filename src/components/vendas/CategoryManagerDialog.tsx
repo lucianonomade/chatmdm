@@ -24,6 +24,7 @@ import { Plus, Pencil, Trash2, Settings } from "lucide-react";
 import { useSupabaseCategories, Category } from "@/hooks/useSupabaseCategories";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface CategoryManagerDialogProps {
   open: boolean;
@@ -33,19 +34,19 @@ interface CategoryManagerDialogProps {
 export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDialogProps) {
   const { categories, isLoading, addCategory, updateCategory, deleteCategory, isAdding, isUpdating, isDeleting } = useSupabaseCategories();
   const { products } = useSupabaseProducts();
-  
+
   // Track which orphan categories we've already registered
   const registeredOrphansRef = useRef<Set<string>>(new Set());
-  
+
   // Add state
   const [showAddConfirm, setShowAddConfirm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  
+
   // Edit state
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState("");
   const [showEditConfirm, setShowEditConfirm] = useState(false);
-  
+
   // Delete state
   const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -53,22 +54,22 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
   // Find orphan categories and auto-register them
   useEffect(() => {
     if (isLoading || isAdding || !products.length) return;
-    
+
     const categoryNamesFromTable = new Set(categories.map(c => c.name.toLowerCase()));
     const orphanCategoryNames: string[] = [];
-    
+
     products.forEach(product => {
-      if (product.category && 
-          !categoryNamesFromTable.has(product.category.toLowerCase()) &&
-          !registeredOrphansRef.current.has(product.category.toLowerCase())) {
+      if (product.category &&
+        !categoryNamesFromTable.has(product.category.toLowerCase()) &&
+        !registeredOrphansRef.current.has(product.category.toLowerCase())) {
         orphanCategoryNames.push(product.category);
         registeredOrphansRef.current.add(product.category.toLowerCase());
       }
     });
-    
+
     // Remove duplicates
     const uniqueOrphans = [...new Set(orphanCategoryNames)];
-    
+
     // Auto-register orphan categories
     if (uniqueOrphans.length > 0) {
       uniqueOrphans.forEach(name => {
@@ -168,8 +169,8 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
                 onKeyDown={(e) => e.key === 'Enter' && handleAddClick()}
                 className="flex-1"
               />
-              <Button 
-                onClick={handleAddClick} 
+              <Button
+                onClick={handleAddClick}
                 disabled={isAdding || !newCategoryName.trim()}
                 className="shrink-0"
               >
@@ -189,55 +190,62 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
                   Nenhuma categoria cadastrada
                 </div>
               ) : (
-                sortedCategories.map((category) => (
-                  <div key={category.id} className="p-3 flex items-center gap-2">
-                    {editingCategory?.id === category.id ? (
-                      <>
-                        <Input
-                          value={editCategoryName}
-                          onChange={(e) => setEditCategoryName(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSaveEditClick()}
-                          className="flex-1"
-                          autoFocus
-                        />
-                        <Button 
-                          size="sm" 
-                          onClick={handleSaveEditClick}
-                          disabled={isUpdating}
-                        >
-                          Salvar
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={handleCancelEdit}
-                        >
-                          Cancelar
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <span className="flex-1 font-medium">{category.name}</span>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8"
-                          onClick={() => handleEditClick(category)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleDeleteClick(category)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                ))
+                sortedCategories.map((category) => {
+                  const isSemCategoria = category.name === "Sem Categoria";
+                  return (
+                    <div key={category.id} className="p-3 flex items-center gap-2">
+                      {editingCategory?.id === category.id ? (
+                        <>
+                          <Input
+                            value={editCategoryName}
+                            onChange={(e) => setEditCategoryName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSaveEditClick()}
+                            className="flex-1"
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={handleSaveEditClick}
+                            disabled={isUpdating}
+                          >
+                            Salvar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                          >
+                            Cancelar
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex-1 font-medium">{category.name}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => handleEditClick(category)}
+                            disabled={isSemCategoria}
+                            title={isSemCategoria ? "Categoria do sistema" : "Editar"}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className={cn("h-8 w-8", !isSemCategoria && "text-destructive hover:text-destructive")}
+                            onClick={() => handleDeleteClick(category)}
+                            disabled={isSemCategoria}
+                            title={isSemCategoria ? "Categoria padrão não pode ser excluída" : "Excluir"}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -302,8 +310,8 @@ export function CategoryManagerDialog({ open, onOpenChange }: CategoryManagerDia
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete} 
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

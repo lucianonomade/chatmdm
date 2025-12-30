@@ -73,7 +73,7 @@ export function useSupabaseProducts() {
   const addProduct = useMutation({
     mutationFn: async (product: Omit<Product, 'id'>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       const rawPricingMode = (product as any).pricing_mode;
       const pricingMode =
         rawPricingMode === 'meter' || rawPricingMode === 'medidor'
@@ -94,7 +94,7 @@ export function useSupabaseProducts() {
           pricing_mode: pricingMode,
           tenant_id: tenantId,
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -125,7 +125,7 @@ export function useSupabaseProducts() {
         .from('products')
         .update(dbData)
         .eq('id', id);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -142,14 +142,36 @@ export function useSupabaseProducts() {
         .from('products')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+    onMutate: async (id) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+
+      // Snapshot previous value
+      const previousProducts = queryClient.getQueryData<Product[]>(['products', tenantId]);
+
+      // Optimistically update
+      if (previousProducts) {
+        queryClient.setQueryData<Product[]>(['products', tenantId], (old) =>
+          old ? old.filter(p => p.id !== id) : []
+        );
+      }
+
+      return { previousProducts };
     },
-    onError: (error) => {
+    onSuccess: async () => {
+      // Always refetch after error or success to ensure data is in sync
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error, _, context) => {
+      // Rollback on error
+      if (context?.previousProducts) {
+        queryClient.setQueryData(['products', tenantId], context.previousProducts);
+      }
       console.error('Error deleting product:', error);
+      toast.error('Erro ao excluir produto');
     },
   });
 
