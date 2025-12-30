@@ -69,7 +69,7 @@ export default function Configuracoes() {
     isTogglingStatus,
     isDeletingUser
   } = useSupabaseUsers();
-  const { authUser } = useAuth();
+  const { authUser, loading: authLoading } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -711,7 +711,12 @@ export default function Configuracoes() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <ChangePasswordDialog />
-                {(authUser?.role === 'admin' || authUser?.role === 'superadmin') && (
+                {authLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Carregando permissões...</span>
+                  </div>
+                ) : (authUser?.role === 'admin' || authUser?.role === 'superadmin') && (
                   <Button onClick={() => {
                     // Pre-fill with admin's email for easier management
                     const adminEmail = authUser?.email || '';
@@ -862,7 +867,20 @@ export default function Configuracoes() {
                     onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
                   />
                 </div>
-                {/* Email is auto-generated and hidden from user */}
+                <div className="space-y-2">
+                  <Label htmlFor="new-user-email">Email</Label>
+                  <Input
+                    id="new-user-email"
+                    type="email"
+                    placeholder="email@empresa.com"
+                    value={newUserData.email}
+                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Este será o login do usuário.
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="new-user-password">Senha</Label>
                   <Input
@@ -885,7 +903,9 @@ export default function Configuracoes() {
                       <SelectValue placeholder="Selecione a função" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="superadmin">Super Global</SelectItem>
+                      {authUser?.role === 'superadmin' && (
+                        <SelectItem value="superadmin">Super Global</SelectItem>
+                      )}
                       <SelectItem value="admin">Administrador</SelectItem>
                       <SelectItem value="manager">Gerente</SelectItem>
                       <SelectItem value="seller">Vendedor</SelectItem>
@@ -1641,7 +1661,9 @@ export default function Configuracoes() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover">
-                  <SelectItem value="superadmin">Super Global</SelectItem>
+                  {authUser?.role === 'superadmin' && (
+                    <SelectItem value="superadmin">Super Global</SelectItem>
+                  )}
                   <SelectItem value="seller">Vendedor</SelectItem>
                   <SelectItem value="manager">Gerente</SelectItem>
                   <SelectItem value="admin">Administrador</SelectItem>

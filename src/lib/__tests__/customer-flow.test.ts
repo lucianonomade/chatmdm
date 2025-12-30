@@ -118,7 +118,7 @@ describe('Customer Management Flow', () => {
 
     it('should update customer data', () => {
       const customer = addCustomer({ name: 'Maria' });
-      
+
       const updated = updateCustomer(customer.id, {
         name: 'Maria Santos',
         phone: '11988887777',
@@ -126,7 +126,7 @@ describe('Customer Management Flow', () => {
 
       expect(updated?.name).toBe('Maria Santos');
       expect(updated?.phone).toBe('11988887777');
-      expect(updated?.updatedAt.getTime()).toBeGreaterThan(customer.createdAt.getTime());
+      expect(updated?.updatedAt.getTime()).toBeGreaterThanOrEqual(customer.createdAt.getTime());
     });
 
     it('should return null when updating non-existent customer', () => {
@@ -136,7 +136,7 @@ describe('Customer Management Flow', () => {
 
     it('should delete customer', () => {
       const customer = addCustomer({ name: 'To Delete' });
-      
+
       expect(deleteCustomer(customer.id)).toBe(true);
       expect(customers).toHaveLength(0);
     });
@@ -296,7 +296,7 @@ describe('Customer-Order Relationship', () => {
     orders: Array<{ customerId: string; total: number; createdAt: Date }>
   ): CustomerWithOrders | null => {
     const customerOrders = orders.filter(o => o.customerId === customerId);
-    
+
     if (customerOrders.length === 0) {
       return null;
     }

@@ -3,8 +3,15 @@ import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+const Toaster = ({ theme: propTheme, ...props }: ToasterProps & { theme?: string }) => {
+  let theme = propTheme;
+  try {
+    const { theme: detectedTheme = "system" } = useTheme();
+    theme = detectedTheme;
+  } catch {
+    // In test environments where next-themes context is missing, fallback to system theme.
+    theme = "system";
+  }
 
   return (
     <Sonner

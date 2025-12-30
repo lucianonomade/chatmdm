@@ -44,7 +44,7 @@ export default function Comissoes() {
   const { orders, isLoading: isLoadingOrders } = useSupabaseOrders();
   const { settings, isLoading: isLoadingSettings } = useSyncedCompanySettings();
   const { authUser } = useAuth();
-  
+
   const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedSellerId, setSelectedSellerId] = useState<string>("all");
@@ -53,32 +53,32 @@ export default function Comissoes() {
   const [selectedSeller, setSelectedSeller] = useState<SellerCommission | null>(null);
   const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
 
-  const isAdmin = authUser?.role === 'admin';
+  const isAdmin = authUser?.role === 'admin' || authUser?.role === 'superadmin';
   const isManager = authUser?.role === 'manager';
   const canViewAll = isAdmin || isManager;
 
   // Get all orders in selected month (filtered by user if not admin/manager)
   const filteredOrders = useMemo(() => {
     if (!authUser || !orders) return [];
-    
+
     const [year, month] = selectedMonth.split('-').map(Number);
     const monthStart = startOfMonth(new Date(year, month - 1));
     const monthEnd = endOfMonth(new Date(year, month - 1));
-    
+
     return orders.filter(order => {
       // Filter by date
       const orderDate = parseISO(order.createdAt);
       const isInMonth = isWithinInterval(orderDate, { start: monthStart, end: monthEnd });
-      
+
       // Only paid or partial orders count for commission
       const hasPaidAmount = (order.amountPaid || 0) > 0;
-      
+
       // If admin/manager, show all orders; otherwise only show user's orders
-      const isAccessible = canViewAll || order.sellerId === authUser.id;
-      
+      const isAccessible = canViewAll || (order.sellerId && String(order.sellerId) === String(authUser.id));
+
       // Apply seller filter for admin/manager
       const matchesSeller = selectedSellerId === "all" || order.sellerId === selectedSellerId;
-      
+
       return isInMonth && hasPaidAmount && isAccessible && matchesSeller;
     });
   }, [orders, authUser, selectedMonth, canViewAll, selectedSellerId]);
@@ -86,36 +86,36 @@ export default function Comissoes() {
   // Get unique sellers for filter dropdown
   const sellers = useMemo(() => {
     if (!canViewAll || !orders) return [];
-    
+
     const sellerMap = new Map<string, string>();
     orders.forEach(order => {
       if (order.sellerId && order.sellerName) {
         sellerMap.set(order.sellerId, order.sellerName);
       }
     });
-    
+
     return Array.from(sellerMap.entries()).map(([id, name]) => ({ id, name }));
   }, [orders, canViewAll]);
 
   // Calculate commissions per seller (for admin/manager view) - now includes orders
   const sellerCommissions = useMemo((): SellerCommission[] => {
     if (!orders) return [];
-    
+
     const [year, month] = selectedMonth.split('-').map(Number);
     const monthStart = startOfMonth(new Date(year, month - 1));
     const monthEnd = endOfMonth(new Date(year, month - 1));
     const commissionRate = (settings?.commissionPercentage || 0) / 100;
-    
+
     const commissionMap = new Map<string, SellerCommission>();
-    
+
     orders.forEach(order => {
       const orderDate = parseISO(order.createdAt);
       const isInMonth = isWithinInterval(orderDate, { start: monthStart, end: monthEnd });
       const hasPaidAmount = (order.amountPaid || 0) > 0;
-      
+
       // For non-admin/manager, only include their own orders
-      const isAccessible = canViewAll || order.sellerId === authUser?.id;
-      
+      const isAccessible = canViewAll || (order.sellerId && String(order.sellerId) === String(authUser?.id));
+
       if (isInMonth && hasPaidAmount && order.sellerId && isAccessible) {
         const existing = commissionMap.get(order.sellerId) || {
           sellerId: order.sellerId,
@@ -125,28 +125,28 @@ export default function Comissoes() {
           ordersCount: 0,
           orders: [],
         };
-        
+
         const amountPaid = order.amountPaid || 0;
         existing.totalSales += amountPaid;
         existing.commissionAmount += amountPaid * commissionRate;
         existing.ordersCount += 1;
         existing.orders.push(order);
-        
+
         commissionMap.set(order.sellerId, existing);
       }
     });
-    
+
     return Array.from(commissionMap.values()).sort((a, b) => b.commissionAmount - a.commissionAmount);
   }, [orders, selectedMonth, settings, canViewAll, authUser]);
 
   // Calculate commission stats
   const stats = useMemo(() => {
     const commissionRate = (settings?.commissionPercentage || 0) / 100;
-    
+
     const totalSales = filteredOrders.reduce((sum, order) => sum + (order.amountPaid || 0), 0);
     const totalCommission = totalSales * commissionRate;
     const ordersCount = filteredOrders.length;
-    
+
     return {
       totalSales,
       totalCommission,
@@ -178,7 +178,7 @@ export default function Comissoes() {
             </div>
             <h3 className="text-lg font-semibold">Comissões Desativadas</h3>
             <p className="text-muted-foreground max-w-md">
-              O sistema de comissões não está ativado. {canViewAll 
+              O sistema de comissões não está ativado. {canViewAll
                 ? "Ative nas configurações para calcular comissões sobre as vendas."
                 : "Entre em contato com o administrador para habilitar o cálculo de comissões sobre suas vendas."}
             </p>
@@ -203,7 +203,7 @@ export default function Comissoes() {
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="w-48"
           />
-          
+
           {canViewAll && sellers.length > 0 && (
             <>
               <div className="flex items-center gap-2">
@@ -323,8 +323,8 @@ export default function Comissoes() {
                 </TableHeader>
                 <TableBody>
                   {sellerCommissions.map((seller) => (
-                    <TableRow 
-                      key={seller.sellerId} 
+                    <TableRow
+                      key={seller.sellerId}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleViewSellerOrders(seller)}
                     >
@@ -389,7 +389,7 @@ export default function Comissoes() {
               </div>
               <p className="font-medium">Nenhuma venda no período</p>
               <p className="text-sm text-muted-foreground">
-                {canViewAll 
+                {canViewAll
                   ? "As vendas com pagamento aparecerão aqui."
                   : "Suas vendas com pagamento aparecerão aqui."}
               </p>
@@ -412,8 +412,8 @@ export default function Comissoes() {
                   {filteredOrders.slice(0, 10).map((order) => {
                     const commission = (order.amountPaid || 0) * (stats.commissionRate / 100);
                     return (
-                      <TableRow 
-                        key={order.id} 
+                      <TableRow
+                        key={order.id}
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => handleViewOrder(order)}
                       >
@@ -487,8 +487,8 @@ export default function Comissoes() {
                 <div>
                   <Label className="text-muted-foreground text-xs">Status</Label>
                   <Badge variant={selectedOrder.paymentStatus === 'paid' ? 'default' : 'secondary'}>
-                    {selectedOrder.paymentStatus === 'paid' ? 'Pago' : 
-                     selectedOrder.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
+                    {selectedOrder.paymentStatus === 'paid' ? 'Pago' :
+                      selectedOrder.paymentStatus === 'partial' ? 'Parcial' : 'Pendente'}
                   </Badge>
                 </div>
               </div>
@@ -581,8 +581,8 @@ export default function Comissoes() {
                   {selectedSeller.orders.map((order) => {
                     const commission = (order.amountPaid || 0) * (stats.commissionRate / 100);
                     return (
-                      <div 
-                        key={order.id} 
+                      <div
+                        key={order.id}
                         className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => {
                           setSellerDialogOpen(false);
@@ -633,7 +633,7 @@ export default function Comissoes() {
               Detalhes de Comissões - {format(new Date(selectedMonth + '-01'), 'MMMM yyyy', { locale: ptBR })}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
@@ -665,7 +665,7 @@ export default function Comissoes() {
                 {filteredOrders.map((order) => {
                   const commission = (order.amountPaid || 0) * (stats.commissionRate / 100);
                   return (
-                    <TableRow 
+                    <TableRow
                       key={order.id}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => {

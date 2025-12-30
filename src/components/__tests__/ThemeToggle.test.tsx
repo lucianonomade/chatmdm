@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from 'next-themes';
 import { ThemeToggle } from '../ThemeToggle';
 
@@ -41,10 +41,13 @@ describe('ThemeToggle Component', () => {
 
   it('should show dropdown menu on click', async () => {
     renderWithTheme(<ThemeToggle />);
-    
-    fireEvent.click(screen.getByRole('button'));
-    
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button'));
+
     // The dropdown should appear with theme options
-    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+    });
   });
 });

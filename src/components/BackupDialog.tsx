@@ -10,7 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, FileSpreadsheet, FileJson, Loader2, Clock, Settings2, Upload, AlertTriangle, Trash2 } from "lucide-react";
+import { Download, FileSpreadsheet, FileJson, Loader2, Clock, Settings2, Upload, AlertTriangle, Trash2, Cloud, Database } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useSupabaseCustomers } from "@/hooks/useSupabaseCustomers";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
@@ -23,6 +23,8 @@ import { exportToExcel, exportToJSON, parseJSONBackup, getBackupStats } from "@/
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,12 +42,15 @@ interface BackupDialogProps {
 }
 
 export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
+  const { authUser } = useAuth();
   const [exporting, setExporting] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
   const [pendingBackupData, setPendingBackupData] = useState<any>(null);
   const [localBackups, setLocalBackupsList] = useState<any[]>([]);
+  const [cloudBackups, setCloudBackups] = useState<any[]>([]);
+  const [loadingCloud, setLoadingCloud] = useState(false);
   const [importToCloud, setImportToCloud] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,8 +89,53 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
       import('@/lib/backupUtils').then(({ getLocalBackups }) => {
         setLocalBackupsList(getLocalBackups());
       });
+
+      fetchCloudBackups();
     }
   }, [open]);
+
+  const fetchCloudBackups = async () => {
+    if (!authUser?.tenant_id) return;
+    setLoadingCloud(true);
+    const { data } = await supabase
+      .from('backups')
+      .select('id, created_at, name, trigger_type')
+      .eq('tenant_id', authUser.tenant_id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (data) setCloudBackups(data);
+    setLoadingCloud(false);
+  };
+
+  const handleRestoreCloud = async (id: string) => {
+    const { data } = await supabase
+      .from('backups')
+      .select('data')
+      .eq('id', id)
+      .single();
+
+    if (data?.data) {
+      setPendingBackupData(data.data);
+      setShowRestoreConfirm(true);
+    } else {
+      toast.error('Erro ao baixar backup da nuvem');
+    }
+  };
+
+  const handleDeleteCloud = async (id: string) => {
+    const { error } = await supabase
+      .from('backups')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Erro ao excluir backup');
+    } else {
+      setCloudBackups(prev => prev.filter(b => b.id !== id));
+      toast.success('Backup excluído da nuvem');
+    }
+  };
 
   const handleExport = async (format: 'excel' | 'json') => {
     setExporting(true);
@@ -163,21 +213,52 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
 
       // 2. Cloud restoration (if selected)
       if (importToCloud) {
-        toast.info("Importando para a nuvem... isso pode levar um tempo.");
+        toast.info("Importando para a nuvem... obtendo dados existentes...");
+
+        // Fetch existing data for robust deduplication
+        const { data: existingCustomersData } = await supabase
+          .from('customers')
+          .select('name, doc')
+          .eq('tenant_id', authUser?.tenant_id || '');
+
+        const { data: existingSuppliersData } = await supabase
+          .from('suppliers')
+          .select('name')
+          .eq('tenant_id', authUser?.tenant_id || '');
+
+        const { data: existingProductsData } = await supabase
+          .from('products')
+          .select('name')
+          .eq('tenant_id', authUser?.tenant_id || '');
+
+        const { data: existingFixedExpensesData } = await supabase
+          .from('fixed_expenses')
+          .select('name')
+          .eq('tenant_id', authUser?.tenant_id || '');
+
+        const existingCustomerDocs = new Set(existingCustomersData?.map(c => c.doc).filter(Boolean));
+        const existingCustomerNames = new Set(existingCustomersData?.map(c => c.name));
+        const existingSupplierNames = new Set(existingSuppliersData?.map(s => s.name));
+        const existingProductNames = new Set(existingProductsData?.map(p => p.name));
+        const existingFixedExpenseNames = new Set(existingFixedExpensesData?.map(f => f.name));
+
+        toast.info("Iniciando importação...");
 
         // Import Customers
         if (pendingBackupData.customers?.length > 0) {
           let addedCount = 0;
           for (const customer of pendingBackupData.customers) {
             // Check if customer already exists (by Document or Name)
-            const exists = customers.some(c =>
-              (c.doc && customer.doc && c.doc === customer.doc) ||
-              (!c.doc && c.name === customer.name)
-            );
+            const exists =
+              (customer.doc && existingCustomerDocs.has(customer.doc)) ||
+              existingCustomerNames.has(customer.name);
 
             if (!exists) {
               const { id, ...rest } = customer;
               await addCustomer(rest);
+              // Update local sets to prevent duplicates within the same import batch
+              existingCustomerNames.add(customer.name);
+              if (customer.doc) existingCustomerDocs.add(customer.doc);
               addedCount++;
             }
           }
@@ -189,11 +270,12 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
           let addedCount = 0;
           for (const supplier of pendingBackupData.suppliers) {
             // Check if supplier already exists by Name
-            const exists = suppliers.some(s => s.name === supplier.name);
+            const exists = existingSupplierNames.has(supplier.name);
 
             if (!exists) {
               const { id, ...rest } = supplier;
               await addSupplier(rest);
+              existingSupplierNames.add(supplier.name);
               addedCount++;
             }
           }
@@ -205,11 +287,12 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
           let addedCount = 0;
           for (const product of pendingBackupData.products) {
             // Check if product already exists by Name
-            const exists = products.some(p => p.name === product.name);
+            const exists = existingProductNames.has(product.name);
 
             if (!exists) {
               const { id, ...rest } = product;
               await addProduct(rest);
+              existingProductNames.add(product.name);
               addedCount++;
             }
           }
@@ -220,7 +303,7 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         if (pendingBackupData.orders?.length > 0) {
           let addedCount = 0;
           for (const order of pendingBackupData.orders) {
-            // Check if order likely exists (by Date and Total and Customer Name)
+            // Check if order likely exists (by Date and Total and Customer Name) - relying on local check for now as fetching all orders is heavy
             const exists = orders.some(o =>
               new Date(o.createdAt).getTime() === new Date(order.createdAt).getTime() &&
               o.total === order.total &&
@@ -258,11 +341,12 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
         if (pendingBackupData.fixedExpenses?.length > 0) {
           let addedCount = 0;
           for (const fixed of pendingBackupData.fixedExpenses) {
-            const exists = fixedExpenses.some(f => f.name === fixed.name);
+            const exists = existingFixedExpenseNames.has(fixed.name);
 
             if (!exists) {
               const { id, ...rest } = fixed;
               await addFixedExpense(rest);
+              existingFixedExpenseNames.add(fixed.name);
               addedCount++;
             }
           }
@@ -508,6 +592,54 @@ export function BackupDialog({ open, onOpenChange }: BackupDialogProps) {
               </div>
             </div>
           )}
+
+          {/* Cloud Backups */}
+          <div className="mt-4 space-y-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <Cloud className="h-3 w-3" />
+              Backups na Nuvem (Cloud)
+              {loadingCloud && <Loader2 className="h-3 w-3 animate-spin ml-2" />}
+            </h4>
+
+            {cloudBackups.length === 0 && !loadingCloud ? (
+              <div className="text-sm text-muted-foreground text-center py-4 bg-muted/20 rounded border border-dashed">
+                Nenhum backup na nuvem encontrado
+              </div>
+            ) : (
+              <div className="max-h-[150px] overflow-y-auto space-y-2 pr-1">
+                {cloudBackups.map((backup) => (
+                  <div key={backup.id} className="flex items-center justify-between p-2 bg-blue-50/50 rounded border border-blue-100 text-sm">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-blue-900">
+                        {backup.name || 'Backup Automático'}
+                      </span>
+                      <span className="text-xs text-blue-700/70">
+                        {new Date(backup.created_at).toLocaleDateString('pt-BR')} {new Date(backup.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • {backup.trigger_type === 'auto' ? 'Automático' : 'Manual'}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-blue-100 text-blue-700"
+                        onClick={() => handleRestoreCloud(backup.id)}
+                      >
+                        <Database className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-red-100 text-red-500"
+                        onClick={() => handleDeleteCloud(backup.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Settings toggle */}

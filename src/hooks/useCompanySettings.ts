@@ -50,15 +50,21 @@ export function useCompanySettings() {
           commissionPercentage: data.commission_percentage ?? 0,
         } as CompanySettings;
       } else {
-        // Sellers can only access public branding data (no CNPJ, email, etc.)
-        const { data, error } = await supabase.rpc('get_public_company_branding');
+        // Sellers can only access public branding data AND commission settings
+        const { data: brandingData, error: brandingError } = await supabase.rpc('get_public_company_branding');
 
-        if (error) throw error;
+        if (brandingError) throw brandingError;
 
-        if (!data) return null;
+        // Also fetch commission settings directly (assuming RLS allows reading these fields)
+        const { data: commissionData } = await supabase
+          .from('company_settings')
+          .select('uses_commission, commission_percentage')
+          .maybeSingle();
+
+        if (!brandingData) return null;
 
         // Type assertion for the RPC response
-        const brandingData = data as {
+        const branding = brandingData as {
           name?: string;
           logo_url?: string;
           print_logo_url?: string;
@@ -69,13 +75,13 @@ export function useCompanySettings() {
         };
 
         return {
-          name: brandingData.name || 'Minha Empresa',
+          name: branding.name || 'Minha Empresa',
           cnpj: '', // Hidden from sellers
-          address: brandingData.address || '',
-          phone: brandingData.phone || '',
-          phone2: brandingData.phone2 || '',
+          address: branding.address || '',
+          phone: branding.phone || '',
+          phone2: branding.phone2 || '',
           email: '', // Hidden from sellers
-          logoUrl: brandingData.logo_url || undefined,
+          logoUrl: branding.logo_url || undefined,
           usesStock: true,
           lowStockThreshold: 10,
           printLogoOnReceipts: true,
@@ -84,7 +90,9 @@ export function useCompanySettings() {
           notifyNewSales: false,
           notifyPendingPayments: false,
           notifyOrderStatus: false,
-          loginHeaderColor: brandingData.login_header_color || '#ffffff',
+          loginHeaderColor: branding.login_header_color || '#ffffff',
+          usesCommission: commissionData?.uses_commission ?? false,
+          commissionPercentage: commissionData?.commission_percentage ?? 0,
         } as CompanySettings;
       }
     },
@@ -120,10 +128,10 @@ export function useCompanySettings() {
   const updateSettings = useMutation({
     mutationFn: async (newSettings: Partial<CompanySettings>) => {
       if (!tenantId) throw new Error("Tenant não encontrado");
-      
+
       // Transform to database format
       const dbSettings: Record<string, unknown> = {};
-      
+
       if (newSettings.name !== undefined) dbSettings.name = newSettings.name;
       if (newSettings.cnpj !== undefined) dbSettings.cnpj = newSettings.cnpj;
       if (newSettings.address !== undefined) dbSettings.address = newSettings.address;
@@ -153,7 +161,7 @@ export function useCompanySettings() {
           .from('company_settings')
           .update(dbSettings)
           .eq('id', settings.id);
-        
+
         if (error) throw error;
       } else {
         // Insert new with tenant_id
@@ -161,7 +169,7 @@ export function useCompanySettings() {
         const { error } = await supabase
           .from('company_settings')
           .insert(dbSettings);
-        
+
         if (error) throw error;
       }
     },

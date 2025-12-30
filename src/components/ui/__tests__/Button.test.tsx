@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '../button';
 
 describe('Button Component', () => {
@@ -12,7 +11,7 @@ describe('Button Component', () => {
   it('should handle click events', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -20,10 +19,10 @@ describe('Button Component', () => {
   it('should be disabled when disabled prop is true', () => {
     const handleClick = vi.fn();
     render(<Button disabled onClick={handleClick}>Disabled</Button>);
-    
+
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
-    
+
     fireEvent.click(button);
     expect(handleClick).not.toHaveBeenCalled();
   });
@@ -36,10 +35,10 @@ describe('Button Component', () => {
     expect(screen.getByRole('button')).toHaveClass('bg-destructive');
 
     rerender(<Button variant="outline">Outline</Button>);
-    expect(screen.getByRole('button')).toHaveClass('border');
+    expect(screen.getByRole('button')).toHaveClass('border-primary/30');
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByRole('button')).toHaveClass('hover:bg-accent');
+    expect(screen.getByRole('button')).toHaveClass('hover:bg-accent/20');
   });
 
   it('should render different sizes', () => {
@@ -57,7 +56,7 @@ describe('Button Component', () => {
         Search
       </Button>
     );
-    
+
     expect(screen.getByTestId('icon')).toBeInTheDocument();
     expect(screen.getByText('Search')).toBeInTheDocument();
   });
@@ -68,7 +67,7 @@ describe('Button Component', () => {
         <a href="/test">Link Button</a>
       </Button>
     );
-    
+
     const link = screen.getByRole('link', { name: /link button/i });
     expect(link).toHaveAttribute('href', '/test');
   });

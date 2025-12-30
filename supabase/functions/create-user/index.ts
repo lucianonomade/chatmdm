@@ -69,8 +69,18 @@ serve(async (req) => {
       .eq('id', callingUser.id)
       .single();
 
-    const adminTenantId = adminProfile?.tenant_id;
+    // Validar tenant_id de múltiplas fontes para garantir integridade
+    // Prioriza user_roles, depois profile
+    const adminTenantId = roleData.tenant_id || adminProfile?.tenant_id;
     const adminEmail = adminProfile?.email || callingUser.email;
+
+    if (!adminTenantId) {
+      console.error(`CRITICAL: Teacher/Admin ${callingUser.id} has no tenant_id in roles or profile.`);
+      return new Response(
+        JSON.stringify({ error: 'Erro crítico: Tenant ID não encontrado para o administrador. Contate o suporte.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Get request body
     const { email, password, name, role } = await req.json();
@@ -103,8 +113,7 @@ serve(async (req) => {
     }
 
     console.log(`Creating user: ${email} with role: ${userRole}`);
-
-    console.log(`Admin tenant_id: ${adminTenantId}`);
+    console.log(`Admin ID: ${callingUser.id}, Tenant ID: ${adminTenantId}`);
 
     // Create the user using admin API with tenant_id in metadata
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({

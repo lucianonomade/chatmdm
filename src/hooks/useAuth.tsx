@@ -41,19 +41,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (userId: string, email?: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
       // Fetch profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('name, tenant_id')
         .eq('id', userId)
         .maybeSingle();
 
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+      }
+
       // Fetch role
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .maybeSingle();
+
+      if (roleError) {
+        console.error('Error fetching role:', roleError);
+      }
+
+      console.log('Profile data:', profile);
+      console.log('Role data:', roleData);
 
       if (profile && roleData) {
         setAuthUser({
@@ -63,9 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: roleData.role as AppRole,
           tenant_id: profile.tenant_id,
         });
+      } else {
+        console.warn('Profile or Role missing for user:', userId);
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error fetching user profile catch:', error);
     } finally {
       setLoading(false);
     }

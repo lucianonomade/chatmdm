@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
   Dialog,
   DialogTrigger,
@@ -23,6 +22,7 @@ describe('Dialog Component', () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Dialog Title</DialogTitle>
+            <DialogDescription>Description for trigger test</DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
@@ -60,6 +60,7 @@ describe('Dialog Component', () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Controlled Dialog</DialogTitle>
+            <DialogDescription>Controlled description</DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
@@ -79,6 +80,7 @@ describe('Dialog Component', () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Test</DialogTitle>
+            <DialogDescription>Test description</DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
@@ -97,6 +99,7 @@ describe('Dialog Component', () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>With Footer</DialogTitle>
+            <DialogDescription>Footer test description</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button>Cancel</Button>
@@ -118,6 +121,7 @@ describe('Dialog Component', () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Closeable</DialogTitle>
+            <DialogDescription>Close test description</DialogDescription>
           </DialogHeader>
           <DialogClose asChild>
             <Button>Close</Button>
@@ -126,7 +130,10 @@ describe('Dialog Component', () => {
       </Dialog>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    // Use getAllByRole and pick the last button (the one in our test content)
+    // to avoid ambiguity with the Dialog's built-in X button
+    const closeButtons = screen.getAllByRole('button', { name: /close/i });
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
 
     await waitFor(() => {
       expect(handleOpenChange).toHaveBeenCalledWith(false);

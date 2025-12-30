@@ -1,0 +1,3292 @@
+﻿
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mC:/Users/wino/max-pdv-test[39m
+
+node.exe : 
+[90mstderr[2m | src/
+components/__tests__/B
+readcrumbs.test.tsx[2
+m > 
+[22m[2mBreadcrumbs 
+Component[2m > 
+[22m[2mshould not 
+render on root path
+No C:\Program Files\no
+dejs\npx.ps1:29 
+caractere:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : 
+NotSpecified    : 
+([90mstderr[2m.    
+..er on root path:S   
+ tring) [], RemoteEx  
+  ception
+    + 
+FullyQualifiedErr    
+orId : NativeComman   
+ dError
+ 
+[22m[39mΓÜá∩╕Å 
+React Router Future 
+Flag Warning: React 
+Router will begin 
+wrapping state 
+updates in `React.star
+tTransition` in v7. 
+You can use the 
+`v7_startTransition` 
+future flag to opt-in 
+early. For more 
+information, see https
+://reactrouter.com/v6/
+upgrading/future#v7_st
+arttransition.
+ΓÜá∩╕Å React Router 
+Future Flag Warning: 
+Relative route 
+resolution within 
+Splat routes is 
+changing in v7. You 
+can use the `v7_relati
+veSplatPath` future 
+flag to opt-in early. 
+For more information, 
+see https://reactroute
+r.com/v6/upgrading/fut
+ure#v7_relativesplatpa
+th.
+
+[90mstderr[2m | src/
+components/__tests__/N
+avLink.test.tsx[2m > 
+[22m[2mNavLink 
+Component[2m > 
+[22m[2mshould 
+render link with text
+[22m[39mΓÜá∩╕Å 
+React Router Future 
+Flag Warning: React 
+Router will begin 
+wrapping state 
+updates in `React.star
+tTransition` in v7. 
+You can use the 
+`v7_startTransition` 
+future flag to opt-in 
+early. For more 
+information, see https
+://reactrouter.com/v6/
+upgrading/future#v7_st
+arttransition.
+ΓÜá∩╕Å React Router 
+Future Flag Warning: 
+Relative route 
+resolution within 
+Splat routes is 
+changing in v7. You 
+can use the `v7_relati
+veSplatPath` future 
+flag to opt-in early. 
+For more information, 
+see https://reactroute
+r.com/v6/upgrading/fut
+ure#v7_relativesplatpa
+th.
+
+ [32mΓ£ô[39m src/components/__tests__/Breadcrumbs.test.tsx[2m > [22mBreadcrumbs Component[2m > [22mshould not render on root path[32m 251[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/Breadcrumbs.test.tsx[2m > [22mBreadcrumbs Component[2m > [22mshould render breadcrumb for single level path[32m 180[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/Breadcrumbs.test.tsx[2m > [22mBreadcrumbs Component[2m > [22mshould display correct route name[32m 170[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/Breadcrumbs.test.tsx[2m > [22mBreadcrumbs Component[2m > [22mshould display PDV for vendas route[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/Breadcrumbs.test.tsx[2m > [22mBreadcrumbs Component[2m > [22mshould have home link pointing to root[32m 69[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould render button with text[33m 1167[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould handle click events[32m 228[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould render toaster container[33m 845[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould render card with title and value[32m 200[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould render icon[32m 41[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould display positive change[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould display negative change[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould not display change when not provided[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/components/dashboard/__tests__/StatsCard.test.tsx[2m > [22mStatsCard Component[2m > [22mshould apply custom icon color[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould render link with text[33m 449[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render table with all parts[33m 1228[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render table headers[32m 65[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould have correct href[33m 1080[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display success toast[33m 379[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould be disabled when disabled prop is true[32m 168[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould apply active class when route matches[32m 180[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display error toast[32m 157[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould render different variants[33m 434[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould not apply active class when route does not match[32m 170[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display toast with title and description[32m 238[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould render input element[32m 247[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould render different sizes[32m 185[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould render with icon[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Button.test.tsx[2m > [22mButton Component[2m > [22mshould support asChild prop[32m 159[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould always apply base className[32m 120[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/NavLink.test.tsx[2m > [22mNavLink Component[2m > [22mshould render with children[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display loading toast[32m 208[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render table body rows[32m 75[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render table footer[32m 26[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display info toast[32m 100[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render correct number of rows[33m 705[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Toast.test.tsx[2m > [22mToast Component[2m > [22mshould display warning toast[32m 113[2mms[22m[39m
+ [32mΓ£ô[39m src/components/__tests__/ThemeToggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mshould render theme toggle button[33m 1183[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould apply custom className to table[32m 120[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Table.test.tsx[2m > [22mTable Component[2m > [22mshould render empty table[32m 111[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould handle value changes[33m 1361[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould display controlled value[32m 31[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould be disabled when disabled prop is true[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould accept different types[32m 33[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould support className prop[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould handle focus and blur events[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould render trigger button[33m 1095[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Input.test.tsx[2m > [22mInput Component[2m > [22mshould support maxLength attribute[33m 304[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould render all tab triggers[33m 1547[2mms[22m[39m
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Dialog.test.tsx[2m 
+> [22m[2mDialog 
+Component[2m > 
+[22m[2mshould 
+render controlled 
+dialog
+[22m[39mWarning: 
+Missing `Description` 
+or `aria-describedby={
+undefined}` for 
+{DialogContent}.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould open dialog when trigger is clicked[33m 713[2mms[22m[39m
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Dialog.test.tsx[2m 
+> [22m[2mDialog 
+Component[2m > 
+[22m[2mshould call 
+onOpenChange when 
+dialog state changes
+[22m[39mWarning: 
+Missing `Description` 
+or `aria-describedby={
+undefined}` for 
+{DialogContent}.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould render controlled dialog[33m 392[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould show default tab content[32m 156[2mms[22m[39m
+TypeError: candidate?.
+scrollIntoView is not 
+a function
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:321:22
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:331:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:336:9
+    at commitHookEffec
+tListMount (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:23189:26)
+    at commitPassiveMo
+untOnFiber (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:24970:11)
+    at commitPassiveMo
+untEffects_complete (C
+:\Users\wino\max-pdv-t
+est\node_modules\react
+-dom\cjs\react-dom.dev
+elopment.js:24930:9)
+    at commitPassiveMo
+untEffects_begin (C:\U
+sers\wino\max-pdv-test
+\node_modules\react-do
+m\cjs\react-dom.develo
+pment.js:24917:7)
+    at commitPassiveMo
+untEffects (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:24905:3)
+    at flushPassiveEff
+ectsImpl (C:\Users\win
+o\max-pdv-test\node_mo
+dules\react-dom\cjs\re
+act-dom.development.js
+:27078:3)
+    at 
+flushPassiveEffects (C
+:\Users\wino\max-pdv-t
+est\node_modules\react
+-dom\cjs\react-dom.dev
+elopment.js:27023:14)
+ [32mΓ£ô[39m src/components/__tests__/ThemeToggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mshould have accessible label[32m 165[2mms[22m[39m
+ [31m├ù[39m src/components/__tests__/ThemeToggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mshould show dropdown menu on click[33m 1275[2mms[22m[39m
+[31m   ΓåÆ Unable to find an accessible element with the role "menu"
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Toggle theme":
+  [36m<button[31m
+    [33maria-expanded[31m=[32m"false"[31m
+    [33maria-haspopup[31m=[32m"menu"[31m
+    [33maria-label[31m=[32m"Toggle theme"[31m
+    [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent/20 hover:text-accent-foreground active:bg-accent/30 h-9 w-9 sm:h-10 sm:w-10 relative"[31m
+    [33mdata-state[31m=[32m"closed"[31m
+    [33mid[31m=[32m"radix-:r4:"[31m
+    [33mtype[31m=[32m"button"[31m
+  [36m/>[31m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<button[31m
+      [33maria-expanded[31m=[32m"false"[31m
+      [33maria-haspopup[31m=[32m"menu"[31m
+      [33maria-label[31m=[32m"Toggle theme"[31m
+      [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent/20 hover:text-accent-foreground active:bg-accent/30 h-9 w-9 sm:h-10 sm:w-10 relative"[31m
+      [33mdata-state[31m=[32m"closed"[31m
+      [33mid[31m=[32m"radix-:r4:"[31m
+      [33mtype[31m=[32m"button"[31m
+    [36m>[31m
+      [36m<svg[31m
+        [33mclass[31m=[32m"lucide lucide-sun h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"[31m
+        [33mfill[31m=[32m"none"[31m
+        [33mheight[31m=[32m"24"[31m
+        [33mstroke[31m=[32m"currentColor"[31m
+        [33mstroke-linecap[31m=[32m"round"[31m
+        [33mstroke-linejoin[31m=[32m"round"[31m
+        [33mstroke-width[31m=[32m"2"[31m
+        [33mviewBox[31m=[32m"0 0 24 24"[31m
+        [33mwidth[31m=[32m"24"[31m
+        [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+      [36m>[31m
+        [36m<circle[31m
+          [33mcx[31m=[32m"12"[31m
+          [33mcy[31m=[32m"12"[31m
+          [33mr[31m=[32m"4"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M12 2v2"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M12 20v2"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"m4.93 4.93 1.41 1.41"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"m17.66 17.66 1.41 1.41"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M2 12h2"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M20 12h2"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"m6.34 17.66-1.41 1.41"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"m19.07 4.93-1.41 1.41"[31m
+        [36m/>[31m
+      [36m</svg>[31m
+      [36m<svg[31m
+        [33mclass[31m=[32m"lucide lucide-moon absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"[31m
+        [33mfill[31m=[32m"none"[31m
+        [33mheight[31m=[32m"24"[31m
+        [33mstroke[31m=[32m"currentColor"[31m
+        [33mstroke-linecap[31m=[32m"round"[31m
+        [33mstroke-linejoin[31m=[32m"round"[31m
+        [33mstroke-width[31m=[32m"2"[31m
+        [33mviewBox[31m=[32m"0 0 24 24"[31m
+        [33mwidth[31m=[32m"24"[31m
+        [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+      [36m>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"[31m
+        [36m/>[31m
+      [36m</svg>[31m
+      [36m<span[31m
+        [33mclass[31m=[32m"sr-only"[31m
+      [36m>[31m
+        [0mAlternar tema[0m
+      [36m</span>[31m
+    [36m</button>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Select.test.tsx[2m 
+> [22m[2mSelect 
+Component[2m > 
+[22m[2mshould open 
+options on trigger 
+click
+[22m[39mThe above 
+error occurred in the 
+<SelectContentImpl> 
+component:
+
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:279:7
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:256:58
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-slot/dist/index.m
+js:33:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-slot/dist/index.m
+js:9:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-primitive/dist/in
+dex.mjs:28:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-portal/dist/index
+.mjs:11:22
+    at SelectPortal
+    at C:/Users/wino/m
+ax-pdv-test/src/compon
+ents/ui/select.tsx:85:
+73
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at 
+CollectionProvider (fi
+le:///C:/Users/wino/ma
+x-pdv-test/node_module
+s/@radix-ui/react-coll
+ection/dist/index.mjs:
+17:13)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Popper (file://
+/C:/Users/wino/max-pdv
+-test/node_modules/@ra
+dix-ui/react-popper/di
+st/index.mjs:30:11)
+    at Select (file://
+/C:/Users/wino/max-pdv
+-test/node_modules/@ra
+dix-ui/react-select/di
+st/index.mjs:42:5)
+
+Consider adding an 
+error boundary to 
+your tree to 
+customize error 
+handling behavior.
+Visit https://reactjs.
+org/link/error-boundar
+ies to learn more 
+about error 
+boundaries.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Select.test.tsx[2m > [22mSelect Component[2m > [22mshould render select trigger[33m 424[2mms[22m[39m
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Dialog.test.tsx[2m 
+> [22m[2mDialog 
+Component[2m > 
+[22m[2mshould 
+render dialog with 
+footer
+[22m[39mWarning: 
+Missing `Description` 
+or `aria-describedby={
+undefined}` for 
+{DialogContent}.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould call onOpenChange when dialog state changes[32m 292[2mms[22m[39m
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Dialog.test.tsx[2m 
+> [22m[2mDialog 
+Component[2m > 
+[22m[2mshould close 
+dialog with 
+DialogClose
+[22m[39mWarning: 
+Missing `Description` 
+or `aria-describedby={
+undefined}` for 
+{DialogContent}.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould render dialog with footer[33m 517[2mms[22m[39m
+ [31m├ù[39m src/components/ui/__tests__/Dialog.test.tsx[2m > [22mDialog Component[2m > [22mshould close dialog with DialogClose[32m 220[2mms[22m[39m
+[31m   ΓåÆ Found multiple elements with the text: Close
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<span[31m
+  [33mclass[31m=[32m"sr-only"[31m
+[36m>[31m
+  [0mClose[0m
+[36m</span>[31m
+
+Ignored nodes: comments, script, style
+[36m<button[31m
+  [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground border border-primary/20 shadow-md shadow-primary/20 hover:brightness-90 hover:shadow-lg hover:shadow-primary/30 active:brightness-75 h-9 sm:h-10 px-3 sm:px-4 py-2 text-sm"[31m
+  [33mtype[31m=[32m"button"[31m
+[36m>[31m
+  [0mClose[0m
+[36m</button>[31m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body[31m
+  [33mdata-scroll-locked[31m=[32m"1"[31m
+  [33mstyle[31m=[32m"pointer-events: none;"[31m
+[36m>[31m
+  [36m<span[31m
+    [33maria-hidden[31m=[32m"true"[31m
+    [33mdata-aria-hidden[31m=[32m"true"[31m
+    [33mdata-radix-focus-guard[31m=[32m""[31m
+    [33mstyle[31m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[31m
+    [33mtabindex[31m=[32m"0"[31m
+  [36m/>[31m
+  [36m<div[31m
+    [33maria-hidden[31m=[32m"true"[31m
+    [33mdata-aria-hidden[31m=[32m"true"[31m
+  [36m/>[31m
+  [36m<div[31m
+    [33maria-hidden[31m=[32m"true"[31m
+    [33mclass[31m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[31m
+    [33mdata-aria-hidden[31m=[32m"true"[31m
+    [33mdata-state[31m=[32m"open"[31m
+    [33mstyle[31m=[32m"pointer-events: auto;"[31m
+  [36m/>[31m
+  [36m<div[31m
+    [33maria-describedby[31m=[32m"radix-:rh:"[31m
+    [33maria-labelledby[31m=[32m"radix-:rg:"[31m
+    [33mclass[31m=[32m"fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-3 sm:gap-4 border bg-background pt-14 pb-4 px-4 sm:pt-16 sm:pb-6 sm:px-6 shadow-lg duration-200 max-h-[90vh] overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-lg"[31m
+    [33mdata-state[31m=[32m"open"[31m
+    [33mid[31m=[32m"radix-:rf:"[31m
+    [33mrole[31m=[32m"dialog"[31m
+    [33mstyle[31m=[32m"pointer-events: auto;"[31m
+    [33mtabindex[31m=[32m"-1"[31m
+  [36m>[31m
+    [36m<button[31m
+      [33mclass[31m=[32m"absolute right-3 top-3 z-20 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-background p-2"[31m
+      [33mtype[31m=[32m"button"[31m
+    [36m>[31m
+      [36m<svg[31m
+        [33mclass[31m=[32m"lucide lucide-x h-5 w-5"[31m
+        [33mfill[31m=[32m"none"[31m
+        [33mheight[31m=[32m"24"[31m
+        [33mstroke[31m=[32m"currentColor"[31m
+        [33mstroke-linecap[31m=[32m"round"[31m
+        [33mstroke-linejoin[31m=[32m"round"[31m
+        [33mstroke-width[31m=[32m"2"[31m
+        [33mviewBox[31m=[32m"0 0 24 24"[31m
+        [33mwidth[31m=[32m"24"[31m
+        [33mxmlns[31m=[32m"http://www.w3.org/2000/svg"[31m
+      [36m>[31m
+        [36m<path[31m
+          [33md[31m=[32m"M18 6 6 18"[31m
+        [36m/>[31m
+        [36m<path[31m
+          [33md[31m=[32m"m6 6 12 12"[31m
+        [36m/>[31m
+      [36m</svg>[31m
+      [36m<span[31m
+        [33mclass[31m=[32m"sr-only"[31m
+      [36m>[31m
+        [0mClose[0m
+      [36m</span>[31m
+    [36m</button>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"flex flex-col space-y-1.5 text-center sm:text-left"[31m
+    [36m>[31m
+      [36m<h2[31m
+        [33mclass[31m=[32m"text-lg font-semibold leading-none tracking-tight"[31m
+        [33mid[31m=[32m"radix-:rg:"[31m
+      [36m>[31m
+        [0mCloseable[0m
+      [36m</h2>[31m
+    [36m</div>[31m
+    [36m<button[31m
+      [33mclass[31m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground border border-primary/20 shadow-md shadow-primary/20 hover:brightness-90 hover:shadow-lg hover:shadow-primary/30 active:brightness-75 h-9 sm:h-10 px-3 sm:px-4 py-2 text-sm"[31m
+      [33mtype[31m=[32m"button"[31m
+    [36m>[31m
+      [0mClose[0m
+    [36m</button>[31m
+  [36m</div>[31m
+  [36m<span[31m
+    [33maria-hidden[31m=[32m"true"[31m
+    [33mdata-aria-hidden[31m=[32m"true"[31m
+    [33mdata-radix-focus-guard[31m=[32m""[31m
+    [33mstyle[31m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[31m
+    [33mtabindex[31m=[32m"0"[31m
+  [36m/>[31m
+[36m</body>[31m[39m
+TypeError: candidate?.
+scrollIntoView is not 
+a function
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:321:22
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:331:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:336:9
+    at commitHookEffec
+tListMount (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:23189:26)
+    at commitPassiveMo
+untOnFiber (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:24970:11)
+    at commitPassiveMo
+untEffects_complete (C
+:\Users\wino\max-pdv-t
+est\node_modules\react
+-dom\cjs\react-dom.dev
+elopment.js:24930:9)
+    at commitPassiveMo
+untEffects_begin (C:\U
+sers\wino\max-pdv-test
+\node_modules\react-do
+m\cjs\react-dom.develo
+pment.js:24917:7)
+    at commitPassiveMo
+untEffects (C:\Users\w
+ino\max-pdv-test\node_
+modules\react-dom\cjs\
+react-dom.development.
+js:24905:3)
+    at flushPassiveEff
+ectsImpl (C:\Users\win
+o\max-pdv-test\node_mo
+dules\react-dom\cjs\re
+act-dom.development.js
+:27078:3)
+    at 
+flushPassiveEffects (C
+:\Users\wino\max-pdv-t
+est\node_modules\react
+-dom\cjs\react-dom.dev
+elopment.js:27023:14)
+[90mstderr[2m | src/
+components/ui/__tests_
+_/Select.test.tsx[2m 
+> [22m[2mSelect 
+Component[2m > 
+[22m[2mshould call 
+onValueChange when 
+option is selected
+[22m[39mThe above 
+error occurred in the 
+<SelectContentImpl> 
+component:
+
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:279:7
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-select/dist/index
+.mjs:256:58
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-slot/dist/index.m
+js:33:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-slot/dist/index.m
+js:9:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-primitive/dist/in
+dex.mjs:28:13
+    at file:///C:/User
+s/wino/max-pdv-test/no
+de_modules/@radix-ui/r
+eact-portal/dist/index
+.mjs:11:22
+    at SelectPortal
+    at C:/Users/wino/m
+ax-pdv-test/src/compon
+ents/ui/select.tsx:85:
+73
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at 
+CollectionProvider (fi
+le:///C:/Users/wino/ma
+x-pdv-test/node_module
+s/@radix-ui/react-coll
+ection/dist/index.mjs:
+17:13)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Provider (file:
+///C:/Users/wino/max-p
+dv-test/node_modules/@
+radix-ui/react-context
+/dist/index.mjs:27:15)
+    at Popper (file://
+/C:/Users/wino/max-pdv
+-test/node_modules/@ra
+dix-ui/react-popper/di
+st/index.mjs:30:11)
+    at Select (file://
+/C:/Users/wino/max-pdv
+-test/node_modules/@ra
+dix-ui/react-select/di
+st/index.mjs:42:5)
+
+Consider adding an 
+error boundary to 
+your tree to 
+customize error 
+handling behavior.
+Visit https://reactjs.
+org/link/error-boundar
+ies to learn more 
+about error 
+boundaries.
+
+ [32mΓ£ô[39m src/components/ui/__tests__/Select.test.tsx[2m > [22mSelect Component[2m > [22mshould open options on trigger click[33m 1573[2mms[22m[39m
+ [31m├ù[39m src/components/ui/__tests__/Select.test.tsx[2m > [22mSelect Component[2m > [22mshould call onValueChange when option is selected[33m 653[2mms[22m[39m
+[31m   ΓåÆ Unable to find an element with the text: Option 1. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[31m
+  [33mstyle[31m=[32m""[31m
+[36m>[31m
+  [36m<div />[31m
+[36m</body>[31m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Select.test.tsx[2m > [22mSelect Component[2m > [22mshould display selected value[32m 103[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Select.test.tsx[2m > [22mSelect Component[2m > [22mshould be disabled when disabled prop is true[32m 57[2mms[22m[39m
+ [31m├ù[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould switch tab content on click[33m 1398[2mms[22m[39m
+[31m   ΓåÆ Unable to find an element with the text: Content 2. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mdata-orientation[31m=[32m"horizontal"[31m
+      [33mdir[31m=[32m"ltr"[31m
+    [36m>[31m
+      [36m<div[31m
+        [33maria-orientation[31m=[32m"horizontal"[31m
+        [33mclass[31m=[32m"inline-flex h-auto min-h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground flex-wrap gap-1"[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mrole[31m=[32m"tablist"[31m
+        [33mstyle[31m=[32m"outline: none;"[31m
+        [33mtabindex[31m=[32m"0"[31m
+      [36m>[31m
+        [36m<button[31m
+          [33maria-controls[31m=[32m"radix-:r8:-content-tab1"[31m
+          [33maria-selected[31m=[32m"true"[31m
+          [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-radix-collection-item[31m=[32m""[31m
+          [33mdata-state[31m=[32m"active"[31m
+          [33mid[31m=[32m"radix-:r8:-trigger-tab1"[31m
+          [33mrole[31m=[32m"tab"[31m
+          [33mtabindex[31m=[32m"-1"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [0mTab 1[0m
+        [36m</button>[31m
+        [36m<button[31m
+          [33maria-controls[31m=[32m"radix-:r8:-content-tab2"[31m
+          [33maria-selected[31m=[32m"false"[31m
+          [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-radix-collection-item[31m=[32m""[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mid[31m=[32m"radix-:r8:-trigger-tab2"[31m
+          [33mrole[31m=[32m"tab"[31m
+          [33mtabindex[31m=[32m"-1"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [0mTab 2[0m
+        [36m</button>[31m
+        [36m<button[31m
+          [33maria-controls[31m=[32m"radix-:r8:-content-tab3"[31m
+          [33maria-selected[31m=[32m"false"[31m
+          [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-radix-collection-item[31m=[32m""[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mid[31m=[32m"radix-:r8:-trigger-tab3"[31m
+          [33mrole[31m=[32m"tab"[31m
+          [33mtabindex[31m=[32m"-1"[31m
+          [33mtype[31m=[32m"button"[31m
+        [36m>[31m
+          [0mTab 3[0m
+        [36m</button>[31m
+      [36m</div>[31m
+      [36m<div[31m
+        [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab1"[31m
+        [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mdata-state[31m=[32m"active"[31m
+        [33mid[31m=[32m"radix-:r8:-content-tab1"[31m
+        [33mrole[31m=[32m"tabpanel"[31m
+        [33mstyle[31m=[32m"animation-duration: 0s;"[31m
+        [33mtabindex[31m=[32m"0"[31m
+      [36m>[31m
+        [0mContent 1[0m
+      [36m</div>[31m
+      [36m<div[31m
+        [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab2"[31m
+        [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mdata-state[31m=[32m"inactive"[31m
+        [33mhidden[31m=[32m""[31m
+        [33mid[31m=[32m"radix-:r8:-content-tab2"[31m
+        [33mrole[31m=[32m"tabpanel"[31m
+        [33mtabindex[31m=[32m"0"[31m
+      [36m/>[31m
+      [36m<div[31m
+        [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab3"[31m
+        [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mdata-state[31m=[32m"inactive"[31m
+        [33mhidden[31m=[32m""[31m
+        [33mid[31m=[32m"radix-:r8:-content-tab3"[31m
+        [33mrole[31m=[32m"tabpanel"[31m
+        [33mtabindex[31m=[32m"0"[31m
+      [36m/>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div>[31m
+      [36m<div[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mdir[31m=[32m"ltr"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33maria-orientation[31m=[32m"horizontal"[31m
+          [33mclass[31m=[32m"inline-flex h-auto min-h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground flex-wrap gap-1"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mrole[31m=[32m"tablist"[31m
+          [33mstyle[31m=[32m"outline: none;"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:r8:-content-tab1"[31m
+            [33maria-selected[31m=[32m"true"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"active"[31m
+            [33mid[31m=[32m"radix-:r8:-trigger-tab1"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 1[0m
+          [36m</button>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:r8:-content-tab2"[31m
+            [33maria-selected[31m=[32m"false"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"inactive"[31m
+            [33mid[31m=[32m"radix-:r8:-trigger-tab2"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 2[0m
+          [36m</button>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:r8:-content-tab3"[31m
+            [33maria-selected[31m=[32m"false"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"inactive"[31m
+            [33mid[31m=[32m"radix-:r8:-trigger-tab3"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 3[0m
+          [36m</button>[31m
+        [36m</div>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab1"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"active"[31m
+          [33mid[31m=[32m"radix-:r8:-content-tab1"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mstyle[31m=[32m"animation-duration: 0s;"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m>[31m
+          [0mContent 1[0m
+        [36m</div>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab2"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mhidden[31m=[32m""[31m
+          [33mid[31m=[32m"radix-:r8:-content-tab2"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m/>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:r8:-trigger-tab3"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mhidden[31m=[32m""[31m
+          [33mid[31m=[32m"radix-:r8:-content-tab3"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m/>[31m
+      [36m</div>[31m
+    [36m</div>[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould mark active tab as selected[32m 256[2mms[22m[39m
+ [31m├ù[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould call onValueChange when tab changes[33m 1204[2mms[22m[39m
+[31m   ΓåÆ expected "vi.fn()" to be called with arguments: [ 'tab2' ][90m
+
+Number of calls: [1m0[22m
+[31m
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div>[31m
+      [36m<div[31m
+        [33mdata-orientation[31m=[32m"horizontal"[31m
+        [33mdir[31m=[32m"ltr"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33maria-orientation[31m=[32m"horizontal"[31m
+          [33mclass[31m=[32m"inline-flex h-auto min-h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground flex-wrap gap-1"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mrole[31m=[32m"tablist"[31m
+          [33mstyle[31m=[32m"outline: none;"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:rg:-content-tab1"[31m
+            [33maria-selected[31m=[32m"true"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"active"[31m
+            [33mid[31m=[32m"radix-:rg:-trigger-tab1"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 1[0m
+          [36m</button>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:rg:-content-tab2"[31m
+            [33maria-selected[31m=[32m"false"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"inactive"[31m
+            [33mid[31m=[32m"radix-:rg:-trigger-tab2"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 2[0m
+          [36m</button>[31m
+          [36m<button[31m
+            [33maria-controls[31m=[32m"radix-:rg:-content-tab3"[31m
+            [33maria-selected[31m=[32m"false"[31m
+            [33mclass[31m=[32m"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"[31m
+            [33mdata-orientation[31m=[32m"horizontal"[31m
+            [33mdata-radix-collection-item[31m=[32m""[31m
+            [33mdata-state[31m=[32m"inactive"[31m
+            [33mid[31m=[32m"radix-:rg:-trigger-tab3"[31m
+            [33mrole[31m=[32m"tab"[31m
+            [33mtabindex[31m=[32m"-1"[31m
+            [33mtype[31m=[32m"button"[31m
+          [36m>[31m
+            [0mTab 3[0m
+          [36m</button>[31m
+        [36m</div>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:rg:-trigger-tab1"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"active"[31m
+          [33mid[31m=[32m"radix-:rg:-content-tab1"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mstyle[31m=[32m"animation-duration: 0s;"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m>[31m
+          [0mContent 1[0m
+        [36m</div>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:rg:-trigger-tab2"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mhidden[31m=[32m""[31m
+          [33mid[31m=[32m"radix-:rg:-content-tab2"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m/>[31m
+        [36m<div[31m
+          [33maria-labelledby[31m=[32m"radix-:rg:-trigger-tab3"[31m
+          [33mclass[31m=[32m"mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"[31m
+          [33mdata-orientation[31m=[32m"horizontal"[31m
+          [33mdata-state[31m=[32m"inactive"[31m
+          [33mhidden[31m=[32m""[31m
+          [33mid[31m=[32m"radix-:rg:-content-tab3"[31m
+          [33mrole[31m=[32m"tabpanel"[31m
+          [33mtabindex[31m=[32m"0"[31m
+        [36m/>[31m
+      [36m</div>[31m
+    [36m</div>[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould support controlled value[33m 415[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Tabs.test.tsx[2m > [22mTabs Component[2m > [22mshould disable tab when disabled prop is true[32m 161[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder Status Flow[2m > [22mallows pending to production transition[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder Status Flow[2m > [22mallows production to finished transition[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder Status Flow[2m > [22mallows finished to delivered transition[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder Status Flow[2m > [22mdoes not allow delivered to any other status[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder ID Generation[2m > [22mgenerates 4-digit order ID[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder ID Generation[2m > [22mgenerates numeric order ID[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mOrder ID Generation[2m > [22mgenerates ID between 1000 and 9999[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mPayment Validation[2m > [22mvalidates correct payment[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mPayment Validation[2m > [22mrejects negative payment[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mPayment Validation[2m > [22mrejects payment greater than total[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mPayment Validation[2m > [22mrejects zero installments[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mPayment Validation[2m > [22mrejects more than 12 installments[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mDeadline Calculations[2m > [22midentifies overdue orders[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mDeadline Calculations[2m > [22midentifies non-overdue orders[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mOrder Business Logic[2m > [22mDeadline Calculations[2m > [22mcalculates days until deadline correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mStock Management[2m > [22madds stock correctly[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mStock Management[2m > [22mremoves stock correctly[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mStock Management[2m > [22mdoes not allow negative stock[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mStock Management[2m > [22madjusts stock to exact value[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mLow Stock Detection[2m > [22mdetects low stock[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mLow Stock Detection[2m > [22mdetects sufficient stock[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mLow Stock Detection[2m > [22muses custom threshold[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mPrice Formatting[2m > [22mformats prices in BRL[32m 104[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/business-logic.test.ts[2m > [22mProduct Business Logic[2m > [22mPrice Formatting[2m > [22mformats zero[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render badge with text[32m 157[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render default variant[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render secondary variant[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render destructive variant[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render outline variant[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould apply custom className[32m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Badge.test.tsx[2m > [22mBadge Component[2m > [22mshould render with icon[32m 35[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer CRUD Operations[2m > [22mshould add a new customer[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer CRUD Operations[2m > [22mshould update customer data[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer CRUD Operations[2m > [22mshould return null when updating non-existent customer[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer CRUD Operations[2m > [22mshould delete customer[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer CRUD Operations[2m > [22mshould return false when deleting non-existent customer[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould search by name[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould search case-insensitive[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould search by phone[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould search by email[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould search by document[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould return empty array for no matches[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mCustomer Search[2m > [22mshould return multiple matches[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mPhone Validation[2m > [22mshould validate correct phone numbers[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mPhone Validation[2m > [22mshould reject invalid phone numbers[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mEmail Validation[2m > [22mshould validate correct emails[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mEmail Validation[2m > [22mshould reject invalid emails[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mCPF Validation[2m > [22mshould validate correct CPFs[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mValidation[2m > [22mCPF Validation[2m > [22mshould reject invalid CPFs[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mFormatting[2m > [22mshould format phone with 11 digits[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mFormatting[2m > [22mshould format phone with 10 digits[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mFormatting[2m > [22mshould return original for invalid format[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer Management Flow[2m > [22mComplete Customer Flow[2m > [22mshould manage customer lifecycle[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer-Order Relationship[2m > [22mshould calculate customer statistics[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/customer-flow.test.ts[2m > [22mCustomer-Order Relationship[2m > [22mshould return null for customer with no orders[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mUtility Functions[2m > [22mformatCurrency[2m > [22mformats positive numbers correctly[32m 56[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mUtility Functions[2m > [22mformatCurrency[2m > [22mformats zero correctly[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mUtility Functions[2m > [22mformatCurrency[2m > [22mformats negative numbers correctly[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mUtility Functions[2m > [22mDate Formatting[2m > [22mformats dates in Brazilian format[32m 27[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mUtility Functions[2m > [22mDate Formatting[2m > [22mformats datetime correctly[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mCart Calculations[2m > [22mcalculates empty cart total as zero[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mCart Calculations[2m > [22mcalculates single item total correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mCart Calculations[2m > [22mcalculates multiple items total correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mCart Calculations[2m > [22mhandles decimal quantities correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mPayment Calculations[2m > [22mcalculates remaining amount correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mPayment Calculations[2m > [22mcalculates installment values correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mOrder Status[2m > [22mreturns correct status labels[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mOrder Status[2m > [22mreturns original value for unknown status[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/utils.test.ts[2m > [22mPayment Status[2m > [22mreturns correct payment status[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Creation[2m > [22mshould create order with correct initial state[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Creation[2m > [22mshould calculate total for multiple items[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Creation[2m > [22mshould include optional fields[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Creation[2m > [22mshould generate sequential order IDs[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Status Transitions[2m > [22mshould allow valid status transitions[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Status Transitions[2m > [22mshould block invalid status transitions[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Status Transitions[2m > [22mshould not allow transitions from Entregue[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Status Transitions[2m > [22mshould allow cancellation from any non-final state[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Status Transitions[2m > [22mshould not allow transitions from Cancelado[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mPayment Processing[2m > [22mshould add payment and update amounts[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mPayment Processing[2m > [22mshould mark as Pago when fully paid[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mPayment Processing[2m > [22mshould handle multiple partial payments[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mPayment Processing[2m > [22mshould reject payment greater than remaining amount[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mPayment Processing[2m > [22mshould reject zero or negative payments[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Queries[2m > [22mshould filter orders by status[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mOrder Queries[2m > [22mshould filter orders by payment status[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mComplete Order Flow[2m > [22mshould complete full order lifecycle[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mService Orders Flow Integration[2m > [22mComplete Order Flow[2m > [22mshould handle order cancellation with partial payment[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mOrder Kanban View[2m > [22mshould organize orders into kanban columns[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/orders-flow.test.ts[2m > [22mOrder Kanban View[2m > [22mshould handle empty columns[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould add product to empty cart[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould increment quantity when adding same product[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould treat same product with different variations as separate items[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould remove product from cart[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould update quantity correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould remove item when quantity is set to 0[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mCart Operations[2m > [22mshould not allow negative quantities[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPrice Calculations[2m > [22mshould calculate subtotal correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPrice Calculations[2m > [22mshould apply percentage discount correctly[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPrice Calculations[2m > [22mshould handle 100% discount[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPrice Calculations[2m > [22mshould calculate complex cart correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPayment Processing[2m > [22mshould process exact payment successfully[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPayment Processing[2m > [22mshould calculate change for overpayment[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPayment Processing[2m > [22mshould reject insufficient payment[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPayment Processing[2m > [22mshould handle split payments[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mPayment Processing[2m > [22mshould handle split payment with overpayment[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mComplete Sale Flow[2m > [22mshould complete a simple sale[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mComplete Sale Flow[2m > [22mshould complete sale with discount[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mSales Flow Integration[2m > [22mComplete Sale Flow[2m > [22mshould complete sale with multiple items and quantities[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mQuote (Or├ºamento) Flow[2m > [22mshould create a valid quote[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mQuote (Or├ºamento) Flow[2m > [22mshould calculate quote total correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/sales-flow.test.ts[2m > [22mQuote (Or├ºamento) Flow[2m > [22mshould convert quote to sale[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould render card with all parts[32m 178[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould apply custom className to Card[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould render card header with proper styling[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould render card title as h3[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould render only content[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/__tests__/Card.test.tsx[2m > [22mCard Component[2m > [22mshould compose card parts correctly[32m 24[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mSales Totals[2m > [22mcalculates daily sales correctly[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mSales Totals[2m > [22mreturns zero for no sales[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mExpense Calculations[2m > [22mcalculates total expenses[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mExpense Calculations[2m > [22mcalculates net profit[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mReceivables[2m > [22mcalculates total receivables[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mReceivables[2m > [22midentifies overdue payments[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mFixed Expenses[2m > [22mcalculates monthly fixed expenses[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mFixed Expenses[2m > [22mfilters out inactive expenses[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mFinancial Calculations[2m > [22mFixed Expenses[2m > [22mfinds expenses due today[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mReport Calculations[2m > [22mPeriod Filtering[2m > [22mfilters last week data[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mReport Calculations[2m > [22mPeriod Filtering[2m > [22mfilters last month data[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mReport Calculations[2m > [22mAggregations[2m > [22mgroups by payment method[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/financial.test.ts[2m > [22mReport Calculations[2m > [22mAggregations[2m > [22mgroups by status[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22maddToCart[2m > [22madds new item to empty cart[32m 9[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22maddToCart[2m > [22mincreases quantity for existing item[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22maddToCart[2m > [22madds multiple different items[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mremoveFromCart[2m > [22mremoves item from cart[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mremoveFromCart[2m > [22mhandles removing non-existent item[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mupdateCartQuantity[2m > [22mupdates item quantity[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mupdateCartQuantity[2m > [22mremoves item when quantity is zero or less[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mclearCart[2m > [22mremoves all items from cart[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mgetCartTotal[2m > [22mcalculates total correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mgetCartTotal[2m > [22mreturns zero for empty cart[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/store.test.ts[2m > [22mCart Store[2m > [22mgetCartItemCount[2m > [22mcounts total items correctly[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mSales Reports[2m > [22mshould filter sales by period[32m 7[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mSales Reports[2m > [22mshould calculate total sales[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mSales Reports[2m > [22mshould group sales by payment method[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mSales Reports[2m > [22mshould group sales by seller[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mSales Reports[2m > [22mshould get daily sales summary[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mProduct Sales Reports[2m > [22mshould get top selling products[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mProduct Sales Reports[2m > [22mshould limit results[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mFinancial Reports[2m > [22mshould calculate monthly profit[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mFinancial Reports[2m > [22mshould calculate profit margin[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mFinancial Reports[2m > [22mshould group expenses by category[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mCash Flow Report[2m > [22mshould generate cash flow entries[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mCash Flow Report[2m > [22mshould calculate running balance[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/reports-flow.test.ts[2m > [22mReports Flow Integration[2m > [22mPeriod Comparison[2m > [22mshould compare two periods[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mLogin Validation[2m > [22mvalidates correct login credentials[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mLogin Validation[2m > [22mrejects short name[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mLogin Validation[2m > [22mrejects short password[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mLogin Validation[2m > [22mrejects empty name[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mLogin Validation[2m > [22mrejects empty password[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mSignup Validation[2m > [22mvalidates correct signup data[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mSignup Validation[2m > [22mrejects invalid email[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mSignup Validation[2m > [22mrejects email without domain[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mSignup Validation[2m > [22mrejects short company name[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mAuthentication Validation[2m > [22mSignup Validation[2m > [22mreturns multiple errors[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mPassword Security[2m > [22maccepts strong password[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mPassword Security[2m > [22mrejects short password[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mPassword Security[2m > [22mrejects password without uppercase[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mPassword Security[2m > [22mrejects password without lowercase[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/auth.test.ts[2m > [22mPassword Security[2m > [22mrejects password without number[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Movements[2m > [22mshould record stock entry[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Movements[2m > [22mshould record stock exit[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Movements[2m > [22mshould prevent negative stock[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Movements[2m > [22mshould handle stock adjustment[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Movements[2m > [22mshould return null for non-existent product[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Queries[2m > [22mshould get low stock products[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Queries[2m > [22mshould calculate total stock value[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mStock Queries[2m > [22mshould get movement history for product[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mSale Stock Deduction[2m > [22mshould deduct stock after sale[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mSale Stock Deduction[2m > [22mshould validate stock before sale[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mStock Management Flow[2m > [22mComplete Stock Flow[2m > [22mshould handle complete inventory cycle[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/stock-flow.test.ts[2m > [22mProduct Variations Stock[2m > [22mshould track stock per variation[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22mvalidates correct customer data[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22mrequires name[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22mvalidates email format[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22mvalidates phone length[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22mvalidates CPF length[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22maccepts valid CPF[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mCustomer Validation[2m > [22maccepts valid CNPJ[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22mvalidates correct product[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22mrequires product name[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22mrequires category[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22mrejects negative price[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22mrejects negative stock[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mProduct Validation[2m > [22maccepts zero price for free items[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mSupplier Validation[2m > [22mvalidates correct supplier[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mSupplier Validation[2m > [22mrequires supplier name[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/lib/__tests__/validation.test.ts[2m > [22mSupplier Validation[2m > [22mvalidates email if provided[32m 0[2mms[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»[39m[1m[41m 
+Failed Tests 5 [49m[
+22m[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»[39m
+
+[41m[1m FAIL 
+[22m[49m src/compone
+nts/__tests__/ThemeTog
+gle.test.tsx[2m > 
+[22mThemeToggle 
+Component[2m > 
+[22mshould show 
+dropdown menu on click
+[31m[1mTestingLibrar
+yElementError[22m: 
+Unable to find an 
+accessible element 
+with the role "menu"
+
+Here are the 
+accessible roles:
+
+  button:
+
+  Name "Toggle theme":
+  [36m<button[31m
+    [33maria-expanded
+[31m=[32m"false"[31
+m
+    [33maria-haspopup
+[31m=[32m"menu"[31m
+    [33maria-label[3
+1m=[32m"Toggle 
+theme"[31m
+    [33mclass[31m=[
+32m"inline-flex 
+items-center 
+justify-center gap-2 
+whitespace-nowrap 
+rounded-md text-sm 
+font-medium ring-offse
+t-background 
+transition-all 
+duration-200 focus-vis
+ible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none 
+disabled:opacity-50 [&
+_svg]:pointer-events-n
+one [&_svg]:size-4 
+[&_svg]:shrink-0 
+hover:bg-accent/20 hov
+er:text-accent-foregro
+und 
+active:bg-accent/30 
+h-9 w-9 sm:h-10 
+sm:w-10 relative"[31m
+    [33mdata-state[3
+1m=[32m"closed"[31m
+    [33mid[31m=[32m
+"radix-:r4:"[31m
+    [33mtype[31m=[3
+2m"button"[31m
+  [36m/>[31m
+
+  --------------------
+----------------------
+--------
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<button[31m
+      [33maria-expand
+ed[31m=[32m"false"[
+31m
+      [33maria-haspop
+up[31m=[32m"menu"[3
+1m
+      [33maria-label
+[31m=[32m"Toggle 
+theme"[31m
+      [33mclass[31m=
+[32m"inline-flex 
+items-center 
+justify-center gap-2 
+whitespace-nowrap 
+rounded-md text-sm 
+font-medium ring-offse
+t-background 
+transition-all 
+duration-200 focus-vis
+ible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none 
+disabled:opacity-50 [&
+_svg]:pointer-events-n
+one [&_svg]:size-4 
+[&_svg]:shrink-0 
+hover:bg-accent/20 hov
+er:text-accent-foregro
+und 
+active:bg-accent/30 
+h-9 w-9 sm:h-10 
+sm:w-10 relative"[31m
+      [33mdata-state
+[31m=[32m"closed"[31
+m
+      [33mid[31m=[3
+2m"radix-:r4:"[31m
+      [33mtype[31m=
+[32m"button"[31m
+    [36m>[31m
+      [36m<svg[31m
+        [33mclass[31
+m=[32m"lucide 
+lucide-sun h-5 w-5 
+rotate-0 scale-100 
+transition-all 
+dark:-rotate-90 
+dark:scale-0"[31m
+        [33mfill[31m
+=[32m"none"[31m
+        [33mheight[3
+1m=[32m"24"[31m
+        [33mstroke[3
+1m=[32m"currentColor"
+[31m
+        [33mstroke-li
+necap[31m=[32m"round
+"[31m
+        [33mstroke-li
+nejoin[31m=[32m"roun
+d"[31m
+        [33mstroke-wi
+dth[31m=[32m"2"[31m
+        [33mviewBox[
+31m=[32m"0 0 24 
+24"[31m
+        [33mwidth[31
+m=[32m"24"[31m
+        [33mxmlns[31
+m=[32m"http://www.w3.
+org/2000/svg"[31m
+      [36m>[31m
+        
+[36m<circle[31m
+          [33mcx[31m
+=[32m"12"[31m
+          [33mcy[31m
+=[32m"12"[31m
+          [33mr[31m=
+[32m"4"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          
+[33md[31m=[32m"M12 
+2v2"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          
+[33md[31m=[32m"M12 
+20v2"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          [33md[31m=
+[32m"m4.93 4.93 1.41 
+1.41"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          [33md[31m=
+[32m"m17.66 17.66 
+1.41 1.41"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          
+[33md[31m=[32m"M2 
+12h2"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          
+[33md[31m=[32m"M20 
+12h2"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          [33md[31m=
+[32m"m6.34 
+17.66-1.41 1.41"[31m
+        [36m/>[31m
+        
+[36m<path[31m
+          [33md[31m=
+[32m"m19.07 
+4.93-1.41 1.41"[31m
+        [36m/>[31m
+      [36m</svg>[31m
+      [36m<svg[31m
+        [33mclass[31
+m=[32m"lucide 
+lucide-moon absolute 
+h-5 w-5 rotate-90 
+scale-0 
+transition-all 
+dark:rotate-0 
+dark:scale-100"[31m
+        [33mfill[31m
+=[32m"none"[31m
+        [33mheight[3
+1m=[32m"24"[31m
+        [33mstroke[3
+1m=[32m"currentColor"
+[31m
+        [33mstroke-li
+necap[31m=[32m"round
+"[31m
+        [33mstroke-li
+nejoin[31m=[32m"roun
+d"[31m
+        [33mstroke-wi
+dth[31m=[32m"2"[31m
+        [33mviewBox[
+31m=[32m"0 0 24 
+24"[31m
+        [33mwidth[31
+m=[32m"24"[31m
+        [33mxmlns[31
+m=[32m"http://www.w3.
+org/2000/svg"[31m
+      [36m>[31m
+        
+[36m<path[31m
+          
+[33md[31m=[32m"M12 
+3a6 6 0 0 0 9 9 9 9 0 
+1 1-9-9Z"[31m
+        [36m/>[31m
+      [36m</svg>[31m
+      [36m<span[31m
+        [33mclass[31
+m=[32m"sr-only"[31m
+      [36m>[31m
+        [0mAlternar 
+tema[0m
+      
+[36m</span>[31m
+    
+[36m</button>[31m
+  [36m</div>[31m
+[36m</body>[31m[39m
+[90m [2mΓ¥»[22m Obj
+ect.getElementError no
+de_modules/@testing-li
+brary/dom/dist/config.
+js:[2m37:19[22m[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@testing-lib
+rary/dom/dist/query-he
+lpers.js:[2m76:38[22
+m[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@testing-lib
+rary/dom/dist/query-he
+lpers.js:[2m52:17[22
+m[39m
+[90m [2mΓ¥»[22m 
+getByRole node_modules
+/@testing-library/dom/
+dist/query-helpers.js:
+[2m95:19[22m[39m
+[36m [2mΓ¥»[22m src
+/components/__tests__/
+ThemeToggle.test.tsx:
+[2m48:19[22m[39m
+    [90m 46| [39m   
+ 
+    [90m 47| [39m   
+ [90m// The dropdown 
+should appear with 
+theme options[39m
+    [90m 48| [39m   
+ [34mexpect[39m(scre
+en[33m.[39m[34mgetB
+yRole[39m([32m'menu'
+[39m))[33m.[39m[34
+mtoBeInTheDocument[39
+m()[33m;[39m
+    [90m   | [39m   
+               
+[31m^[39m
+    [90m 49| [39m  
+})[33m;[39m
+    [90m 50| 
+[39m})[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/5]ΓÄ
+»[22m[39m
+
+[41m[1m FAIL 
+[22m[49m src/compone
+nts/ui/__tests__/Dialo
+g.test.tsx[2m > 
+[22mDialog 
+Component[2m > 
+[22mshould close 
+dialog with 
+DialogClose
+[31m[1mTestingLibrar
+yElementError[22m[39
+m: Found multiple 
+elements with the 
+text: Close
+
+Here are the matching 
+elements:
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<span[39m
+  [33mclass[39m=[32
+m"sr-only"[39m
+[36m>[39m
+  [0mClose[0m
+[36m</span>[39m
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<button[39m
+  [33mclass[39m=[32
+m"inline-flex 
+items-center 
+justify-center gap-2 
+whitespace-nowrap 
+rounded-md 
+font-medium ring-offse
+t-background 
+transition-all 
+duration-200 focus-vis
+ible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none 
+disabled:opacity-50 [&
+_svg]:pointer-events-n
+one [&_svg]:size-4 
+[&_svg]:shrink-0 
+bg-primary text-primar
+y-foreground border 
+border-primary/20 
+shadow-md 
+shadow-primary/20 
+hover:brightness-90 
+hover:shadow-lg hover:
+shadow-primary/30 
+active:brightness-75 
+h-9 sm:h-10 px-3 
+sm:px-4 py-2 
+text-sm"[39m
+  [33mtype[39m=[32m
+"button"[39m
+[36m>[39m
+  [0mClose[0m
+[36m</button>[39m
+
+(If this is 
+intentional, then use 
+the `*AllBy*` variant 
+of the query (like 
+`queryAllByText`, 
+`getAllByText`, or 
+`findAllByText`)).
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<body[39m
+  [33mdata-scroll-loc
+ked[39m=[32m"1"[39m
+  [33mstyle[39m=[32
+m"pointer-events: 
+none;"[39m
+[36m>[39m
+  [36m<span[39m
+    [33maria-hidden[
+39m=[32m"true"[39m
+    [33mdata-aria-hid
+den[39m=[32m"true"[
+39m
+    [33mdata-radix-fo
+cus-guard[39m=[32m""
+[39m
+    [33mstyle[39m=[
+32m"outline: none; 
+opacity: 0; position: 
+fixed; 
+pointer-events: 
+none;"[39m
+    [33mtabindex[39m
+=[32m"0"[39m
+  [36m/>[39m
+  [36m<div[39m
+    [33maria-hidden[
+39m=[32m"true"[39m
+    [33mdata-aria-hid
+den[39m=[32m"true"[
+39m
+  [36m/>[39m
+  [36m<div[39m
+    [33maria-hidden[
+39m=[32m"true"[39m
+    [33mclass[39m=[
+32m"fixed inset-0 
+z-50 bg-black/80 data-
+[state=open]:animate-i
+n data-[state=closed]:
+animate-out data-[stat
+e=closed]:fade-out-0 d
+ata-[state=open]:fade-
+in-0"[39m
+    [33mdata-aria-hid
+den[39m=[32m"true"[
+39m
+    [33mdata-state[3
+9m=[32m"open"[39m
+    [33mstyle[39m=[
+32m"pointer-events: 
+auto;"[39m
+  [36m/>[39m
+  [36m<div[39m
+    [33maria-describe
+dby[39m=[32m"radix-:
+rh:"[39m
+    [33maria-labelled
+by[39m=[32m"radix-:r
+g:"[39m
+    [33mclass[39m=[
+32m"fixed left-1/2 
+top-1/2 z-50 grid 
+w-[calc(100%-2rem)] 
+max-w-lg 
+-translate-x-1/2 
+-translate-y-1/2 
+gap-3 sm:gap-4 border 
+bg-background pt-14 
+pb-4 px-4 sm:pt-16 
+sm:pb-6 sm:px-6 
+shadow-lg 
+duration-200 
+max-h-[90vh] 
+overflow-y-auto data-[
+state=open]:animate-in
+ data-[state=closed]:a
+nimate-out data-[state
+=closed]:fade-out-0 da
+ta-[state=open]:fade-i
+n-0 data-[state=closed
+]:zoom-out-95 data-[st
+ate=open]:zoom-in-95 d
+ata-[state=closed]:sli
+de-out-to-left-1/2 dat
+a-[state=closed]:slide
+-out-to-top-[48%] data
+-[state=open]:slide-in
+-from-left-1/2 data-[s
+tate=open]:slide-in-fr
+om-top-[48%] 
+rounded-lg"[39m
+    [33mdata-state[3
+9m=[32m"open"[39m
+    [33mid[39m=[32m
+"radix-:rf:"[39m
+    [33mrole[39m=[3
+2m"dialog"[39m
+    [33mstyle[39m=[
+32m"pointer-events: 
+auto;"[39m
+    [33mtabindex[39m
+=[32m"-1"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=
+[32m"absolute 
+right-3 top-3 z-20 
+rounded-sm opacity-70 
+ring-offset-background
+ transition-opacity 
+hover:opacity-100 
+focus:outline-none 
+focus:ring-2 
+focus:ring-ring 
+focus:ring-offset-2 di
+sabled:pointer-events-
+none bg-background 
+p-2"[39m
+      [33mtype[39m=
+[32m"button"[39m
+    [36m>[39m
+      [36m<svg[39m
+        [33mclass[39
+m=[32m"lucide 
+lucide-x h-5 w-5"[39m
+        [33mfill[39m
+=[32m"none"[39m
+        [33mheight[3
+9m=[32m"24"[39m
+        [33mstroke[3
+9m=[32m"currentColor"
+[39m
+        [33mstroke-li
+necap[39m=[32m"round
+"[39m
+        [33mstroke-li
+nejoin[39m=[32m"roun
+d"[39m
+        [33mstroke-wi
+dth[39m=[32m"2"[39m
+        [33mviewBox[
+39m=[32m"0 0 24 
+24"[39m
+        [33mwidth[39
+m=[32m"24"[39m
+        [33mxmlns[39
+m=[32m"http://www.w3.
+org/2000/svg"[39m
+      [36m>[39m
+        
+[36m<path[39m
+          
+[33md[39m=[32m"M18 
+6 6 18"[39m
+        [36m/>[39m
+        
+[36m<path[39m
+          
+[33md[39m=[32m"m6 
+6 12 12"[39m
+        [36m/>[39m
+      [36m</svg>[39m
+      [36m<span[39m
+        [33mclass[39
+m=[32m"sr-only"[39m
+      [36m>[39m
+        [0mClose[0m
+      
+[36m</span>[39m
+    
+[36m</button>[39m
+    [36m<div[39m
+      [33mclass[39m=
+[32m"flex flex-col 
+space-y-1.5 
+text-center 
+sm:text-left"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39
+m=[32m"text-lg 
+font-semibold 
+leading-none 
+tracking-tight"[39m
+        [33mid[39m=
+[32m"radix-:rg:"[39m
+      [36m>[39m
+        
+[0mCloseable[0m
+      [36m</h2>[39m
+    [36m</div>[39m
+    [36m<button[39m
+      [33mclass[39m=
+[32m"inline-flex 
+items-center 
+justify-center gap-2 
+whitespace-nowrap 
+rounded-md 
+font-medium ring-offse
+t-background 
+transition-all 
+duration-200 focus-vis
+ible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none 
+disabled:opacity-50 [&
+_svg]:pointer-events-n
+one [&_svg]:size-4 
+[&_svg]:shrink-0 
+bg-primary text-primar
+y-foreground border 
+border-primary/20 
+shadow-md 
+shadow-primary/20 
+hover:brightness-90 
+hover:shadow-lg hover:
+shadow-primary/30 
+active:brightness-75 
+h-9 sm:h-10 px-3 
+sm:px-4 py-2 
+text-sm"[39m
+      [33mtype[39m=
+[32m"button"[39m
+    [36m>[39m
+      [0mClose[0m
+    
+[36m</button>[39m
+  [36m</div>[39m
+  [36m<span[39m
+    [33maria-hidden[
+39m=[32m"true"[39m
+    [33mdata-aria-hid
+den[39m=[32m"true"[
+39m
+    [33mdata-radix-fo
+cus-guard[39m=[32m""
+[39m
+    [33mstyle[39m=[
+32m"outline: none; 
+opacity: 0; position: 
+fixed; 
+pointer-events: 
+none;"[39m
+    [33mtabindex[39m
+=[32m"0"[39m
+  [36m/>[39m
+[36m</body>[39m
+[90m [2mΓ¥»[22m Obj
+ect.getElementError no
+de_modules/@testing-li
+brary/dom/dist/config.
+js:[2m37:19[22m[39m
+[90m [2mΓ¥»[22m 
+getElementError node_m
+odules/@testing-librar
+y/dom/dist/query-helpe
+rs.js:[2m20:35[22m[
+39m
+[90m [2mΓ¥»[22m get
+MultipleElementsFoundE
+rror node_modules/@tes
+ting-library/dom/dist/
+query-helpers.js:[2m2
+3:10[22m[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@testing-lib
+rary/dom/dist/query-he
+lpers.js:[2m55:13[22
+m[39m
+[90m [2mΓ¥»[22m 
+getByText node_modules
+/@testing-library/dom/
+dist/query-helpers.js:
+[2m95:19[22m[39m
+[36m [2mΓ¥»[22m src
+/components/ui/__tests
+__/Dialog.test.tsx:[2
+m129:28[22m[39m
+    [90m127| [39m
+    [90m128| [39m   
+ // Use getByText to 
+avoid ambiguity with 
+the X button's 
+sr-only teΓÇª
+    [90m129| [39m   
+ fireEvent[33m.[39m
+[34mclick[39m(screen
+[33m.[39m[34mgetByTe
+xt[39m([32m'Close'[
+39m))[33m;[39m
+    [90m   | [39m   
+                      
+  [31m^[39m
+    [90m130| [39m
+    [90m131| [39m   
+ [35mawait[39m 
+[34mwaitFor[39m(() 
+[33m=>[39m {
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/5]ΓÄ
+»[22m[39m
+
+[41m[1m FAIL 
+[22m[49m src/compone
+nts/ui/__tests__/Selec
+t.test.tsx[2m > 
+[22mSelect 
+Component[2m > 
+[22mshould call 
+onValueChange when 
+option is selected
+[31m[1mTestingLibrar
+yElementError[22m: 
+Unable to find an 
+element with the 
+text: Option 1. This 
+could be because the 
+text is broken up by 
+multiple elements. In 
+this case, you can 
+provide a function 
+for your text matcher 
+to make your matcher 
+more flexible.
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<body[31m
+  [33mstyle[31m=[32
+m""[31m
+[36m>[31m
+  [36m<div />[31m
+[36m</body>[31m[39m
+[90m [2mΓ¥»[22m Obj
+ect.getElementError no
+de_modules/@testing-li
+brary/dom/dist/config.
+js:[2m37:19[22m[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@testing-lib
+rary/dom/dist/query-he
+lpers.js:[2m76:38[22
+m[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@testing-lib
+rary/dom/dist/query-he
+lpers.js:[2m52:17[22
+m[39m
+[90m [2mΓ¥»[22m 
+getByText node_modules
+/@testing-library/dom/
+dist/query-helpers.js:
+[2m95:19[22m[39m
+[36m [2mΓ¥»[22m src
+/components/ui/__tests
+__/Select.test.tsx:[2
+m56:28[22m[39m
+    [90m 54| [39m   
+ })[33m;[39m
+    [90m 55| [39m
+    [90m 56| [39m   
+ fireEvent[33m.[39m
+[34mclick[39m(screen
+[33m.[39m[34mgetByTe
+xt[39m([32m'Option 
+1'[39m))[33m;[39m
+    [90m   | [39m   
+                      
+  [31m^[39m
+    [90m 57| [39m
+    [90m 58| [39m   
+ [35mawait[39m 
+[34mwaitFor[39m(() 
+[33m=>[39m {
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/5]ΓÄ
+»[22m[39m
+
+[41m[1m FAIL 
+[22m[49m src/compone
+nts/ui/__tests__/Tabs.
+test.tsx[2m > 
+[22mTabs 
+Component[2m > 
+[22mshould switch 
+tab content on click
+[31m[1mTestingLibrar
+yElementError[22m[39
+m: Unable to find an 
+element with the 
+text: Content 2. This 
+could be because the 
+text is broken up by 
+multiple elements. In 
+this case, you can 
+provide a function 
+for your text matcher 
+to make your matcher 
+more flexible.
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-orient
+ation[39m=[32m"horiz
+ontal"[39m
+      [33mdir[39m=[
+32m"ltr"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mclass[39
+m=[32m"inline-flex 
+h-auto min-h-10 
+items-center 
+justify-start 
+rounded-md bg-muted 
+p-1 
+text-muted-foreground 
+flex-wrap gap-1"[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mrole[39m
+=[32m"tablist"[39m
+        [33mstyle[39
+m=[32m"outline: 
+none;"[39m
+        [33mtabindex
+[39m=[32m"0"[39m
+      [36m>[39m
+        
+[36m<button[39m
+          [33maria-co
+ntrols[39m=[32m"radi
+x-:r8:-content-tab1"[
+39m
+          [33maria-se
+lected[39m=[32m"true
+"[39m
+          [33mclass[
+39m=[32m"inline-flex 
+items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-ra
+dix-collection-item[3
+9m=[32m""[39m
+          [33mdata-st
+ate[39m=[32m"active"
+[39m
+          [33mid[39m
+=[32m"radix-:r8:-trig
+ger-tab1"[39m
+          [33mrole[3
+9m=[32m"tab"[39m
+          [33mtabinde
+x[39m=[32m"-1"[39m
+          [33mtype[3
+9m=[32m"button"[39m
+        [36m>[39m
+          [0mTab 
+1[0m
+        
+[36m</button>[39m
+        
+[36m<button[39m
+          [33maria-co
+ntrols[39m=[32m"radi
+x-:r8:-content-tab2"[
+39m
+          [33maria-se
+lected[39m=[32m"fals
+e"[39m
+          [33mclass[
+39m=[32m"inline-flex 
+items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-ra
+dix-collection-item[3
+9m=[32m""[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mid[39m
+=[32m"radix-:r8:-trig
+ger-tab2"[39m
+          [33mrole[3
+9m=[32m"tab"[39m
+          [33mtabinde
+x[39m=[32m"-1"[39m
+          [33mtype[3
+9m=[32m"button"[39m
+        [36m>[39m
+          [0mTab 
+2[0m
+        
+[36m</button>[39m
+        
+[36m<button[39m
+          [33maria-co
+ntrols[39m=[32m"radi
+x-:r8:-content-tab3"[
+39m
+          [33maria-se
+lected[39m=[32m"fals
+e"[39m
+          [33mclass[
+39m=[32m"inline-flex 
+items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-ra
+dix-collection-item[3
+9m=[32m""[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mid[39m
+=[32m"radix-:r8:-trig
+ger-tab3"[39m
+          [33mrole[3
+9m=[32m"tab"[39m
+          [33mtabinde
+x[39m=[32m"-1"[39m
+          [33mtype[3
+9m=[32m"button"[39m
+        [36m>[39m
+          [0mTab 
+3[0m
+        
+[36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labe
+lledby[39m=[32m"radi
+x-:r8:-trigger-tab1"[
+39m
+        [33mclass[39
+m=[32m"mt-2 ring-offs
+et-background focus-vi
+sible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mdata-stat
+e[39m=[32m"active"[
+39m
+        [33mid[39m=
+[32m"radix-:r8:-conten
+t-tab1"[39m
+        [33mrole[39m
+=[32m"tabpanel"[39m
+        [33mstyle[39
+m=[32m"animation-dura
+tion: 0s;"[39m
+        [33mtabindex
+[39m=[32m"0"[39m
+      [36m>[39m
+        [0mContent 
+1[0m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labe
+lledby[39m=[32m"radi
+x-:r8:-trigger-tab2"[
+39m
+        [33mclass[39
+m=[32m"mt-2 ring-offs
+et-background focus-vi
+sible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mdata-stat
+e[39m=[32m"inactive"
+[39m
+        [33mhidden[3
+9m=[32m""[39m
+        [33mid[39m=
+[32m"radix-:r8:-conten
+t-tab2"[39m
+        [33mrole[39m
+=[32m"tabpanel"[39m
+        [33mtabindex
+[39m=[32m"0"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33maria-labe
+lledby[39m=[32m"radi
+x-:r8:-trigger-tab3"[
+39m
+        [33mclass[39
+m=[32m"mt-2 ring-offs
+et-background focus-vi
+sible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mdata-stat
+e[39m=[32m"inactive"
+[39m
+        [33mhidden[3
+9m=[32m""[39m
+        [33mid[39m=
+[32m"radix-:r8:-conten
+t-tab3"[39m
+        [33mrole[39m
+=[32m"tabpanel"[39m
+        [33mtabindex
+[39m=[32m"0"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mdir[39m=
+[32m"ltr"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33maria-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mclass[
+39m=[32m"inline-flex 
+h-auto min-h-10 
+items-center 
+justify-start 
+rounded-md bg-muted 
+p-1 
+text-muted-foreground 
+flex-wrap gap-1"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mrole[3
+9m=[32m"tablist"[39m
+          [33mstyle[
+39m=[32m"outline: 
+none;"[39m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:r8:-content-tab1"
+[39m
+            [33maria-
+selected[39m=[32m"tr
+ue"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"activ
+e"[39m
+            [33mid[3
+9m=[32m"radix-:r8:-tr
+igger-tab1"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+1[0m
+          
+[36m</button>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:r8:-content-tab2"
+[39m
+            [33maria-
+selected[39m=[32m"fa
+lse"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"inact
+ive"[39m
+            [33mid[3
+9m=[32m"radix-:r8:-tr
+igger-tab2"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+2[0m
+          
+[36m</button>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:r8:-content-tab3"
+[39m
+            [33maria-
+selected[39m=[32m"fa
+lse"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"inact
+ive"[39m
+            [33mid[3
+9m=[32m"radix-:r8:-tr
+igger-tab3"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+3[0m
+          
+[36m</button>[39m
+        
+[36m</div>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:r8:-trigger-tab1"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"active"
+[39m
+          [33mid[39m
+=[32m"radix-:r8:-cont
+ent-tab1"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mstyle[
+39m=[32m"animation-du
+ration: 0s;"[39m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m>[39m
+          [0mContent 
+1[0m
+        
+[36m</div>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:r8:-trigger-tab2"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mhidden
+[39m=[32m""[39m
+          [33mid[39m
+=[32m"radix-:r8:-cont
+ent-tab2"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:r8:-trigger-tab3"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mhidden
+[39m=[32m""[39m
+          [33mid[39m
+=[32m"radix-:r8:-cont
+ent-tab3"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m/>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+[90m [2mΓ¥»[22m 
+waitFor node_modules/@
+testing-library/dom/di
+st/wait-for.js:[2m163
+:27[22m[39m
+[36m [2mΓ¥»[22m src
+/components/ui/__tests
+__/Tabs.test.tsx:[2m4
+0:11[22m[39m
+    [90m 38| [39m   
+ fireEvent[33m.[39m
+[34mclick[39m(screen
+[33m.[39m[34mgetByRo
+le[39m([32m'tab'[39
+m[33m,[39m { 
+name[33m:[39m 
+[32m'Tab 2'[39m 
+}))[33m;[39m
+    [90m 39| [39m
+    [90m 40| [39m   
+ [35mawait[39m 
+[34mwaitFor[39m(() 
+[33m=>[39m {
+    [90m   | [39m   
+       [31m^[39m
+    [90m 41| [39m   
+   [34mexpect[39m(sc
+reen[33m.[39m[34mge
+tByText[39m([32m'Con
+tent 2'[39m))[33m.[
+39m[34mtoBeInTheDocum
+ent[39m()[33m;[39m
+    [90m 42| [39m   
+ })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/5]ΓÄ
+»[22m[39m
+
+[41m[1m FAIL 
+[22m[49m src/compone
+nts/ui/__tests__/Tabs.
+test.tsx[2m > 
+[22mTabs 
+Component[2m > 
+[22mshould call 
+onValueChange when 
+tab changes
+[31m[1mAssertionErro
+r[22m[39m: expected 
+"vi.fn()" to be 
+called with 
+arguments: [ 'tab2' 
+][90m
+
+Number of calls: 
+[1m0[22m
+[39m
+
+Ignored nodes: 
+comments, script, 
+style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-orie
+ntation[39m=[32m"hor
+izontal"[39m
+        [33mdir[39m=
+[32m"ltr"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33maria-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mclass[
+39m=[32m"inline-flex 
+h-auto min-h-10 
+items-center 
+justify-start 
+rounded-md bg-muted 
+p-1 
+text-muted-foreground 
+flex-wrap gap-1"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mrole[3
+9m=[32m"tablist"[39m
+          [33mstyle[
+39m=[32m"outline: 
+none;"[39m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:rg:-content-tab1"
+[39m
+            [33maria-
+selected[39m=[32m"tr
+ue"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"activ
+e"[39m
+            [33mid[3
+9m=[32m"radix-:rg:-tr
+igger-tab1"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+1[0m
+          
+[36m</button>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:rg:-content-tab2"
+[39m
+            [33maria-
+selected[39m=[32m"fa
+lse"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"inact
+ive"[39m
+            [33mid[3
+9m=[32m"radix-:rg:-tr
+igger-tab2"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+2[0m
+          
+[36m</button>[39m
+          
+[36m<button[39m
+            [33maria-
+controls[39m=[32m"ra
+dix-:rg:-content-tab3"
+[39m
+            [33maria-
+selected[39m=[32m"fa
+lse"[39m
+            [33mclass
+[39m=[32m"inline-fle
+x items-center 
+justify-center 
+whitespace-nowrap 
+rounded-sm px-2.5 
+sm:px-3 py-1.5 
+text-xs sm:text-sm 
+font-medium ring-offse
+t-background 
+transition-all data-[s
+tate=active]:bg-backgr
+ound data-[state=activ
+e]:text-foreground dat
+a-[state=active]:shado
+w-sm focus-visible:out
+line-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2 disabled:pointe
+r-events-none disabled
+:opacity-50"[39m
+            [33mdata-
+orientation[39m=[32m
+"horizontal"[39m
+            [33mdata-
+radix-collection-item
+[39m=[32m""[39m
+            [33mdata-
+state[39m=[32m"inact
+ive"[39m
+            [33mid[3
+9m=[32m"radix-:rg:-tr
+igger-tab3"[39m
+            [33mrole
+[39m=[32m"tab"[39m
+            [33mtabin
+dex[39m=[32m"-1"[39
+m
+            [33mtype
+[39m=[32m"button"[39
+m
+          [36m>[39m
+            [0mTab 
+3[0m
+          
+[36m</button>[39m
+        
+[36m</div>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:rg:-trigger-tab1"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"active"
+[39m
+          [33mid[39m
+=[32m"radix-:rg:-cont
+ent-tab1"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mstyle[
+39m=[32m"animation-du
+ration: 0s;"[39m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m>[39m
+          [0mContent 
+1[0m
+        
+[36m</div>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:rg:-trigger-tab2"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mhidden
+[39m=[32m""[39m
+          [33mid[39m
+=[32m"radix-:rg:-cont
+ent-tab2"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33maria-la
+belledby[39m=[32m"ra
+dix-:rg:-trigger-tab3"
+[39m
+          [33mclass[
+39m=[32m"mt-2 ring-of
+fset-background focus-
+visible:outline-none 
+focus-visible:ring-2 f
+ocus-visible:ring-ring
+ focus-visible:ring-of
+fset-2"[39m
+          [33mdata-or
+ientation[39m=[32m"h
+orizontal"[39m
+          [33mdata-st
+ate[39m=[32m"inactiv
+e"[39m
+          [33mhidden
+[39m=[32m""[39m
+          [33mid[39m
+=[32m"radix-:rg:-cont
+ent-tab3"[39m
+          [33mrole[3
+9m=[32m"tabpanel"[39
+m
+          [33mtabinde
+x[39m=[32m"0"[39m
+        [36m/>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+[36m [2mΓ¥»[22m src
+/components/ui/__tests
+__/Tabs.test.tsx:[2m6
+2:28[22m[39m
+    [90m 60| [39m
+    [90m 61| [39m   
+ [35mawait[39m 
+[34mwaitFor[39m(() 
+[33m=>[39m {
+    [90m 62| [39m   
+   [34mexpect[39m(ha
+ndleChange)[33m.[39m
+[34mtoHaveBeenCalledW
+ith[39m([32m'tab2'[
+39m)[33m;[39m
+    [90m   | [39m   
+                      
+  [31m^[39m
+    [90m 63| [39m   
+ })[33m;[39m
+    [90m 64| [39m  
+})[33m;[39m
+[90m [2mΓ¥»[22m run
+WithExpensiveErrorDiag
+nosticsDisabled node_m
+odules/@testing-librar
+y/dom/dist/config.js:
+[2m47:12[22m[39m
+[90m [2mΓ¥»[22m 
+checkCallback node_mod
+ules/@testing-library/
+dom/dist/wait-for.js:
+[2m124:77[22m[39m
+[90m [2mΓ¥»[22m Tim
+eout.checkRealTimersCa
+llback node_modules/@t
+esting-library/dom/dis
+t/wait-for.js:[2m118:
+16[22m[39m
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m20 passed[39m[22m[90m (24)[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/5]ΓÄ
+»[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»[39m[1m[41m 
+Unhandled Errors [49m
+[22m[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»[39m
+[31m[1m
+Vitest caught 2 
+unhandled errors 
+during the test run.
+This might cause 
+false positive tests. 
+Resolve unhandled 
+errors to make sure 
+your tests are not 
+affected.[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+[1m[41m Unhandled 
+Rejection [49m[22m[
+31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39
+m
+[31m[1mTypeError[22
+m: candidate?.scrollIn
+toView is not a 
+function[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m321:22[22m[3
+9m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m331:13[22m[3
+9m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m336:9[22m[39
+m
+[90m [2mΓ¥»[22m com
+mitHookEffectListMount
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m23189:26
+[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountOnFiber
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m24970:11
+[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+_complete node_modules
+/react-dom/cjs/react-d
+om.development.js:[2m
+24930:9[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+_begin node_modules/re
+act-dom/cjs/react-dom.
+development.js:[2m249
+17:7[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m24905:3[
+22m[39m
+[90m [2mΓ¥»[22m flu
+shPassiveEffectsImpl n
+ode_modules/react-dom/
+cjs/react-dom.developm
+ent.js:[2m27078:3[22
+m[39m
+[90m [2mΓ¥»[22m 
+flushPassiveEffects no
+de_modules/react-dom/c
+js/react-dom.developme
+nt.js:[2m27023:14[22
+m[39m
+
+[31mThis error 
+originated in "[1msrc
+/components/ui/__tests
+__/Select.test.tsx[22
+m" test file. It 
+doesn't mean the 
+error was thrown 
+inside the file 
+itself, but while it 
+was running.[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m259 passed[39m[22m[90m (264)[39m
+[2m     Errors [22m [1m[31m2 errors[39m[22m
+[2m   Start at [22m 21:18:12
+[2m   Duration [22m 22.38s[2m (transform 2.12s, setup 20.33s, import 28.74s, tests 26.83s, environment 113.26s)[22m
+
+[31mThe latest test 
+that might've caused 
+the error is 
+"[1mshould open 
+options on trigger 
+click[22m". It might 
+mean one of the 
+following:
+- The error was 
+thrown, while Vitest 
+was running this test.
+- If the error 
+occurred after the 
+test had been 
+completed, this was 
+the last documented 
+test before it was 
+thrown.[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+[1m[41m Unhandled 
+Rejection [49m[22m[
+31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39
+m
+[31m[1mTypeError[22
+m: candidate?.scrollIn
+toView is not a 
+function[39m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m321:22[22m[3
+9m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m331:13[22m[3
+9m
+[90m [2mΓ¥»[22m nod
+e_modules/@radix-ui/re
+act-select/dist/index.
+mjs:[2m336:9[22m[39
+m
+[90m [2mΓ¥»[22m com
+mitHookEffectListMount
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m23189:26
+[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountOnFiber
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m24970:11
+[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+_complete node_modules
+/react-dom/cjs/react-d
+om.development.js:[2m
+24930:9[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+_begin node_modules/re
+act-dom/cjs/react-dom.
+development.js:[2m249
+17:7[22m[39m
+[90m [2mΓ¥»[22m com
+mitPassiveMountEffects
+ node_modules/react-do
+m/cjs/react-dom.develo
+pment.js:[2m24905:3[
+22m[39m
+[90m [2mΓ¥»[22m flu
+shPassiveEffectsImpl n
+ode_modules/react-dom/
+cjs/react-dom.developm
+ent.js:[2m27078:3[22
+m[39m
+[90m [2mΓ¥»[22m 
+flushPassiveEffects no
+de_modules/react-dom/c
+js/react-dom.developme
+nt.js:[2m27023:14[22
+m[39m
+
+[31mThis error 
+originated in "[1msrc
+/components/ui/__tests
+__/Select.test.tsx[22
+m" test file. It 
+doesn't mean the 
+error was thrown 
+inside the file 
+itself, but while it 
+was running.[39m
+[31mThe latest test 
+that might've caused 
+the error is 
+"[1mshould call 
+onValueChange when 
+option is 
+selected[22m". It 
+might mean one of the 
+following:
+- The error was 
+thrown, while Vitest 
+was running this test.
+- If the error 
+occurred after the 
+test had been 
+completed, this was 
+the last documented 
+test before it was 
+thrown.[39m
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ
+»ΓÄ»ΓÄ»[39m
+

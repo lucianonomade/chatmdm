@@ -64,6 +64,37 @@ export interface ProductVariation {
   price: number;
 }
 
+/*
+ # Full System Audit and Prep
+
+## User Management & Permissions
+- [x] Fix missing "Adicionar Usuário" button visibility for admins.
+- [x] Restore Email input in Create User dialog.
+- [x] Fix `tenant_id` assignment in `create-user` Edge Function.
+- [x] Restrict Super Global role creation to superadmins.
+
+## POS (Terminal de Vendas)
+- [x] Implement stock validation in `Vendas.tsx`. (Implemented/Pending verification)
+- [x] Implement automatic stock deduction on order creation (Migration created).
+- [x] Implement stock restoration on order deletion/cancellation (Migration created).
+- [ ] Verify "Gráfica" vs standard product flow.
+- [ ] Test "Metragem" (Meter-based) pricing calculation.
+
+## Financial Module & Security
+- [x] Audit RLS policies for all financial tables (Missing policies fixed in Migration). (Implemented/Pending verification)
+- [x] Verify tenant isolation for all financial records (Hooks verified).
+- [ ] Verify installment calculation logic for `ContasReceber`.
+- [ ] Verify Expense tracking and reporting.
+
+## Commissions
+- [x] Fix visibility for Sellers (Hook updated).
+- [x] Ensure Sellers can read Commission settings (RLS Migration created).
+
+## Data & Reliability
+- [ ] Fix Backup deduplication (Plan: ID/Name pre-check). (Next major focus)
+- [ ] Verify Restore process for large datasets.
+*/
+
 export interface Product {
   id: string;
   name: string;

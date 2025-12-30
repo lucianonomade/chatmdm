@@ -134,12 +134,12 @@ const DEFAULT_FINISHING_OPTIONS = [
 export default function Vendas() {
   const [searchParams] = useSearchParams();
   const editOrderId = searchParams.get('editOrder');
-  
-  const { 
-    cart, 
-    addToCart, 
-    removeFromCart, 
-    clearCart, 
+
+  const {
+    cart,
+    addToCart,
+    removeFromCart,
+    clearCart,
     users,
   } = useStore();
   const { settings: companySettings } = useSyncedCompanySettings();
@@ -149,20 +149,20 @@ export default function Vendas() {
   const { customers, addCustomer, isAdding: isAddingCustomer } = useSupabaseCustomers();
   const { addOrder, updateOrder } = useSupabaseOrders();
   const { addMultipleReceivables } = useSupabaseReceivables();
-  
+
   const { authUser } = useAuth();
   const { notifyNewSale, notifyPendingPayment } = useAutoNotifications();
-  
+
   // Editing order state
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
 
-  
+
   // View state
   const [viewMode, setViewMode] = useState<'categories' | 'subcategories' | 'products'>('categories');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  
+
   // Product selection state
   const [selectedProductForVariation, setSelectedProductForVariation] = useState<Product | null>(null);
   const [variationDialogOpen, setVariationDialogOpen] = useState(false);
@@ -170,7 +170,7 @@ export default function Vendas() {
   const [selectedQuantity, setSelectedQuantity] = useState<string>("1");
   const [selectedTotal, setSelectedTotal] = useState<string>("");
   const [currentBasePrice, setCurrentBasePrice] = useState<number>(0);
-  
+
   // Custom options state
   const [dimensions, setDimensions] = useState({ width: "", height: "" });
   const [selectedFinishings, setSelectedFinishings] = useState<string[]>([]);
@@ -181,19 +181,19 @@ export default function Vendas() {
   });
   const [newFinishing, setNewFinishing] = useState("");
   const [finishingPopoverOpen, setFinishingPopoverOpen] = useState(false);
-  
+
   // Customer state
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-  
+
   // Default customer constant
   const DEFAULT_CUSTOMER_NAME = "Consumidor";
-  
+
   // Seller state
   const [selectedSeller, setSelectedSeller] = useState<string>("");
-  
+
   // Payment state
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'pix' | 'card' | null>(null);
@@ -208,7 +208,7 @@ export default function Vendas() {
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
   const [lastSaleTotal, setLastSaleTotal] = useState(0);
   const [lastSaleItems, setLastSaleItems] = useState<OrderItem[]>([]);
-  const [lastSaleCustomer, setLastSaleCustomer] = useState<{name: string} | null>(null);
+  const [lastSaleCustomer, setLastSaleCustomer] = useState<{ name: string } | null>(null);
   const [lastSaleDate, setLastSaleDate] = useState<Date | null>(null);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [lastSaleSeller, setLastSaleSeller] = useState<string | null>(null);
@@ -216,14 +216,14 @@ export default function Vendas() {
   const [lastSaleAmountPaid, setLastSaleAmountPaid] = useState<number>(0);
   const [lastSaleRemaining, setLastSaleRemaining] = useState<number>(0);
   const [lastSaleInstallments, setLastSaleInstallments] = useState<number>(1);
-  
+
   // Quick sale state
   const [quickSaleDialogOpen, setQuickSaleDialogOpen] = useState(false);
   const [quickSaleCustomer, setQuickSaleCustomer] = useState("");
   const [quickSaleDesc, setQuickSaleDesc] = useState("");
   const [quickSaleAmount, setQuickSaleAmount] = useState("");
   const [quickSaleQuantity, setQuickSaleQuantity] = useState("1");
-  
+
   // Purchase state
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
@@ -252,19 +252,19 @@ export default function Vendas() {
 
   // Ensure default customer "Consumidor" exists as an option (but don't auto-select)
   const [defaultCustomerChecked, setDefaultCustomerChecked] = useState(false);
-  
+
   useEffect(() => {
     // Only check once per session to avoid duplicate creation
     if (defaultCustomerChecked) return;
-    
+
     // Wait for customers to load
     if (customers === undefined || isAddingCustomer) return;
-    
+
     const defaultCustomer = customers.find(c => c.name === DEFAULT_CUSTOMER_NAME);
-    
+
     // Mark as checked to prevent multiple attempts
     setDefaultCustomerChecked(true);
-    
+
     // Create default customer if it doesn't exist (as an option, not selected)
     if (!defaultCustomer) {
       addCustomer({
@@ -279,7 +279,7 @@ export default function Vendas() {
 
   // Load editing order from sessionStorage - only run once when we have products
   const [orderLoaded, setOrderLoaded] = useState(false);
-  
+
   useEffect(() => {
     // Only load once and only when we have products loaded
     if (editOrderId && !orderLoaded && products.length > 0) {
@@ -290,20 +290,20 @@ export default function Vendas() {
           if (order.id === editOrderId) {
             // Clear cart first
             clearCart();
-            
+
             // Set the editing order ID
             setEditingOrderId(order.id);
-            
+
             // Set customer
             if (order.customerId) {
               setSelectedCustomer(order.customerId);
             }
-            
+
             // Set seller
             if (order.sellerId) {
               setSelectedSeller(order.sellerId);
             }
-            
+
             // Add items to cart with original prices preserved
             order.items.forEach((item: any) => {
               const product = products.find(p => p.id === item.productId);
@@ -337,7 +337,7 @@ export default function Vendas() {
                 });
               }
             });
-            
+
             toast.info(`Editando pedido #${order.id}`);
             sessionStorage.removeItem('editingOrder');
             setOrderLoaded(true);
@@ -364,26 +364,26 @@ export default function Vendas() {
   // Get subcategories/products for selected category - merge from products AND database
   const subcategories = useMemo(() => {
     if (selectedCategory === "Todos") return [];
-    
+
     // Get subcategories from products
     const productSubs = new Set(
       products
         .filter(p => p.category === selectedCategory)
         .map(p => p.subcategory || p.name)
     );
-    
+
     // Get subcategories from database
     const dbSubs = getSubcategoriesByCategoryName(selectedCategory, dbCategories);
     dbSubs.forEach(sub => productSubs.add(sub.name));
-    
+
     return Array.from(productSubs).sort((a, b) => a.localeCompare(b, 'pt-BR'));
   }, [products, selectedCategory, dbSubcategories, dbCategories, getSubcategoriesByCategoryName]);
 
   // Get products for selected subcategory
   const subcategoryProducts = useMemo(() => {
     if (!selectedSubcategory) return [];
-    return products.filter(p => 
-      p.category === selectedCategory && 
+    return products.filter(p =>
+      p.category === selectedCategory &&
       (p.subcategory === selectedSubcategory || p.name === selectedSubcategory)
     );
   }, [products, selectedCategory, selectedSubcategory]);
@@ -451,67 +451,67 @@ export default function Vendas() {
   // Subcategory icon helper - returns varied modern icons
   const getSubcategoryIcon = (subcategory: string) => {
     const lower = subcategory.toLowerCase();
-    
+
     // Banners e faixas
     if (lower.includes('banner')) return <Flag className="w-5 h-5 lg:w-6 lg:h-6 text-blue-500" />;
     if (lower.includes('faixa')) return <Megaphone className="w-5 h-5 lg:w-6 lg:h-6 text-orange-500" />;
     if (lower.includes('lona')) return <Frame className="w-5 h-5 lg:w-6 lg:h-6 text-cyan-500" />;
-    
+
     // Adesivos e etiquetas
     if (lower.includes('adesivo')) return <Sticker className="w-5 h-5 lg:w-6 lg:h-6 text-pink-500" />;
     if (lower.includes('etiqueta')) return <Tag className="w-5 h-5 lg:w-6 lg:h-6 text-violet-500" />;
     if (lower.includes('vinil')) return <Layers className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-500" />;
-    
+
     // Cartões e impressos
     if (lower.includes('cartão') || lower.includes('cartao')) return <CardIcon className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500" />;
     if (lower.includes('convite')) return <Gift className="w-5 h-5 lg:w-6 lg:h-6 text-rose-500" />;
     if (lower.includes('flyer') || lower.includes('panfleto')) return <FileText className="w-5 h-5 lg:w-6 lg:h-6 text-sky-500" />;
     if (lower.includes('folder')) return <BookOpen className="w-5 h-5 lg:w-6 lg:h-6 text-teal-500" />;
     if (lower.includes('catálogo') || lower.includes('catalogo')) return <ClipboardList className="w-5 h-5 lg:w-6 lg:h-6 text-amber-500" />;
-    
+
     // Carimbo e selo
     if (lower.includes('carimbo')) return <Stamp className="w-5 h-5 lg:w-6 lg:h-6 text-red-500" />;
     if (lower.includes('selo')) return <Award className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-500" />;
-    
+
     // Papelaria
     if (lower.includes('bloco')) return <StickyNote className="w-5 h-5 lg:w-6 lg:h-6 text-lime-500" />;
     if (lower.includes('marca') || lower.includes('book')) return <Bookmark className="w-5 h-5 lg:w-6 lg:h-6 text-purple-500" />;
     if (lower.includes('agenda') || lower.includes('calendário') || lower.includes('calendario')) return <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />;
-    
+
     // Placas e sinalizações
     if (lower.includes('placa')) return <MapPin className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />;
     if (lower.includes('sinal')) return <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-600" />;
-    
+
     // Embalagens e caixas
     if (lower.includes('caixa') || lower.includes('embalagem')) return <Box className="w-5 h-5 lg:w-6 lg:h-6 text-amber-600" />;
     if (lower.includes('sacola')) return <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6 text-green-500" />;
-    
+
     // Camisetas e brindes
     if (lower.includes('camiseta') || lower.includes('camisa')) return <Shirt className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />;
     if (lower.includes('brinde')) return <Gift className="w-5 h-5 lg:w-6 lg:h-6 text-pink-600" />;
     if (lower.includes('caneca')) return <Coffee className="w-5 h-5 lg:w-6 lg:h-6 text-brown-500" />;
-    
+
     // Empresarial
     if (lower.includes('corporativ') || lower.includes('empresa')) return <Building2 className="w-5 h-5 lg:w-6 lg:h-6 text-slate-600" />;
     if (lower.includes('apresenta')) return <Briefcase className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />;
-    
+
     // Veículos
     if (lower.includes('veículo') || lower.includes('veiculo') || lower.includes('carro')) return <Car className="w-5 h-5 lg:w-6 lg:h-6 text-blue-700" />;
-    
+
     // Premium
     if (lower.includes('premium') || lower.includes('luxo')) return <Crown className="w-5 h-5 lg:w-6 lg:h-6 text-amber-500" />;
     if (lower.includes('especial')) return <Gem className="w-5 h-5 lg:w-6 lg:h-6 text-violet-600" />;
-    
+
     // Personalizados
     if (lower.includes('personaliz')) return <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-fuchsia-500" />;
-    
+
     // Cores baseadas em hash para itens sem match
     const colors = ['text-blue-500', 'text-emerald-500', 'text-violet-500', 'text-rose-500', 'text-amber-500', 'text-cyan-500', 'text-pink-500', 'text-indigo-500'];
     const icons = [Star, Heart, Sparkles, Zap, Gem, Crown, Award, Tag];
     const hash = subcategory.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const IconComponent = icons[hash % icons.length];
     const colorClass = colors[hash % colors.length];
-    
+
     return <IconComponent className={`w-5 h-5 lg:w-6 lg:h-6 ${colorClass}`} />;
   };
 
@@ -550,7 +550,7 @@ export default function Vendas() {
 
     // Set base price for calculations
     setCurrentBasePrice(product.price);
-    
+
     // For meter-based products, start with empty total (will be calculated from dimensions)
     const pricingMode = (product as any)?.pricing_mode;
     if (pricingMode === 'medidor') {
@@ -583,6 +583,31 @@ export default function Vendas() {
     if (isNaN(total) || total < 0) {
       toast.error("Preço inválido");
       return;
+    }
+
+    // Check stock if enabled
+    if (companySettings?.usesStock) {
+      // For Gráfica/Variations
+      if (selectedProductForVariation.category === 'Gráfica' && selectedVariationId) {
+        if (selectedProductForVariation.type !== 'service' && quantity > selectedProductForVariation.stock) {
+          toast.error(`Estoque insuficiente. Disponível: ${selectedProductForVariation.stock}`);
+          return;
+        }
+      }
+      // Standard Products with Variations
+      else if (selectedVariationId) {
+        if (selectedProductForVariation.type !== 'service' && quantity > selectedProductForVariation.stock) {
+          toast.error(`Estoque insuficiente. Disponível: ${selectedProductForVariation.stock}`);
+          return;
+        }
+      }
+      // Simple Products without variations
+      else if (selectedProductForVariation.type !== 'service' && (!selectedProductForVariation.variations || selectedProductForVariation.variations.length === 0)) {
+        if (quantity > selectedProductForVariation.stock) {
+          toast.error(`Estoque insuficiente. Disponível: ${selectedProductForVariation.stock}`);
+          return;
+        }
+      }
     }
 
     const finalUnitPrice = total / quantity;
@@ -701,20 +726,20 @@ export default function Vendas() {
 
     const customerName = newCustomerName.trim();
     const customerPhone = newCustomerPhone;
-    
+
     addCustomer({
       name: customerName,
       phone: customerPhone,
       email: '',
       doc: ''
     });
-    
+
     // After adding, find and select by name (customers list will refresh)
     setTimeout(() => {
       const found = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
       if (found) setSelectedCustomer(found.id);
     }, 500);
-    
+
     setNewCustomerName("");
     setNewCustomerPhone("");
     setCustomerDialogOpen(false);
@@ -722,7 +747,7 @@ export default function Vendas() {
 
   const handleFinishSale = async (method: 'cash' | 'pix' | 'card') => {
     if (cart.length === 0) return;
-    
+
     // Validate customer selection
     if (!selectedCustomer) {
       toast.error("Selecione um cliente para finalizar a venda");
@@ -755,7 +780,7 @@ export default function Vendas() {
     // Check if we're editing an existing order
     if (editingOrderId) {
       setLastSaleId(editingOrderId);
-      
+
       // Create payments array - if installments > 1, create all installment entries
       let paymentsArray: any[] = [];
       if (paid > 0) {
@@ -766,7 +791,7 @@ export default function Vendas() {
           method: method
         });
       }
-      
+
       // Add pending installments if there's remaining amount and installments > 1
       if (remaining > 0 && installments > 1) {
         const installmentValue = remaining / installments;
@@ -800,7 +825,7 @@ export default function Vendas() {
       toast.success("Pedido Atualizado!", {
         description: `Pedido #${editingOrderId} foi atualizado com sucesso.`,
       });
-      
+
       setEditingOrderId(null);
     } else {
       const newOrderId = (Math.floor(Math.random() * 9000) + 1000).toString();
@@ -816,7 +841,7 @@ export default function Vendas() {
           method: method
         });
       }
-      
+
       // Add pending installments if there's remaining amount and installments > 1
       if (remaining > 0 && installments > 1) {
         const installmentValue = remaining / installments;
@@ -852,7 +877,7 @@ export default function Vendas() {
       if (remaining > 0 && installments >= 1) {
         const installmentValue = remaining / installments;
         const customerName = customer?.name || "Consumidor Final";
-        
+
         const receivablesData = installmentDates.slice(0, installments).map((date, index) => ({
           order_id: newOrderId,
           customer_id: customer?.id || null,
@@ -1039,9 +1064,9 @@ export default function Vendas() {
     const vendasPhones = [companySettings.phone, companySettings.phone2].filter(Boolean).join(' | ');
     printWindow.document.write(`
       <div class="header-section">
-        ${companySettings.logoUrl 
-          ? `<img src="${companySettings.logoUrl}" alt="Logo" style="max-height: 60px; max-width: 150px; margin-bottom: 10px;" />` 
-          : `<div class="font-bold" style="font-size: 1.2em;">${companySettings.name}</div>`}
+        ${companySettings.logoUrl
+        ? `<img src="${companySettings.logoUrl}" alt="Logo" style="max-height: 60px; max-width: 150px; margin-bottom: 10px;" />`
+        : `<div class="font-bold" style="font-size: 1.2em;">${companySettings.name}</div>`}
         ${companySettings.cnpj ? `<div style="font-size: 0.9em;">CNPJ: ${companySettings.cnpj}</div>` : ''}
         <div>${companySettings.address || ''}</div>
         <div>${vendasPhones}</div>
@@ -1116,10 +1141,10 @@ export default function Vendas() {
 
     // Totals
     if (showPrices) {
-      const installmentValue = orderData.remaining > 0 && orderData.installments > 1 
-        ? orderData.remaining / orderData.installments 
+      const installmentValue = orderData.remaining > 0 && orderData.installments > 1
+        ? orderData.remaining / orderData.installments
         : 0;
-      
+
       printWindow.document.write(`
         <div class="total-section">
           <div>TOTAL: R$ ${orderData.total.toFixed(2)}</div>
@@ -1299,7 +1324,7 @@ export default function Vendas() {
                 className="pl-9 lg:pl-10 h-10 lg:h-12 text-sm lg:text-lg"
               />
             </div>
-            <Button 
+            <Button
               className="h-10 lg:h-12 px-3 lg:px-6 bg-green-600 hover:bg-green-700 font-bold text-xs lg:text-sm shrink-0"
               onClick={() => setQuickSaleDialogOpen(true)}
             >
@@ -1308,7 +1333,7 @@ export default function Vendas() {
               <span className="hidden sm:inline lg:hidden"> </span>
               <span className="hidden lg:inline">Venda Rápida</span>
             </Button>
-            <Button 
+            <Button
               className="h-10 lg:h-12 px-3 lg:px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs lg:text-sm shrink-0"
               onClick={() => setPurchaseDialogOpen(true)}
             >
@@ -1319,7 +1344,7 @@ export default function Vendas() {
 
           {/* Dynamic Breadcrumb */}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3 lg:mb-4">
-            <span 
+            <span
               className={cn(
                 "font-semibold",
                 viewMode === 'categories' ? "text-foreground" : "hover:text-foreground cursor-pointer transition-colors"
@@ -1331,7 +1356,7 @@ export default function Vendas() {
             {viewMode !== 'categories' && selectedCategory && (
               <>
                 <ChevronRight className="h-4 w-4" />
-                <span 
+                <span
                   className={cn(
                     "font-semibold",
                     viewMode === 'subcategories' ? "text-foreground" : "hover:text-foreground cursor-pointer transition-colors"
@@ -1361,8 +1386,8 @@ export default function Vendas() {
             {viewMode === 'categories' && (
               <div className="space-y-3 lg:space-y-4">
                 <div className="flex items-center justify-end">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setCategoryManagerOpen(true)}
                     className="text-xs lg:text-sm"
@@ -1502,7 +1527,7 @@ export default function Vendas() {
                             <span className="text-[10px] lg:text-xs text-muted-foreground block">a partir de</span>
                           )}
                           <p className="text-primary font-bold text-xs lg:text-sm truncate">
-                            R$ {product.variations && product.variations.length > 0 
+                            R$ {product.variations && product.variations.length > 0
                               ? Math.min(...product.variations.map(v => v.price)).toFixed(2)
                               : product.price.toFixed(2)}
                           </p>
@@ -1532,8 +1557,8 @@ export default function Vendas() {
           {/* Customer Selection */}
           <div className={cn(
             "p-2 lg:p-4 border-b transition-colors",
-            !selectedCustomer && cart.length > 0 
-              ? "border-destructive bg-destructive/5 animate-pulse" 
+            !selectedCustomer && cart.length > 0
+              ? "border-destructive bg-destructive/5 animate-pulse"
               : "border-border"
           )}>
             {!selectedCustomer && cart.length > 0 && (
@@ -1544,8 +1569,8 @@ export default function Vendas() {
             )}
             <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className={cn(
                     "w-full justify-between h-10 lg:h-12 text-sm",
                     !selectedCustomer && cart.length > 0 && "border-destructive text-destructive hover:bg-destructive/10"
@@ -1716,7 +1741,7 @@ export default function Vendas() {
                   <div className="flex items-center justify-between pt-1 border-t border-border/50">
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1 bg-background rounded-lg border">
-                        <button 
+                        <button
                           className="w-8 h-8 flex items-center justify-center hover:bg-red-100 hover:text-red-600 rounded-l-lg"
                           onClick={() => {
                             if (item.quantity > 1) {
@@ -1731,7 +1756,7 @@ export default function Vendas() {
                           <Minus className="w-4 h-4" />
                         </button>
                         <span className="font-bold text-sm w-8 text-center">{item.quantity}</span>
-                        <button 
+                        <button
                           className="w-8 h-8 flex items-center justify-center hover:bg-green-100 hover:text-green-600 rounded-r-lg"
                           onClick={() => {
                             const newQuantity = item.quantity + 1;
@@ -2016,20 +2041,20 @@ export default function Vendas() {
               </DialogContent>
             </Dialog>
 
-            <Button 
-              variant="ghost" 
-              className="w-full text-primary hover:bg-hover/10 h-9 lg:h-10 text-sm" 
-              onClick={() => handlePrint('quote')} 
+            <Button
+              variant="ghost"
+              className="w-full text-primary hover:bg-hover/10 h-9 lg:h-10 text-sm"
+              onClick={() => handlePrint('quote')}
               disabled={cart.length === 0}
             >
               <Printer className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Imprimir </span>Orçamento
             </Button>
 
-            <Button 
-              variant="ghost" 
-              className="w-full text-destructive hover:bg-destructive/10 h-9 lg:h-10 text-sm" 
-              onClick={clearCart} 
+            <Button
+              variant="ghost"
+              className="w-full text-destructive hover:bg-destructive/10 h-9 lg:h-10 text-sm"
+              onClick={clearCart}
               disabled={cart.length === 0}
             >
               Cancelar
@@ -2049,24 +2074,24 @@ export default function Vendas() {
               <Check className="w-10 h-10" />
             </div>
             <div className="flex flex-col gap-3">
-              <PrintButton 
-                label="Imprimir Recibo" 
-                onClick={() => handlePrint('receipt')} 
+              <PrintButton
+                label="Imprimir Recibo"
+                onClick={() => handlePrint('receipt')}
                 variant="default"
                 size="lg"
                 iconSize={20}
                 className="w-full h-12"
               />
               <div className="grid grid-cols-2 gap-3">
-                <PrintButton 
-                  label="Pedido" 
-                  onClick={() => handlePrint('order')} 
+                <PrintButton
+                  label="Pedido"
+                  onClick={() => handlePrint('order')}
                   size="lg"
                   className="h-12"
                 />
-                <PrintButton 
-                  label="O.S." 
-                  onClick={() => handlePrint('production')} 
+                <PrintButton
+                  label="O.S."
+                  onClick={() => handlePrint('production')}
                   size="lg"
                   className="h-12"
                 />
@@ -2135,55 +2160,55 @@ export default function Vendas() {
             {(selectedProductForVariation && (
               (selectedProductForVariation as any).pricing_mode === 'medidor'
             )) && (
-              <div className="space-y-1.5 pt-2 border-t border-dashed">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase">Medidas</Label>
-                <div className="grid grid-cols-2 gap-3 bg-muted/50 p-3 rounded-lg">
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Largura (m)</span>
-                    <Input
-                      placeholder="0.00"
-                      value={dimensions.width}
-                      onChange={(e) => {
-                        const newWidth = e.target.value;
-                        setDimensions({...dimensions, width: newWidth});
-                        const width = parseFloat(newWidth) || 0;
-                        const height = parseFloat(dimensions.height) || 0;
-                        const qty = parseInt(selectedQuantity) || 1;
-                        const total = width * height * currentBasePrice * qty;
-                        setSelectedTotal(total.toFixed(2));
-                      }}
-                      className="h-10 text-base"
-                    />
+                <div className="space-y-1.5 pt-2 border-t border-dashed">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase">Medidas</Label>
+                  <div className="grid grid-cols-2 gap-3 bg-muted/50 p-3 rounded-lg">
+                    <div className="space-y-1">
+                      <span className="text-sm text-muted-foreground">Largura (m)</span>
+                      <Input
+                        placeholder="0.00"
+                        value={dimensions.width}
+                        onChange={(e) => {
+                          const newWidth = e.target.value;
+                          setDimensions({ ...dimensions, width: newWidth });
+                          const width = parseFloat(newWidth) || 0;
+                          const height = parseFloat(dimensions.height) || 0;
+                          const qty = parseInt(selectedQuantity) || 1;
+                          const total = width * height * currentBasePrice * qty;
+                          setSelectedTotal(total.toFixed(2));
+                        }}
+                        className="h-10 text-base"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-sm text-muted-foreground">Altura (m)</span>
+                      <Input
+                        placeholder="0.00"
+                        value={dimensions.height}
+                        onChange={(e) => {
+                          const newHeight = e.target.value;
+                          setDimensions({ ...dimensions, height: newHeight });
+                          const width = parseFloat(dimensions.width) || 0;
+                          const height = parseFloat(newHeight) || 0;
+                          const qty = parseInt(selectedQuantity) || 1;
+                          const total = width * height * currentBasePrice * qty;
+                          setSelectedTotal(total.toFixed(2));
+                        }}
+                        className="h-10 text-base"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-sm text-muted-foreground">Altura (m)</span>
-                    <Input
-                      placeholder="0.00"
-                      value={dimensions.height}
-                      onChange={(e) => {
-                        const newHeight = e.target.value;
-                        setDimensions({...dimensions, height: newHeight});
-                        const width = parseFloat(dimensions.width) || 0;
-                        const height = parseFloat(newHeight) || 0;
-                        const qty = parseInt(selectedQuantity) || 1;
-                        const total = width * height * currentBasePrice * qty;
-                        setSelectedTotal(total.toFixed(2));
-                      }}
-                      className="h-10 text-base"
-                    />
-                  </div>
+                  {/* Calculated result inline */}
+                  {parseFloat(dimensions.width) > 0 && parseFloat(dimensions.height) > 0 && (
+                    <div className="flex items-center justify-between text-sm bg-primary/10 px-3 py-2 rounded">
+                      <span className="text-muted-foreground">
+                        {dimensions.width} × {dimensions.height} = {(parseFloat(dimensions.width) * parseFloat(dimensions.height)).toFixed(2)} m²
+                      </span>
+                      <span className="font-bold text-primary">Valor por m²: R$ {currentBasePrice.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
-                {/* Calculated result inline */}
-                {parseFloat(dimensions.width) > 0 && parseFloat(dimensions.height) > 0 && (
-                  <div className="flex items-center justify-between text-sm bg-primary/10 px-3 py-2 rounded">
-                    <span className="text-muted-foreground">
-                      {dimensions.width} × {dimensions.height} = {(parseFloat(dimensions.width) * parseFloat(dimensions.height)).toFixed(2)} m²
-                    </span>
-                    <span className="font-bold text-primary">Valor por m²: R$ {currentBasePrice.toFixed(2)}</span>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
 
             {/* Finishing & Observations - Stack on mobile, side by side on desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-dashed">
@@ -2209,75 +2234,75 @@ export default function Vendas() {
                     side="bottom"
                     sideOffset={8}
                   >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-sm">Opções Disponíveis</h4>
-                      <span className="text-xs text-muted-foreground">{selectedFinishings.length} selecionados</span>
-                    </div>
-                    <div 
-                      className="max-h-[200px] sm:max-h-[250px] overflow-y-auto space-y-1"
-                      onWheel={(e) => e.stopPropagation()}
-                    >
-                      {finishingOptions.map((option, index) => {
-                        const isSelected = selectedFinishings.includes(option);
-                        const isSemAcabamento = option === "Sem Acabamento";
-                        return (
-                          <div
-                            key={`${option}-${index}`}
-                            className={cn(
-                              "flex items-center gap-2 sm:gap-3 p-2 rounded-lg cursor-pointer select-none",
-                              isSelected ? "bg-primary/10" : "hover:bg-muted"
-                            )}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              if (isSemAcabamento) {
-                                setSelectedFinishings([]);
-                                setFinishingPopoverOpen(false);
-                              } else {
-                                if (isSelected) {
-                                  setSelectedFinishings(prev => prev.filter(f => f !== option));
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm">Opções Disponíveis</h4>
+                        <span className="text-xs text-muted-foreground">{selectedFinishings.length} selecionados</span>
+                      </div>
+                      <div
+                        className="max-h-[200px] sm:max-h-[250px] overflow-y-auto space-y-1"
+                        onWheel={(e) => e.stopPropagation()}
+                      >
+                        {finishingOptions.map((option, index) => {
+                          const isSelected = selectedFinishings.includes(option);
+                          const isSemAcabamento = option === "Sem Acabamento";
+                          return (
+                            <div
+                              key={`${option}-${index}`}
+                              className={cn(
+                                "flex items-center gap-2 sm:gap-3 p-2 rounded-lg cursor-pointer select-none",
+                                isSelected ? "bg-primary/10" : "hover:bg-muted"
+                              )}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (isSemAcabamento) {
+                                  setSelectedFinishings([]);
+                                  setFinishingPopoverOpen(false);
                                 } else {
-                                  setSelectedFinishings(prev => [...prev, option]);
+                                  if (isSelected) {
+                                    setSelectedFinishings(prev => prev.filter(f => f !== option));
+                                  } else {
+                                    setSelectedFinishings(prev => [...prev, option]);
+                                  }
+                                  setFinishingPopoverOpen(false);
                                 }
-                                setFinishingPopoverOpen(false);
-                              }
-                            }}
-                          >
-                            <Checkbox
-                              checked={isSelected}
-                              className="pointer-events-none"
-                            />
-                            <span className="text-sm">{option}</span>
-                          </div>
-                        );
-                      })}
+                              }}
+                            >
+                              <Checkbox
+                                checked={isSelected}
+                                className="pointer-events-none"
+                              />
+                              <span className="text-sm">{option}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <Separator />
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Novo acabamento..."
+                          value={newFinishing}
+                          onChange={(e) => setNewFinishing(e.target.value)}
+                          className="text-sm"
+                        />
+                        <Button size="sm" onClick={() => {
+                          if (newFinishing.trim()) {
+                            const updatedOptions = [...finishingOptions, newFinishing.trim()];
+                            setFinishingOptions(updatedOptions);
+                            localStorage.setItem('finishingOptions', JSON.stringify(updatedOptions));
+                            setSelectedFinishings([...selectedFinishings, newFinishing.trim()]);
+                            setNewFinishing("");
+                            toast.success("Acabamento adicionado!");
+                            setFinishingPopoverOpen(false);
+                          }
+                        }}>
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Separator />
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Novo acabamento..."
-                        value={newFinishing}
-                        onChange={(e) => setNewFinishing(e.target.value)}
-                        className="text-sm"
-                      />
-                      <Button size="sm" onClick={() => {
-                        if (newFinishing.trim()) {
-                          const updatedOptions = [...finishingOptions, newFinishing.trim()];
-                          setFinishingOptions(updatedOptions);
-                          localStorage.setItem('finishingOptions', JSON.stringify(updatedOptions));
-                          setSelectedFinishings([...selectedFinishings, newFinishing.trim()]);
-                          setNewFinishing("");
-                          toast.success("Acabamento adicionado!");
-                          setFinishingPopoverOpen(false);
-                        }
-                      }}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Observations */}

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Input } from '../input';
 
@@ -13,10 +12,10 @@ describe('Input Component', () => {
   it('should handle value changes', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
-    
+
     render(<Input onChange={handleChange} />);
     const input = screen.getByRole('textbox');
-    
+
     await user.type(input, 'Hello');
     expect(handleChange).toHaveBeenCalled();
   });
@@ -53,13 +52,13 @@ describe('Input Component', () => {
   it('should handle focus and blur events', () => {
     const handleFocus = vi.fn();
     const handleBlur = vi.fn();
-    
+
     render(<Input onFocus={handleFocus} onBlur={handleBlur} placeholder="focus test" />);
     const input = screen.getByPlaceholderText('focus test');
-    
+
     fireEvent.focus(input);
     expect(handleFocus).toHaveBeenCalledTimes(1);
-    
+
     fireEvent.blur(input);
     expect(handleBlur).toHaveBeenCalledTimes(1);
   });
@@ -67,10 +66,10 @@ describe('Input Component', () => {
   it('should support maxLength attribute', async () => {
     const user = userEvent.setup();
     render(<Input maxLength={5} placeholder="max length" />);
-    
+
     const input = screen.getByPlaceholderText('max length');
     await user.type(input, '12345678');
-    
+
     expect(input).toHaveValue('12345');
   });
 });

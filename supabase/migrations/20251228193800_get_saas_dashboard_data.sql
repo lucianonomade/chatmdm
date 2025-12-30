@@ -5,6 +5,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- SECURITY: Only superadmins can access SaaS dashboard data
+  IF NOT has_role(auth.uid(), 'superadmin'::app_role) THEN
+    RAISE EXCEPTION 'Unauthorized: Only superadmins can access SaaS dashboard';
+  END IF;
+
   RETURN (
     SELECT jsonb_agg(
       to_jsonb(t) || 

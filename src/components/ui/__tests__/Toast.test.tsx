@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, waitFor, act } from '@testing-library/react';
-import { screen } from '@testing-library/dom';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { toast } from 'sonner';
 import { Toaster } from '../sonner';
 
@@ -13,9 +12,15 @@ describe('Toast Component', () => {
     vi.useRealTimers();
   });
 
-  it('should render toaster container', () => {
+  it('should render toaster container', async () => {
     render(<Toaster />);
-    expect(document.querySelector('[data-sonner-toaster]')).toBeInTheDocument();
+    // sonner might render the container only after a short delay or first toast
+    await act(async () => {
+      toast('Init');
+    });
+    await waitFor(() => {
+      expect(document.querySelector('[data-sonner-toaster]')).toBeInTheDocument();
+    });
   });
 
   it('should display success toast', async () => {

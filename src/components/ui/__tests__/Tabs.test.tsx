@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
-import { screen, fireEvent } from '@testing-library/dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../tabs';
 
 describe('Tabs Component', () => {
@@ -36,7 +36,8 @@ describe('Tabs Component', () => {
   it('should switch tab content on click', async () => {
     renderTabs();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Tab 2' }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: 'Tab 2' }));
 
     await waitFor(() => {
       expect(screen.getByText('Content 2')).toBeInTheDocument();
@@ -57,7 +58,8 @@ describe('Tabs Component', () => {
     const handleChange = vi.fn();
     renderTabs({ onValueChange: handleChange });
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Tab 2' }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: 'Tab 2' }));
 
     await waitFor(() => {
       expect(handleChange).toHaveBeenCalledWith('tab2');

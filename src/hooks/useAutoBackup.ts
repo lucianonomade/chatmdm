@@ -5,6 +5,8 @@ import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { useSupabaseSuppliers } from "@/hooks/useSupabaseSuppliers";
 import { exportToJSON } from "@/lib/backupUtils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const BACKUP_INTERVAL_KEY = 'autoBackupInterval'; // in hours
 const LAST_BACKUP_KEY = 'lastBackupTime';
@@ -14,6 +16,7 @@ const BACKUP_ON_CLOSE_KEY = 'backupOnClose';
 export function useAutoBackup() {
   const { orders, expenses, fixedExpenses, companySettings, updateCompanySettings } = useStore();
   const { customers } = useSupabaseCustomers();
+  const { authUser } = useAuth();
   const { products } = useSupabaseProducts();
   const { suppliers } = useSupabaseSuppliers();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,7 +45,7 @@ export function useAutoBackup() {
   };
 
   // Perform backup
-  const performBackup = useCallback((silent = false) => {
+  const performBackup = useCallback(async (silent = false, uploadToCloud = false) => {
     try {
       const data = {
         customers,
@@ -70,6 +73,23 @@ export function useAutoBackup() {
         exportToJSON(data, companySettings.name || 'empresa');
       }
 
+      // Upload to Cloud (Supabase) if requested
+      if (uploadToCloud && authUser?.tenant_id) {
+        const { error } = await supabase.from('backups').insert({
+          tenant_id: authUser.tenant_id,
+          data: data,
+          trigger_type: silent ? 'auto' : 'manual',
+          name: `Backup ${silent ? 'Automático' : 'Manual'} - ${new Date().toLocaleString('pt-BR')}`
+        });
+
+        if (error) {
+          console.error('Cloud backup error:', error);
+          if (!silent) toast.error("Erro ao salvar backup na nuvem");
+        } else {
+          if (!silent) toast.success("Backup salvo na nuvem com sucesso!");
+        }
+      }
+
       const now = new Date().toISOString();
       setLastBackupTime(now);
 
@@ -85,7 +105,7 @@ export function useAutoBackup() {
       }
       return false;
     }
-  }, [customers, products, suppliers, orders, expenses, fixedExpenses, companySettings.name]);
+  }, [customers, products, suppliers, orders, expenses, fixedExpenses, companySettings.name, authUser]);
 
   // Check if backup is due
   const isBackupDue = useCallback(() => {
@@ -112,15 +132,17 @@ export function useAutoBackup() {
     intervalRef.current = setInterval(() => {
       if (isBackupDue()) {
         console.log('Auto backup triggered');
-        performBackup(true);
+        // Auto backup should upload to cloud too!
+        performBackup(true, true);
         toast.info("Backup automático realizado", { duration: 3000 });
       }
-    }, 60 * 60 * 1000); // Check every hour
+    }, 5 * 60 * 1000); // Check every 5 minutes
 
+    // Also check immediately on start
     // Also check immediately on start
     if (isBackupDue()) {
       setTimeout(() => {
-        performBackup(true);
+        performBackup(true, true);
         toast.info("Backup automático realizado", { duration: 3000 });
       }, 5000); // Wait 5 seconds after app starts
     }
