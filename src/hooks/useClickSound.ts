@@ -7,10 +7,15 @@ let isContextReady = false;
 
 // Pre-create oscillator nodes pool for instant sound
 const initAudioContext = () => {
+  if (typeof window === "undefined") return null;
+
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-      latencyHint: "interactive", // Optimize for low latency
-    });
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      audioContext = new AudioContextClass({
+        latencyHint: "interactive", // Optimize for low latency
+      });
+    }
   }
   return audioContext;
 };
@@ -18,8 +23,10 @@ const initAudioContext = () => {
 // Initialize context on first user interaction to avoid suspension
 const ensureContextReady = () => {
   const ctx = initAudioContext();
+  if (!ctx) return null;
+
   if (ctx.state === "suspended") {
-    ctx.resume();
+    ctx.resume().catch(() => { });
   }
   isContextReady = ctx.state === "running";
   return ctx;
@@ -28,19 +35,24 @@ const ensureContextReady = () => {
 // Pre-warm the audio context on first user interaction
 const warmUpAudio = () => {
   if (isContextReady) return;
-  
+
   const ctx = ensureContextReady();
-  
+  if (!ctx) return;
+
   // Play a silent sound to fully activate the audio pipeline
   if (ctx.state === "running") {
-    const silentOsc = ctx.createOscillator();
-    const silentGain = ctx.createGain();
-    silentGain.gain.value = 0;
-    silentOsc.connect(silentGain);
-    silentGain.connect(ctx.destination);
-    silentOsc.start();
-    silentOsc.stop(ctx.currentTime + 0.001);
-    isContextReady = true;
+    try {
+      const silentOsc = ctx.createOscillator();
+      const silentGain = ctx.createGain();
+      silentGain.gain.value = 0;
+      silentOsc.connect(silentGain);
+      silentGain.connect(ctx.destination);
+      silentOsc.start();
+      silentOsc.stop(ctx.currentTime + 0.001);
+      isContextReady = true;
+    } catch (e) {
+      // ignore errors during warm up
+    }
   }
 };
 
@@ -59,7 +71,7 @@ const soundConfigs: Record<SoundType, { frequency: number; type: OscillatorType;
 const playToneImmediate = (ctx: AudioContext, volume: number, soundType: SoundType) => {
   const config = soundConfigs[soundType] || soundConfigs.beep;
   const now = ctx.currentTime;
-  
+
   const oscillator = ctx.createOscillator();
   const gainNode = ctx.createGain();
 
@@ -71,7 +83,7 @@ const playToneImmediate = (ctx: AudioContext, volume: number, soundType: SoundTy
 
   // Normalize volume (0-100) to gain (0-1)
   const normalizedVolume = (volume / 100) * 0.8;
-  
+
   if (config.attack) {
     gainNode.gain.setValueAtTime(0, now);
     gainNode.gain.linearRampToValueAtTime(normalizedVolume, now + config.attack);
@@ -89,7 +101,7 @@ const playToneImmediate = (ctx: AudioContext, volume: number, soundType: SoundTy
 // Trigger haptic feedback (vibration) on supported devices
 const triggerHapticFeedback = (settings: ReturnType<typeof getSoundSettings>) => {
   if (!settings.vibrationEnabled) return;
-  
+
   // Check if Vibration API is supported
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     try {
@@ -104,22 +116,23 @@ const triggerHapticFeedback = (settings: ReturnType<typeof getSoundSettings>) =>
 const playClickSoundImpl = () => {
   try {
     const settings = getSoundSettings();
-    
+
     // Trigger haptic feedback immediately
     triggerHapticFeedback(settings);
-    
+
     // Check if sound is enabled
     if (!settings.enabled) {
       return;
     }
 
     const ctx = initAudioContext();
+    if (!ctx) return;
 
     // Resume if suspended (shouldn't happen if warmed up)
     if (ctx.state === "suspended") {
       ctx.resume().then(() => {
         playToneImmediate(ctx, settings.volume, settings.soundType);
-      });
+      }).catch(() => { });
       return;
     }
 
@@ -134,21 +147,22 @@ const playClickSoundImpl = () => {
 const playNotificationSoundImpl = () => {
   try {
     const settings = getSoundSettings();
-    
+
     if (!settings.notificationSoundEnabled) {
       return;
     }
 
     const ctx = initAudioContext();
+    if (!ctx) return;
 
     if (ctx.state === "suspended") {
-      ctx.resume();
-      return;
+      ctx.resume().catch(() => { });
+      // Continue trying to play even if resume is pending/failed
     }
 
     const now = ctx.currentTime;
     const normalizedVolume = (settings.volume / 100) * 0.6;
-    
+
     // First tone
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
@@ -188,16 +202,19 @@ export const useClickSound = () => {
       document.removeEventListener("click", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
+      document.removeEventListener("pointerdown", handleInteraction);
     };
 
     document.addEventListener("click", handleInteraction, { passive: true });
     document.addEventListener("touchstart", handleInteraction, { passive: true });
     document.addEventListener("keydown", handleInteraction, { passive: true });
+    document.addEventListener("pointerdown", handleInteraction, { passive: true });
 
     return () => {
       document.removeEventListener("click", handleInteraction);
       document.removeEventListener("touchstart", handleInteraction);
       document.removeEventListener("keydown", handleInteraction);
+      document.removeEventListener("pointerdown", handleInteraction);
     };
   }, []);
 
@@ -214,9 +231,11 @@ if (typeof window !== "undefined") {
     warmUpAudio();
     document.removeEventListener("click", initOnInteraction);
     document.removeEventListener("touchstart", initOnInteraction);
+    document.removeEventListener("pointerdown", initOnInteraction);
   };
   document.addEventListener("click", initOnInteraction, { passive: true, once: true });
   document.addEventListener("touchstart", initOnInteraction, { passive: true, once: true });
+  document.addEventListener("pointerdown", initOnInteraction, { passive: true, once: true });
 }
 
 // Função global para uso sem hook

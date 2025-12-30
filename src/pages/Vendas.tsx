@@ -170,6 +170,7 @@ export default function Vendas() {
   const [selectedQuantity, setSelectedQuantity] = useState<string>("1");
   const [selectedTotal, setSelectedTotal] = useState<string>("");
   const [currentBasePrice, setCurrentBasePrice] = useState<number>(0);
+  const [editingCartItem, setEditingCartItem] = useState<string | null>(null);
 
   // Custom options state
   const [dimensions, setDimensions] = useState({ width: "", height: "" });
@@ -684,28 +685,55 @@ export default function Vendas() {
           price: finalUnitPrice
         };
 
-        addToCart(productWithOverriddenPrice, quantity, undefined, {
-          variationNameOverride: cleanVariationName(variation.name),
-          finishing: selectedFinishings.join(', '),
-          customDescription: customDescription
-        });
-        toast.success("Item adicionado!");
+        if (editingCartItem) {
+          useStore.getState().updateCartItem(editingCartItem, {
+            ...productWithOverriddenPrice,
+            quantity: quantity,
+            variationName: cleanVariationName(variation.name),
+            finishing: selectedFinishings.join(', '),
+            customDescription: customDescription,
+            total: finalUnitPrice * quantity
+          });
+          toast.success("Item atualizado!");
+        } else {
+          addToCart(productWithOverriddenPrice, quantity, undefined, {
+            variationNameOverride: cleanVariationName(variation.name),
+            finishing: selectedFinishings.join(', '),
+            customDescription: customDescription
+          });
+          toast.success("Item adicionado!");
+        }
         setVariationDialogOpen(false);
+        setEditingCartItem(null);
         return;
       }
     }
 
     // No variations - add directly
     if (!selectedProductForVariation.variations || selectedProductForVariation.variations.length === 0) {
-      addToCart({
+      const productToAdd = {
         ...selectedProductForVariation,
         price: finalUnitPrice
-      }, quantity, undefined, {
-        finishing: selectedFinishings.join(', '),
-        customDescription: customDescription
-      });
-      toast.success("Item adicionado!");
+      };
+
+      if (editingCartItem) {
+        useStore.getState().updateCartItem(editingCartItem, {
+          ...productToAdd,
+          quantity: quantity,
+          finishing: selectedFinishings.join(', '),
+          customDescription: customDescription,
+          total: finalUnitPrice * quantity
+        });
+        toast.success("Item atualizado!");
+      } else {
+        addToCart(productToAdd, quantity, undefined, {
+          finishing: selectedFinishings.join(', '),
+          customDescription: customDescription
+        });
+        toast.success("Item adicionado!");
+      }
       setVariationDialogOpen(false);
+      setEditingCartItem(null);
       return;
     }
 
@@ -1688,18 +1716,19 @@ export default function Vendas() {
                         if (product) {
                           setSelectedProductForVariation(product);
                           setVariationDialogOpen(true);
+                          setEditingCartItem(item.id); // Set the item being edited
                           setSelectedQuantity(item.quantity.toString());
                           setSelectedTotal(item.total.toFixed(2));
                           setCurrentBasePrice(item.price);
                           setSelectedFinishings(item.finishing ? item.finishing.split(', ').filter(Boolean) : []);
                           setCustomDescription(item.customDescription || "");
                           if (item.dimensions) {
-                            const dims = item.dimensions.replace('m', '').split('x');
+                            const dims = item.dimensions.replace('m', '').replace(' ', '').split('x');
                             setDimensions({ width: dims[0] || "", height: dims[1] || "" });
                           } else {
                             setDimensions({ width: "", height: "" });
                           }
-                          removeFromCart(item.id);
+                          // Do NOT remove from cart immediately
                         }
                       }}
                     >
@@ -2105,7 +2134,13 @@ export default function Vendas() {
       </Dialog>
 
       {/* Variation/Product Configuration Dialog */}
-      <Dialog open={variationDialogOpen} onOpenChange={setVariationDialogOpen}>
+      <Dialog open={variationDialogOpen} onOpenChange={(open) => {
+        setVariationDialogOpen(open);
+        if (!open) {
+          setEditingCartItem(null);
+          // Optional: reset other states if desired, but might be annoying if accidental close
+        }
+      }}>
         <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-hidden flex flex-col p-4">
           <DialogHeader className="shrink-0 pb-2 pr-12 mt-2">
             <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -2257,16 +2292,25 @@ export default function Vendas() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 if (isSemAcabamento) {
-                                  setSelectedFinishings([]);
-                                  setFinishingPopoverOpen(false);
+                                  // If clicking "Sem Acabamento"
+                                  if (isSelected) {
+                                    // Deselect if already selected
+                                    setSelectedFinishings([]);
+                                  } else {
+                                    // Select "Sem Acabamento" and clear others
+                                    setSelectedFinishings([option]);
+                                  }
                                 } else {
+                                  // Clicking other options
                                   if (isSelected) {
                                     setSelectedFinishings(prev => prev.filter(f => f !== option));
                                   } else {
-                                    setSelectedFinishings(prev => [...prev, option]);
+                                    // Add new option and remove "Sem Acabamento" if present
+                                    setSelectedFinishings(prev => [...prev.filter(f => f !== "Sem Acabamento"), option]);
                                   }
-                                  setFinishingPopoverOpen(false);
                                 }
+                                // Keep popover open for multiple selections (except when behavior dictates closing, but standard UX for multi-select is keeping it open)
+                                // setFinishingPopoverOpen(false); 
                               }}
                             >
                               <Checkbox
